@@ -1,0 +1,10 @@
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30
+sqlalchemy>=2.0,<3
+pydantic-settings>=2.4
+# Speech-to-text (Whisper running locally through CTranslate2). Pulls in PyAV,
+# which we also use to decode/convert any uploaded audio format - no system ffmpeg needed.
+faster-whisper>=1.1
+numpy>=1.26
+# Only used by `run.py --https` to create a self-signed certificate (mobile testing over LAN).
+cryptography>=42

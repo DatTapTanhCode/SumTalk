@@ -1,0 +1,4 @@
+# Optional: run Whisper on an NVIDIA GPU (Windows/Linux). Needs a recent NVIDIA driver, no CUDA toolkit install.
+# CTranslate2 4.x is built against CUDA 12 + cuDNN 9; the app adds these DLL folders to the search path itself.
+nvidia-cublas-cu12>=12.4,<13
+nvidia-cudnn-cu12>=9.1,<10
