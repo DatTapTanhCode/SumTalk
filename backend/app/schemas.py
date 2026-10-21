@@ -16,12 +16,14 @@ class MeetingCreate(BaseModel):
     language: str | None = None  # None / "auto" = detect automatically
     capture_mode: Literal["mic", "mic+system"] | None = None
     started_at: datetime | None = None  # when the browser started recording (it may have been offline)
+    meeting_at: datetime | None = None  # when the meeting took place, defaults to started_at
 
     _lang = field_validator("language")(_normalize_language)
 
 
 class MeetingUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
+    meeting_at: datetime | None = None
 
 
 class RetranscribeIn(BaseModel):
@@ -52,6 +54,7 @@ class MeetingOut(BaseModel):
     size_bytes: int | None
     received_chunks: int
     total_chunks: int | None
+    meeting_at: datetime | None
     created_at: datetime
     updated_at: datetime
     completed_at: datetime | None

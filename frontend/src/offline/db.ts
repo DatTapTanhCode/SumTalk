@@ -8,6 +8,7 @@ export interface LocalRecording {
   language: string | null
   captureMode: CaptureMode
   startedAt: string
+  meetingAt?: string // absent on recordings made before the date field existed
   state: 'recording' | 'stopped'
   chunkCount: number // chunks produced so far (next seq)
   totalSamples: number

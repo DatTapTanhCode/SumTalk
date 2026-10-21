@@ -1,6 +1,6 @@
 from collections.abc import Iterator
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from .config import get_settings
@@ -38,3 +38,13 @@ def init_db() -> None:
     from . import models  # noqa: F401  (register tables)
 
     Base.metadata.create_all(engine)
+    _add_missing_columns()
+
+
+def _add_missing_columns() -> None:
+    """`create_all` never alters an existing table, so new columns are added by hand."""
+    with engine.begin() as conn:
+        columns = {row[1] for row in conn.execute(text("PRAGMA table_info(meetings)"))}
+        if "meeting_at" not in columns:
+            conn.execute(text("ALTER TABLE meetings ADD COLUMN meeting_at DATETIME"))
+            conn.execute(text("UPDATE meetings SET meeting_at = created_at WHERE meeting_at IS NULL"))

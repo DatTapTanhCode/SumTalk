@@ -1,6 +1,6 @@
 import { LANGUAGE_CHOICES } from '../lib/languages'
 import { cn } from '../lib/format'
-import { inputClass } from './ui'
+import { inputClass } from './primitives'
 
 /** Spoken language. "auto" lets Whisper detect it (per segment, so mixed-language meetings work). */
 export function LanguageSelect({

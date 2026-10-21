@@ -3,7 +3,9 @@ import { useEffect, useRef, useState, type DragEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { errorMessage } from '../api/client'
 import { LanguageSelect } from '../components/LanguageSelect'
-import { Button, Card, Notice, ProgressBar, inputClass } from '../components/ui'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Notice, ProgressBar, inputClass } from '../components/primitives'
 import { cn, formatBytes, formatDuration } from '../lib/format'
 import { configStore } from '../lib/server'
 import { useStore } from '../lib/store'
@@ -83,8 +85,9 @@ export function UploadPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Upload audio</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <div className="eyebrow">Ingest / 02</div>
+        <h1 className="mt-2 text-[28px] font-bold tracking-[-0.03em] text-foreground">Upload audio</h1>
+        <p className="mt-1 text-base text-muted-foreground">
           An existing recording becomes a meeting. Large files are sent in parts and resume after a network drop; the server
           converts every format to 16 kHz mono WAV before transcribing.
         </p>
@@ -99,36 +102,45 @@ export function UploadPage() {
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           className={cn(
-            'flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-16 text-center transition-colors',
-            dragging ? 'border-indigo-400 bg-indigo-50' : 'border-slate-300 bg-white hover:border-indigo-300 hover:bg-slate-50',
+            'panel-ticks flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed px-6 py-16 text-center transition-colors',
+            dragging ? 'border-foreground bg-secondary/60' : 'border-foreground/25 bg-card hover:border-foreground/50 hover:bg-secondary/30',
           )}
         >
-          <div className="grid size-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-600">
-            <CloudUpload className="size-7" />
+          <div className="grid size-12 place-items-center rounded-md border border-border bg-background text-foreground">
+            <CloudUpload className="size-6" />
           </div>
-          <p className="mt-4 font-medium text-slate-800">Drop an audio file here, or click to choose</p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-4 text-[17px] font-semibold text-foreground">Drop an audio file here, or click to choose</p>
+          <p className="mt-2 font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
             {config.allowed_extensions.map((e) => e.slice(1).toUpperCase()).join(' · ')} · up to {config.max_upload_mb} MB
           </p>
           <input ref={inputRef} type="file" accept={accept} className="sr-only" onChange={(e) => choose(e.target.files?.[0])} />
         </label>
       ) : (
-        <Card className="space-y-5 p-5 sm:p-6">
+        <Card className="panel-ticks space-y-5 p-5 sm:p-6">
           <div className="flex items-start gap-4">
-            <div className={cn('grid size-12 shrink-0 place-items-center rounded-xl', validation ? 'bg-red-50 text-red-500' : 'bg-sky-50 text-sky-600')}>
-              <FileAudio className="size-6" />
+            <div
+              className={cn(
+                'grid size-11 shrink-0 place-items-center rounded-md border border-border bg-background',
+                validation ? 'text-live' : 'text-foreground',
+              )}
+            >
+              <FileAudio className="size-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate font-medium text-slate-900">{file.name}</div>
-              <div className="mt-0.5 text-sm text-slate-500">
+              <div className="truncate text-[15px] font-semibold text-foreground">{file.name}</div>
+              <div className="mt-1 font-mono text-[10px] tracking-[0.06em] text-muted-foreground uppercase">
                 {formatBytes(file.size)}
                 {file.type && ` · ${file.type}`}
                 {duration !== null && ` · ${formatDuration(duration)}`}
               </div>
             </div>
             {!uploading && (
-              <button onClick={() => setFile(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Remove file">
-                <X className="size-5" />
+              <button
+                onClick={() => setFile(null)}
+                className="rounded-[3px] p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                aria-label="Remove file"
+              >
+                <X className="size-4" />
               </button>
             )}
           </div>
@@ -140,23 +152,27 @@ export function UploadPage() {
             <>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label htmlFor="upload-title" className="text-sm font-medium text-slate-700">Meeting title</label>
+                  <label htmlFor="upload-title" className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">
+                    Meeting title
+                  </label>
                   <input id="upload-title" value={title} disabled={uploading} onChange={(e) => setTitle(e.target.value)} className={inputClass} />
                 </div>
                 <div className="space-y-1.5">
-                  <label htmlFor="upload-language" className="text-sm font-medium text-slate-700">Spoken language</label>
+                  <label htmlFor="upload-language" className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">
+                    Spoken language
+                  </label>
                   <LanguageSelect id="upload-language" value={language} onChange={setLanguage} disabled={uploading} />
                 </div>
               </div>
 
               {progress ? (
-                <div className="space-y-2.5 rounded-xl bg-slate-50 p-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2 font-medium text-slate-700">
+                <div className="space-y-2.5 rounded-md border border-border bg-background p-3.5">
+                  <div className="flex items-center justify-between text-base">
+                    <span className="flex items-center gap-2 font-medium text-foreground">
                       {progress.waitingForNetwork ? (
-                        <WifiOff className="size-4 text-amber-600" />
+                        <WifiOff className="size-4 text-live" />
                       ) : (
-                        <LoaderCircle className="size-4 animate-spin text-indigo-500" />
+                        <LoaderCircle className="size-4 animate-spin text-foreground" />
                       )}
                       {progress.phase === 'starting'
                         ? 'Starting upload…'
@@ -166,10 +182,10 @@ export function UploadPage() {
                             ? 'Waiting for the network…'
                             : 'Uploading…'}
                     </span>
-                    <span className="font-mono text-slate-600 tabular-nums">{Math.round((progress.loaded / progress.total) * 100)}%</span>
+                    <span className="digital text-[15px] text-foreground">{Math.round((progress.loaded / progress.total) * 100)}%</span>
                   </div>
                   <ProgressBar value={progress.loaded / progress.total} indeterminate={progress.phase !== 'uploading'} />
-                  <div className="flex justify-between text-xs text-slate-500 tabular-nums">
+                  <div className="flex justify-between font-mono text-[10px] tracking-[0.06em] text-muted-foreground uppercase tabular-nums">
                     <span>
                       {formatBytes(progress.loaded)} of {formatBytes(progress.total)}
                       {progress.bytesPerSecond > 0 && ` · ${formatBytes(progress.bytesPerSecond)}/s`}
@@ -185,7 +201,7 @@ export function UploadPage() {
                     Cancel
                   </Button>
                 ) : (
-                  <Button onClick={upload}>
+                  <Button size="lg" onClick={upload}>
                     <Upload className="size-4" /> Upload &amp; transcribe
                   </Button>
                 )}

@@ -66,7 +66,7 @@ export const api = {
 
   createRecording: (
     id: string,
-    body: { title: string; language: string | null; capture_mode: string; started_at: string },
+    body: { title: string; language: string | null; capture_mode: string; started_at: string; meeting_at: string },
   ) => request<Meeting>(`/api/meetings/${id}`, json('PUT', body)),
   uploadChunk: (id: string, seq: number, pcm: ArrayBuffer) =>
     request<{ seq: number; received_chunks: number }>(`/api/meetings/${id}/chunks/${seq}`, {

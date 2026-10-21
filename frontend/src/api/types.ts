@@ -18,6 +18,7 @@ export interface Meeting {
   size_bytes: number | null
   received_chunks: number
   total_chunks: number | null
+  meeting_at: string | null
   created_at: string
   updated_at: string
   completed_at: string | null

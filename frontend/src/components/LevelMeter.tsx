@@ -54,14 +54,8 @@ export function LevelMeter({
       for (let i = 0; i < list.length; i++) {
         const barHeight = Math.max(3, list[i] * (height - 4))
         const x = (offset + i) * (barWidth + gap)
-        context.fillStyle = active ? (i > list.length - 4 ? '#e11d48' : '#fb7185') : '#cbd5e1'
-        if (context.roundRect) {
-          context.beginPath()
-          context.roundRect(x, (height - barHeight) / 2, barWidth, barHeight, 1.5)
-          context.fill()
-        } else {
-          context.fillRect(x, (height - barHeight) / 2, barWidth, barHeight) // Safari < 16
-        }
+        context.fillStyle = active ? (i > list.length - 4 ? '#d71921' : '#0a0a0a') : '#c9c9c4'
+        context.fillRect(x, (height - barHeight) / 2, barWidth, barHeight)
       }
       frame = requestAnimationFrame(draw)
     }

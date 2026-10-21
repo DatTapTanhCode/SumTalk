@@ -62,6 +62,7 @@ class Meeting(Base):
     total_chunks: Mapped[int | None] = mapped_column(Integer)
     live_offset: Mapped[int] = mapped_column(Integer, default=0)  # samples already handled by live transcription
 
+    meeting_at: Mapped[datetime | None] = mapped_column(UTCDateTime)  # when the meeting itself took place
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, onupdate=utcnow)
     completed_at: Mapped[datetime | None] = mapped_column(UTCDateTime)

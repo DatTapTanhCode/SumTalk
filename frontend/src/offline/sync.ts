@@ -78,6 +78,7 @@ async function syncRecording(recording: LocalRecording): Promise<void> {
         language: recording.language,
         capture_mode: recording.captureMode,
         started_at: recording.startedAt,
+        meeting_at: recording.meetingAt ?? recording.startedAt,
       })
       await localStore.patchRecording(id, { createdOnServer: true })
     }

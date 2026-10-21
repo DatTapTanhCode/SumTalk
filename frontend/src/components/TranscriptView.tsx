@@ -7,7 +7,7 @@ function highlight(text: string, query: string): ReactNode {
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return text.split(new RegExp(`(${escaped})`, 'gi')).map((part, i) =>
     i % 2 === 1 ? (
-      <mark key={i} className="rounded bg-amber-200/70 px-0.5 text-inherit">
+      <mark key={i} className="rounded-[2px] bg-foreground/15 px-0.5 text-inherit">
         {part}
       </mark>
     ) : (
@@ -84,50 +84,62 @@ export function TranscriptView({
   if (segments.length === 0 && !partial) return <div ref={listRef}>{empty}</div>
 
   return (
-    <div ref={listRef} className="space-y-0.5">
+    <div ref={listRef} className="space-y-px">
       {trimmedQuery && (
-        <p className="px-3 pb-2 text-xs text-slate-500">
+        <p className="px-3 pb-2 font-mono text-[10px] tracking-[0.08em] text-muted-foreground uppercase">
           {visible.length} {visible.length === 1 ? 'line matches' : 'lines match'} "{trimmedQuery}"
         </p>
       )}
       {visible.map((segment) => {
         const active = segment.idx === activeIdx
-        return (
-          <div
-            key={segment.idx}
-            data-idx={segment.idx}
-            onClick={() => onSeek?.(segment.start)}
-            className={cn(
-              'group flex gap-3 rounded-xl px-3 py-2 transition-colors',
-              onSeek && 'cursor-pointer hover:bg-slate-50',
-              active && 'bg-indigo-50 hover:bg-indigo-50',
-            )}
-          >
+        const rowClass = cn(
+          'group flex w-full gap-3 border-l-2 border-transparent py-1.5 pr-3 pl-2.5 text-left transition-colors',
+          'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-foreground',
+          onSeek && 'cursor-pointer hover:bg-secondary/50',
+          active && 'border-l-foreground bg-secondary/60 hover:bg-secondary/60',
+        )
+        const content = (
+          <>
             <span
               className={cn(
-                'w-12 shrink-0 pt-0.5 font-mono text-xs tabular-nums',
-                active ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500',
+                'digital w-16 shrink-0 pt-0.5 text-[16px] leading-none',
+                active ? 'text-foreground' : 'text-muted-foreground/80',
               )}
             >
               {formatClock(segment.start)}
             </span>
-            <p className={cn('min-w-0 flex-1 text-[15px] leading-relaxed', active ? 'text-slate-900' : 'text-slate-700')}>
+            <p className="min-w-0 flex-1 text-[16px] leading-[1.75] text-foreground">
               {highlight(segment.text, trimmedQuery)}
             </p>
             {segment.language && mainLanguage && segment.language !== mainLanguage && (
-              <span className="mt-0.5 h-fit rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-slate-500 uppercase">
+              <span className="mt-1 h-fit rounded-[2px] border border-border px-1 font-mono text-[9px] tracking-[0.08em] text-muted-foreground uppercase">
                 {segment.language}
               </span>
             )}
+          </>
+        )
+        return onSeek ? (
+          <button
+            key={segment.idx}
+            type="button"
+            data-idx={segment.idx}
+            onClick={() => onSeek(segment.start)}
+            className={rowClass}
+          >
+            {content}
+          </button>
+        ) : (
+          <div key={segment.idx} data-idx={segment.idx} className={rowClass}>
+            {content}
           </div>
         )
       })}
       {partial && !trimmedQuery && (
-        <div className="flex gap-3 px-3 py-2">
-          <span className="w-12 shrink-0" />
-          <p className="flex-1 text-[15px] leading-relaxed text-slate-400 italic">
+        <div className="flex gap-3 py-2 pr-3 pl-2.5">
+          <span className="w-16 shrink-0" />
+          <p className="flex-1 text-[16px] leading-[1.75] text-muted-foreground italic">
             {partial}
-            <span className="ml-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-slate-400" />
+            <span className="ml-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-[blink_1.05s_steps(1)_infinite] bg-foreground" />
           </p>
         </div>
       )}

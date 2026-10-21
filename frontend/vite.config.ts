@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
@@ -9,6 +10,9 @@ export default defineConfig(({ mode }) => {
   const https = mode === 'https'
   return {
     plugins: [react(), tailwindcss(), ...(https ? [basicSsl()] : [])],
+    resolve: {
+      alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+    },
     server: {
       host: https ? true : 'localhost',
       port: 5173,

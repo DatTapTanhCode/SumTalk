@@ -73,6 +73,7 @@ def create_recording(meeting_id: str, body: MeetingCreate, db: Session = Depends
             status=MeetingStatus.RECORDING,
             capture_mode=body.capture_mode,
             language=body.language,
+            meeting_at=body.meeting_at or body.started_at or utcnow(),
             created_at=body.started_at or utcnow(),
         )
         db.add(meeting)
@@ -92,6 +93,8 @@ def update_meeting(meeting_id: str, body: MeetingUpdate, db: Session = Depends(g
     meeting = get_meeting(db, meeting_id)
     if body.title is not None:
         meeting.title = body.title.strip()
+    if body.meeting_at is not None:
+        meeting.meeting_at = body.meeting_at
     db.commit()
     return to_out(db, meeting)
 

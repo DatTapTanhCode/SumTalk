@@ -38,7 +38,12 @@ let ticker: number | undefined
 
 export const getAnalyser = (): AnalyserNode | null => recorder?.analyser ?? null
 
-export async function startRecording(options: { title: string; language: string | null; captureMode: CaptureMode }) {
+export async function startRecording(options: {
+  title: string
+  language: string | null
+  captureMode: CaptureMode
+  meetingAt: string
+}) {
   if (sessionStore.get().phase !== 'idle') return
   sessionStore.set({ phase: 'starting', error: null, warning: null })
 
@@ -73,6 +78,7 @@ export async function startRecording(options: { title: string; language: string 
       language: options.language,
       captureMode: options.captureMode,
       startedAt: new Date().toISOString(),
+      meetingAt: options.meetingAt,
       state: 'recording',
       chunkCount: 0,
       totalSamples: 0,

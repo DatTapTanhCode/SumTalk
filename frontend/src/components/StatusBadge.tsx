@@ -1,25 +1,32 @@
 import type { MeetingStatus } from '../api/types'
 import { cn } from '../lib/format'
 
+/** Hardware readout, not a pill: 1px box, square dot, mono label. */
 const STYLES: Record<MeetingStatus | 'local', { label: string; className: string; dot: string; pulse?: boolean }> = {
-  recording: { label: 'Recording', className: 'bg-rose-50 text-rose-700 ring-rose-200', dot: 'bg-rose-500', pulse: true },
-  uploading: { label: 'Uploading', className: 'bg-sky-50 text-sky-700 ring-sky-200', dot: 'bg-sky-500', pulse: true },
-  queued: { label: 'Queued', className: 'bg-slate-100 text-slate-600 ring-slate-200', dot: 'bg-slate-400' },
-  processing: { label: 'Preparing audio', className: 'bg-amber-50 text-amber-700 ring-amber-200', dot: 'bg-amber-500', pulse: true },
-  transcribing: { label: 'Transcribing', className: 'bg-indigo-50 text-indigo-700 ring-indigo-200', dot: 'bg-indigo-500', pulse: true },
-  done: { label: 'Ready', className: 'bg-emerald-50 text-emerald-700 ring-emerald-200', dot: 'bg-emerald-500' },
-  failed: { label: 'Failed', className: 'bg-red-50 text-red-700 ring-red-200', dot: 'bg-red-500' },
-  local: { label: 'On this device', className: 'bg-orange-50 text-orange-700 ring-orange-200', dot: 'bg-orange-500' },
+  recording: { label: 'Recording', className: 'border-live/40 bg-live-soft text-live', dot: 'bg-live', pulse: true },
+  uploading: { label: 'Uploading', className: 'border-border bg-card text-foreground', dot: 'bg-foreground', pulse: true },
+  queued: { label: 'Queued', className: 'border-border bg-card text-muted-foreground', dot: 'bg-muted-foreground' },
+  processing: { label: 'Preparing audio', className: 'border-border bg-card text-foreground', dot: 'bg-muted-foreground', pulse: true },
+  transcribing: { label: 'Transcribing', className: 'border-border bg-secondary text-foreground', dot: 'bg-foreground', pulse: true },
+  done: { label: 'Ready', className: 'border-border bg-card text-foreground', dot: 'bg-foreground' },
+  failed: { label: 'Failed', className: 'border-live/40 bg-card text-live', dot: 'bg-live' },
+  local: { label: 'On this device', className: 'border-border bg-secondary text-muted-foreground', dot: 'bg-muted-foreground' },
 }
 
-export function StatusBadge({ status, progress }: { status: MeetingStatus | 'local'; progress?: number }) {
+export function StatusBadge({ status, progress, className }: { status: MeetingStatus | 'local'; progress?: number; className?: string }) {
   const style = STYLES[status]
   const label = status === 'transcribing' && progress ? `${style.label} ${Math.round(progress * 100)}%` : style.label
   return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 whitespace-nowrap', style.className)}>
-      <span className="relative flex size-1.5">
-        {style.pulse && <span className={cn('absolute inline-flex size-full animate-ping rounded-full opacity-75', style.dot)} />}
-        <span className={cn('relative inline-flex size-1.5 rounded-full', style.dot)} />
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-[3px] border px-1.5 py-0.5 font-mono text-[10px] tracking-[0.08em] whitespace-nowrap uppercase',
+        style.className,
+        className,
+      )}
+    >
+      <span className="relative flex size-1.5 shrink-0">
+        {style.pulse && <span className={cn('absolute inline-flex size-full animate-ping rounded-[1px] opacity-60', style.dot)} />}
+        <span className={cn('relative inline-flex size-1.5 rounded-[1px]', style.dot)} />
       </span>
       {label}
     </span>
