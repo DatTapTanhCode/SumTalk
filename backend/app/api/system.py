@@ -31,4 +31,8 @@ def client_config():
         max_upload_mb=settings.max_upload_mb,
         allowed_extensions=settings.allowed_extensions,
         live_transcription=settings.live_transcription,
+        summary_languages=settings.summary_languages,
+        translation_languages=settings.translation_languages,
+        default_summary_language=settings.default_summary_language,
+        ai_mock=settings.ai_mock,
     )

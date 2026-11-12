@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from .ai.summary.schema import Minutes
+
 
 def _normalize_language(value: str | None) -> str | None:
     if value is None:
@@ -108,6 +110,10 @@ class ClientConfig(BaseModel):
     max_upload_mb: int
     allowed_extensions: list[str]
     live_transcription: bool
+    summary_languages: list[str] = []
+    translation_languages: list[str] = []
+    default_summary_language: str = "vi"
+    ai_mock: bool = False
 
 
 class SttStatus(BaseModel):
@@ -121,3 +127,66 @@ class SttStatus(BaseModel):
 class HealthOut(BaseModel):
     ok: bool
     stt: SttStatus
+
+
+# --------------------------------------------------------------------------- Sprint 3: summary + translation
+
+AIJobStatus = Literal["pending", "running", "done", "failed"]
+
+
+def _language_code(value: str | None) -> str | None:
+    return value.strip().lower() if isinstance(value, str) else value
+
+
+class SummaryOut(BaseModel):
+    status: AIJobStatus
+    language: str
+    content: Minutes | None = None
+    error: str | None = None
+    model: str | None = None
+    mode: str | None = None  # empty | single | map_reduce
+    calls: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    latency_sec: float = 0.0
+    cost_usd: float = 0.0
+    updated_at: datetime
+
+
+class RegenerateSummaryIn(BaseModel):
+    language: str | None = Field(default=None, description="Output language, e.g. vi or en. Default: keep the current one.")
+
+    _lang = field_validator("language")(_language_code)
+
+
+class TranslationCreate(BaseModel):
+    target_lang: str = Field(description="Language to translate into, e.g. vi or en")
+
+    _lang = field_validator("target_lang")(_language_code)
+
+
+class TranslationInfo(BaseModel):
+    target_lang: str
+    status: AIJobStatus
+    progress: int
+    error: str | None = None
+    updated_at: datetime
+
+
+class TranslatedSegmentOut(BaseModel):
+    segment_id: int  # idx of the segment in the final transcript
+    start: float
+    end: float
+    speaker: str | None = None  # no speaker labels yet (diarization is not built)
+    original: str
+    translation: str | None  # None while not translated yet
+    skipped: bool = False  # already in the target language, kept unchanged
+
+
+class TranslationOut(TranslationInfo):
+    model: str | None = None
+    calls: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cost_usd: float = 0.0
+    segments: list[TranslatedSegmentOut] = []

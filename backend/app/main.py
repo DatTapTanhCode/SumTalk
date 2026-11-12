@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .api import meetings, system, uploads
+from .api import ai, meetings, system, uploads
 from .config import get_settings
 from .db import init_db
 from .services import pipeline
@@ -36,10 +36,11 @@ async def lifespan(_app: FastAPI):
     pipeline.stop_workers()
 
 
-app = FastAPI(title="SumTalk API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="SumTalk API", version="0.3.0", lifespan=lifespan)
 app.include_router(system.router)
 app.include_router(meetings.router)
 app.include_router(uploads.router)
+app.include_router(ai.router)
 
 
 class SinglePageApp(StaticFiles):
