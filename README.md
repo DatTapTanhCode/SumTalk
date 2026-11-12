@@ -144,6 +144,16 @@ To ship the desktop installer already pointing at your server: `set SUMTALK_DEFA
 `set SUMTALK_DEFAULT_STT_BASE_URL=...`, `set SUMTALK_DEFAULT_STT_API_KEY=...` before `build-desktop.bat`
 (anyone with the installer can read the key – use one you can revoke).
 
+## Web deployment (AWS EC2 + S3)
+
+For testing and demos without installing anything: one EC2 instance runs the app and Caddy (automatic
+HTTPS + a login page) with Docker Compose; finished audio and database backups go to S3
+(`STORAGE_BACKEND=s3`, playback through presigned URLs). Two set-ups: a cheap CPU instance with a hosted
+Whisper API, or a GPU instance running Whisper itself (and serving desktop apps through `/v1`).
+Step-by-step guide (Vietnamese): [docs/deploy/AWS-EC2-S3.md](docs/deploy/AWS-EC2-S3.md). Files: `Dockerfile`,
+`deploy/docker-compose.yml` (+ `docker-compose.gpu.yml`), `deploy/Caddyfile`, `deploy/.env.example`,
+`deploy/scripts/`, `deploy/aws/iam-policy-s3.json`.
+
 ## Configuration
 
 Copy `backend/.env.example` to `backend/.env`. Main options:
