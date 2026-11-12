@@ -6,12 +6,14 @@ import os
 import sys
 import threading
 from collections.abc import Iterator
-from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 
 from ..config import SAMPLE_RATE, get_settings
+from .stt_types import Detection, TranscribedSegment, looks_like_hallucination
+
+__all__ = ["Detection", "TranscribedSegment", "Transcriber", "local_transcriber", "transcriber"]
 
 log = logging.getLogger(__name__)
 settings = get_settings()
@@ -22,27 +24,6 @@ MIN_DETECT_SAMPLES = SAMPLE_RATE  # utterances shorter than 1 s inherit a neighb
 
 # Windows without developer mode cannot create symlinks; the HF cache copes, but warns loudly.
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
-
-# Phrases Whisper is known to invent on silence/music (YouTube outro captions in its training data).
-_HALLUCINATIONS = (
-    "subscribe",
-    "amara.org",
-    "subtitles by",
-    "ghiền mì gõ",
-    "đăng ký kênh",
-    "like và đăng ký",
-    "hẹn gặp lại các bạn trong những video tiếp theo",
-)
-
-
-@dataclass
-class TranscribedSegment:
-    start: float
-    end: float
-    text: str
-    language: str | None
-    words: list[tuple[float, float, str]] | None = None  # (start, end, word) when word timestamps were requested
-
 
 def _register_nvidia_libraries() -> None:
     """The optional nvidia-cublas/cudnn wheels install their DLLs under site-packages/nvidia/*/(bin|lib)."""
@@ -89,16 +70,7 @@ def _cuda_available() -> bool:
 
 
 def _looks_like_hallucination(segment) -> bool:
-    if segment.no_speech_prob > 0.6 and segment.avg_logprob < -0.8:
-        return True
-    text = segment.text.lower()
-    return any(phrase in text for phrase in _HALLUCINATIONS)
-
-
-@dataclass
-class Detection:
-    language: str | None
-    probability: float
+    return looks_like_hallucination(segment.text, segment.no_speech_prob, segment.avg_logprob)
 
 
 def _language_plan(model, audio: np.ndarray) -> tuple[list[tuple[int, int, str]], Detection]:
@@ -284,4 +256,17 @@ class Transcriber:
         return iterate(), detection
 
 
-transcriber = Transcriber()
+local_transcriber = Transcriber()
+
+
+def _select_engine():
+    """STT_PROVIDER=remote: an OpenAI-compatible API does the work and no model is downloaded here."""
+    if settings.stt_provider.lower() == "remote":
+        from .stt_remote import RemoteTranscriber
+
+        return RemoteTranscriber()
+    return local_transcriber
+
+
+# The engine used for meetings. local_transcriber stays available for this server's own /v1 API.
+transcriber = _select_engine()

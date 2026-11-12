@@ -44,15 +44,39 @@ class Settings(BaseSettings):
     preload_model: bool = True
     beam_size: int = 5
 
+    # --- Speech-to-text engine ---
+    # local  = faster-whisper on this machine (downloads the model; fast with an NVIDIA GPU).
+    # remote = an OpenAI-compatible transcription API, nothing downloaded here: a SumTalk server with a GPU
+    #          (https://<server>/v1, see STT_SERVER_API_KEYS), Groq (https://api.groq.com/openai/v1),
+    #          OpenAI (https://api.openai.com/v1), speaches...
+    stt_provider: str = "local"
+    stt_base_url: str = ""
+    stt_api_key: str = ""
+    stt_model: str = "whisper-large-v3-turbo"  # OpenAI: whisper-1 ; Groq: whisper-large-v3-turbo
+    stt_timeout_sec: float = 120.0
+    stt_max_retries: int = 3  # on 429 / 5xx / network errors, with backoff
+    stt_concurrency: int = 4  # parallel requests when transcribing a long file
+    stt_block_sec: float = 30.0  # audio per request, cut at pauses (Whisper works on 30 s windows)
+    # This server's own OpenAI-compatible API (/v1/audio/transcriptions) for desktop apps and other
+    # installs, backed by its local Whisper. Off while empty. Comma-separated keys.
+    stt_server_api_keys: str = ""
+
     # --- Live transcription while recording ---
     live_transcription: bool = True
-    live_min_window_sec: float = 2.5
-    live_max_window_sec: float = 25.0
+    live_min_window_sec: float = 1.0
+    # Words both of the last two passes agree on are committed once the window is this long, so the
+    # window (and the work per pass) stays short even when nobody pauses.
+    live_soft_window_sec: float = 8.0
+    live_max_window_sec: float = 15.0
+    live_interval_sec: float = 0.0  # minimum time between two live passes (2 is gentler on paid APIs)
     # After a recording stops, re-transcribe the whole file with the accurate settings.
     final_pass: bool = True
+    # Long files are transcribed in sections of about this length, cut at a quiet moment: the first
+    # lines appear after seconds and memory stays flat whatever the length.
+    long_section_sec: float = 300.0
 
     # --- Recording / upload limits ---
-    chunk_seconds: int = 3  # length of the PCM chunks the browser sends while recording
+    chunk_seconds: float = 1.0  # length of the PCM chunks the browser sends while recording
     max_chunk_bytes: int = 4 * 1024 * 1024
     max_upload_mb: int = 1024
     upload_part_mb: int = 8
@@ -83,6 +107,10 @@ class Settings(BaseSettings):
     ai_job_time_limit_sec: float = 1800.0
     ai_retry_backoff_sec: float = 5.0
     ai_mock: bool = False  # true: deterministic fake LLM (tests, CI, machines without a model)
+
+    @property
+    def stt_server_keys(self) -> list[str]:
+        return [key.strip() for key in self.stt_server_api_keys.split(",") if key.strip()]
 
     @property
     def models_dir(self) -> Path:

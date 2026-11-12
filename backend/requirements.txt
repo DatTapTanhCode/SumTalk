@@ -10,3 +10,5 @@ numpy>=1.26
 cryptography>=42
 # Calls the LLM for summary + translation (OpenAI-compatible API: Ollama or a cloud provider).
 httpx>=0.27
+# Multipart forms for the OpenAI-compatible transcription API (/v1/audio/transcriptions).
+python-multipart>=0.0.9
