@@ -15,11 +15,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Notice } from '@/components/primitives'
+import { Notice, PageHeader } from '@/components/primitives'
 import { cn, formatDateTime, formatDuration } from '@/lib/format'
 import { languageName } from '@/lib/languages'
 import { useStore } from '@/lib/store'
@@ -46,6 +45,9 @@ const SORTS: { key: SortKey; label: string }[] = [
 ]
 
 const DAY_ORDER = ['Today', 'Yesterday', 'Last 7 days', 'Earlier']
+
+/** Columns of the desktop table: name | date | duration | language | status | actions. */
+const ROW_GRID = 'md:grid md:grid-cols-[minmax(0,1fr)_10rem_5.5rem_7rem_9rem_2rem] md:items-center md:gap-4'
 
 const meetingTime = (meeting: Meeting) => meeting.meeting_at ?? meeting.created_at
 
@@ -84,50 +86,6 @@ function dayBucket(iso: string): string {
   return 'Earlier'
 }
 
-function Stat({
-  label,
-  value,
-  hint,
-  tone = 'default',
-  onClick,
-  active,
-}: {
-  label: string
-  value: string
-  hint?: string
-  tone?: 'default' | 'warning'
-  onClick?: () => void
-  active?: boolean
-}) {
-  const className = cn(
-    'w-full bg-card px-4 py-3 text-left transition-colors',
-    onClick && 'hover:bg-secondary/60',
-    active && 'bg-secondary',
-  )
-  const body = (
-    <>
-      <div
-        className={cn(
-          'font-mono text-[10px] tracking-[0.14em] uppercase',
-          tone === 'warning' ? 'text-live' : 'text-muted-foreground',
-        )}
-      >
-        {label}
-      </div>
-      <div className={cn('digital mt-1.5 text-[38px] leading-none', tone === 'warning' ? 'text-live' : 'text-foreground')}>{value}</div>
-      {hint && <div className="mt-1.5 text-[11px] text-muted-foreground">{hint}</div>}
-    </>
-  )
-  if (onClick) {
-    return (
-      <button type="button" onClick={onClick} aria-pressed={active} className={className}>
-        {body}
-      </button>
-    )
-  }
-  return <div className={className}>{body}</div>
-}
-
 function RowActions({
   meeting,
   onRename,
@@ -144,7 +102,7 @@ function RowActions({
           variant="ghost"
           size="icon-sm"
           aria-label={`Actions for ${meeting.title}`}
-          className="relative z-20 shrink-0 text-muted-foreground opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 sm:data-[state=open]:opacity-100"
+          className="relative z-20 shrink-0 text-muted-foreground opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100 md:data-[state=open]:opacity-100"
         >
           <MoreHorizontal />
         </Button>
@@ -156,6 +114,21 @@ function RowActions({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+function SourceIcon({ source, className }: { source: 'upload' | 'record' | 'local'; className?: string }) {
+  const Icon = source === 'upload' ? FileAudio : source === 'local' ? CloudOff : Mic
+  return (
+    <div
+      className={cn(
+        'grid size-9 shrink-0 place-items-center rounded-[3px] border border-border bg-background',
+        source === 'record' ? 'text-foreground' : 'text-muted-foreground',
+        className,
+      )}
+    >
+      <Icon className="size-4" />
+    </div>
   )
 }
 
@@ -182,10 +155,10 @@ function MeetingRow({
 }) {
   const language = meeting.language ?? meeting.detected_language
   const remaining = remainingSeconds(meeting)
-  const when = meeting.meeting_at ?? meeting.created_at
+  const when = meetingTime(meeting)
 
   return (
-    <div className="group row-rule relative flex items-center gap-4 px-4 py-3.5 hover:bg-secondary/40 sm:px-5">
+    <div className={cn('group row-rule relative flex items-center gap-3 px-4 py-3.5 hover:bg-secondary/40 sm:px-5', ROW_GRID)}>
       {!editing && (
         <Link
           to={`/meetings/${meeting.id}`}
@@ -193,49 +166,47 @@ function MeetingRow({
           className="absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-foreground"
         />
       )}
-      <div
-        className={cn(
-          'grid size-9 shrink-0 place-items-center rounded-[3px] border border-border bg-background',
-          meeting.source === 'upload' ? 'text-muted-foreground' : 'text-foreground',
-        )}
-      >
-        {meeting.source === 'upload' ? <FileAudio className="size-4" /> : <Mic className="size-4" />}
-      </div>
-      <div className="min-w-0 flex-1">
-        {editing ? (
-          <input
-            autoFocus
-            value={draft}
-            onChange={(e) => onDraft(e.target.value)}
-            onBlur={onCommitRename}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') e.currentTarget.blur()
-              if (e.key === 'Escape') {
-                e.preventDefault()
-                onCancelRename()
-              }
-            }}
-            aria-label="Meeting title"
-            className="relative z-20 w-full rounded-[3px] border border-foreground bg-card px-2 py-1 text-base font-medium outline-none"
-          />
-        ) : (
-          <div className="truncate text-[15px] font-semibold text-foreground">{meeting.title}</div>
-        )}
-        <div className="mt-1 flex flex-wrap gap-x-2 font-mono text-[10px] tracking-[0.06em] text-muted-foreground uppercase">
-          <span>{formatDateTime(when)}</span>
-          {meeting.duration_sec > 0 && <span>· {formatDuration(meeting.duration_sec)}</span>}
-          {remaining !== null && <span className="text-foreground">· ~{formatRemaining(remaining)} left</span>}
-          {language && <span>· {languageName(language)}</span>}
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <SourceIcon source={meeting.source === 'upload' ? 'upload' : 'record'} />
+        <div className="min-w-0 flex-1">
+          {editing ? (
+            <input
+              autoFocus
+              value={draft}
+              onChange={(e) => onDraft(e.target.value)}
+              onBlur={onCommitRename}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur()
+                if (e.key === 'Escape') {
+                  e.preventDefault()
+                  onCancelRename()
+                }
+              }}
+              aria-label="Meeting title"
+              className="relative z-20 w-full rounded-[3px] border border-foreground bg-card px-2 py-1 text-base font-medium outline-none"
+            />
+          ) : (
+            <div className="truncate text-[15px] font-semibold text-foreground">{meeting.title}</div>
+          )}
+          {/* On phones the columns collapse into one meta line. */}
+          <div className="mt-1 flex flex-wrap gap-x-2 font-mono text-[10px] tracking-[0.06em] text-muted-foreground uppercase md:hidden">
+            <span>{formatDateTime(when)}</span>
+            {meeting.duration_sec > 0 && <span>· {formatDuration(meeting.duration_sec)}</span>}
+            {language && <span>· {languageName(language)}</span>}
+          </div>
+          {pending > 0 && <div className="mt-1 font-mono text-[10px] tracking-[0.06em] text-muted-foreground uppercase">{pending} chunks on device</div>}
         </div>
-        <StatusBadge status={meeting.status} progress={meeting.progress} className="mt-1.5 sm:hidden" />
       </div>
-      {pending > 0 && (
-        <span className="hidden rounded-[3px] border border-border px-1.5 py-0.5 font-mono text-[10px] tracking-[0.06em] text-muted-foreground uppercase sm:inline">
-          {pending} chunks on device
-        </span>
-      )}
-      <StatusBadge status={meeting.status} progress={meeting.progress} className="hidden sm:inline-flex" />
-      {!editing && <RowActions meeting={meeting} onRename={onStartRename} onDelete={onDelete} />}
+      <div className="hidden truncate font-mono text-[11px] tracking-[0.04em] text-muted-foreground uppercase md:block">{formatDateTime(when)}</div>
+      <div className="digital hidden text-[18px] leading-none text-foreground md:block">
+        {meeting.duration_sec > 0 ? formatDuration(meeting.duration_sec) : '—'}
+      </div>
+      <div className="hidden truncate font-mono text-[11px] tracking-[0.04em] text-muted-foreground uppercase md:block">{language ? languageName(language) : '—'}</div>
+      <div className="flex flex-col items-end gap-0.5 md:items-start">
+        <StatusBadge status={meeting.status} progress={meeting.progress} />
+        {remaining !== null && <span className="font-mono text-[10px] tracking-[0.06em] text-foreground uppercase">~{formatRemaining(remaining)} left</span>}
+      </div>
+      {editing ? <span /> : <RowActions meeting={meeting} onRename={onStartRename} onDelete={onDelete} />}
     </div>
   )
 }
@@ -244,27 +215,42 @@ function LocalRow({ recording, pending }: { recording: LocalRecording; pending: 
   return (
     <Link
       to={`/meetings/${recording.id}`}
-      className="row-rule flex items-center gap-4 px-4 py-3.5 hover:bg-secondary/40 sm:px-5"
+      className={cn('row-rule flex items-center gap-3 px-4 py-3.5 hover:bg-secondary/40 sm:px-5', ROW_GRID)}
     >
-      <div className="grid size-9 shrink-0 place-items-center rounded-[3px] border border-border bg-background text-muted-foreground">
-        <CloudOff className="size-4" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-[15px] font-semibold text-foreground">{recording.title}</div>
-        <div className="mt-1 font-mono text-[10px] tracking-[0.06em] text-muted-foreground uppercase">
-          {formatDateTime(recording.meetingAt ?? recording.startedAt)} · {formatDuration(recording.totalSamples / 16000)} · {pending} chunks waiting
-          {recording.error && <span className="text-live"> · {recording.error}</span>}
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <SourceIcon source="local" />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[15px] font-semibold text-foreground">{recording.title}</div>
+          <div className="mt-1 font-mono text-[10px] tracking-[0.06em] text-muted-foreground uppercase">
+            {pending} chunks waiting
+            {recording.error && <span className="text-live"> · {recording.error}</span>}
+          </div>
         </div>
       </div>
+      <div className="hidden truncate font-mono text-[11px] tracking-[0.04em] text-muted-foreground uppercase md:block">{formatDateTime(recording.meetingAt ?? recording.startedAt)}</div>
+      <div className="digital hidden text-[18px] leading-none text-foreground md:block">{formatDuration(recording.totalSamples / 16000)}</div>
+      <div className="hidden font-mono text-[11px] text-muted-foreground md:block">—</div>
       <StatusBadge status="local" />
+      <span className="hidden md:block" />
     </Link>
   )
 }
 
-function GroupHeader({ label }: { label: string }) {
+function TableHead() {
   return (
-    <div className="bg-secondary/60 px-4 py-1.5 font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase sm:px-5">{label}</div>
+    <div className={cn('hidden border-b border-border px-4 py-2 font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase sm:px-5', ROW_GRID)}>
+      <div className="pl-12">Name</div>
+      <div>Date</div>
+      <div>Duration</div>
+      <div>Language</div>
+      <div>Status</div>
+      <div />
+    </div>
   )
+}
+
+function GroupHeader({ label }: { label: string }) {
+  return <div className="border-b border-border bg-secondary/60 px-4 py-1.5 font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase sm:px-5">{label}</div>
 }
 
 export function MeetingsPage() {
@@ -298,15 +284,15 @@ export function MeetingsPage() {
   const serverIds = useMemo(() => new Set(meetings?.map((m) => m.id)), [meetings])
   const localOnly = sync.recordings.filter((r) => !serverIds.has(r.id))
 
-  const stats = useMemo(() => {
+  const counts = useMemo(() => {
     const list = meetings ?? []
     const busy = list.filter((m) => BUSY_STATUSES.includes(m.status))
     return {
-      meetings: list.length,
-      recorded: list.reduce((sum, m) => sum + (m.duration_sec || 0), 0),
+      all: list.length,
       transcribed: list.filter((m) => m.status === 'done').length,
-      busy: busy.length,
+      progress: busy.length,
       failed: list.filter((m) => m.status === 'failed').length,
+      recorded: list.reduce((sum, m) => sum + (m.duration_sec || 0), 0),
       remaining: busy.reduce((sum, m) => sum + (remainingSeconds(m) ?? 0), 0),
     }
   }, [meetings])
@@ -383,26 +369,30 @@ export function MeetingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="eyebrow">Library</div>
-          <h1 className="mt-2 text-[28px] font-bold tracking-[-0.03em] text-foreground">Meetings</h1>
-          <p className="mt-1 text-base text-muted-foreground">Record or upload a meeting and get the transcript in the language it was spoken.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button asChild variant="secondary" size="lg">
-            <Link to="/upload">
-              <Upload className="size-4" /> Upload audio
-            </Link>
-          </Button>
-          <Button asChild size="lg">
-            <Link to="/record">
-              <Mic className="size-4" /> New recording
-            </Link>
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-5">
+      <PageHeader
+        eyebrow="Library"
+        title="Meetings"
+        description={
+          meetings && total > 0
+            ? `${total} ${total === 1 ? 'meeting' : 'meetings'} · ${formatDuration(counts.recorded)} of audio`
+            : 'Record or upload a meeting and get the transcript in the language it was spoken.'
+        }
+        actions={
+          <>
+            <Button asChild variant="secondary" size="lg">
+              <Link to="/upload">
+                <Upload className="size-4" /> Upload audio
+              </Link>
+            </Button>
+            <Button asChild size="lg" className="md:hidden">
+              <Link to="/record">
+                <Mic className="size-4" /> Record
+              </Link>
+            </Button>
+          </>
+        }
+      />
 
       {error && (
         <Notice tone="warning" icon={<CircleAlert className="size-4" />} title="Can't load meetings from the server">
@@ -415,111 +405,77 @@ export function MeetingsPage() {
         </Notice>
       )}
 
-      <section
-        aria-label="Summary"
-        className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border lg:grid-cols-4"
-      >
-        <Stat
-          label="All meetings"
-          value={meetings === null ? '—' : String(stats.meetings)}
-          hint={meetings === null ? 'in your library' : `${formatDuration(stats.recorded)} of audio`}
-          onClick={() => setFilter('all')}
-          active={filter === 'all'}
-        />
-        <Stat
-          label="Transcribed"
-          value={meetings === null ? '—' : String(stats.transcribed)}
-          hint="ready to read"
-          onClick={() => setFilter(filter === 'transcribed' ? 'all' : 'transcribed')}
-          active={filter === 'transcribed'}
-        />
-        <Stat
-          label="In progress"
-          value={meetings === null ? '—' : String(stats.busy)}
-          hint={stats.remaining > 0 ? `~${formatRemaining(stats.remaining)} left` : 'nothing running'}
-          onClick={() => setFilter(filter === 'progress' ? 'all' : 'progress')}
-          active={filter === 'progress'}
-        />
-        <Stat
-          label="Failed"
-          value={meetings === null ? '—' : String(stats.failed)}
-          hint="couldn't be processed"
-          tone={stats.failed > 0 ? 'warning' : 'default'}
-          onClick={() => setFilter(filter === 'failed' ? 'all' : 'failed')}
-          active={filter === 'failed'}
-        />
-      </section>
-
       {localOnly.length > 0 && (
         <section>
-          <h2 className="mb-2 font-mono text-xl font-semibold tracking-[0.12em] text-foreground uppercase">Waiting to upload from this device</h2>
-          <Card className="divide-y divide-border overflow-hidden">
+          <h2 className="mb-2 font-mono text-[11px] font-semibold tracking-[0.12em] text-foreground uppercase">Waiting to upload from this device</h2>
+          <div className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
             {localOnly.map((recording) => (
               <LocalRow key={recording.id} recording={recording} pending={sync.pending[recording.id] ?? 0} />
             ))}
-          </Card>
+          </div>
         </section>
       )}
 
       <section>
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-baseline gap-2">
-            <h2 className="font-mono text-xl font-semibold tracking-[0.12em] text-foreground uppercase">All meetings</h2>
-            <span className="font-mono text-xl tracking-[0.04em] text-muted-foreground tabular-nums">
-              {meetings === null ? '' : filtering ? `${visible.length} of ${total}` : `${total} ${total === 1 ? 'meeting' : 'meetings'}`}
-            </span>
+        {/* Filter tabs with counts, then search + sort - the way file and issue lists do it. */}
+        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 border-b border-border">
+          <div className="-mb-px flex gap-5 overflow-x-auto" role="group" aria-label="Filter meetings">
+            {FILTERS.map(({ key, label }) => {
+              const count = meetings === null ? null : counts[key]
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFilter(key)}
+                  aria-pressed={filter === key}
+                  className={cn(
+                    'flex items-center gap-2 border-b-2 px-0.5 pb-2.5 font-mono text-[11px] tracking-[0.1em] whitespace-nowrap uppercase transition-colors',
+                    filter === key
+                      ? 'border-foreground font-semibold text-foreground'
+                      : 'border-transparent text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {label}
+                  {count !== null && (
+                    <span
+                      className={cn(
+                        'digital text-[17px] leading-none tracking-normal',
+                        key === 'failed' && count > 0 ? 'text-live' : filter === key ? 'text-foreground' : 'text-muted-foreground',
+                      )}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
-          <div className="relative w-full max-w-64">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search titles"
-              aria-label="Search meetings"
-              className="py-2 pr-9 pl-9"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                aria-label="Clear search"
-                className="absolute top-1/2 right-2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"
-              >
-                <X className="size-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="mb-5 flex flex-wrap items-center gap-2">
-          {FILTERS.map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setFilter(key)}
-              aria-pressed={filter === key}
-              className={cn(
-                'rounded-[5px] border px-2.5 py-1 font-mono text-[10px] tracking-[0.1em] uppercase transition-colors',
-                filter === key
-                  ? 'border-foreground/25 bg-secondary font-semibold text-foreground'
-                  : 'border-border bg-card text-muted-foreground hover:bg-secondary/60 hover:text-foreground',
+          <div className="flex w-full items-center gap-2 pb-2.5 sm:w-auto">
+            <div className="relative flex-1 sm:w-60 sm:flex-none">
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search titles"
+                aria-label="Search meetings"
+                className="py-1.5 pr-9 pl-9"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  aria-label="Clear search"
+                  className="absolute top-1/2 right-2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
               )}
-            >
-              {label}
-              {key === 'progress' && stats.remaining > 0 && (
-                <span className={cn('ml-1.5 hidden sm:inline', filter === key ? 'text-foreground/60' : 'text-muted-foreground/70')}>
-                  · ~{formatRemaining(stats.remaining)}
-                </span>
-              )}
-            </button>
-          ))}
-          <label className="ml-auto flex items-center gap-2 font-mono text-[11px] tracking-[0.1em] text-muted-foreground uppercase">
-            <span className="hidden sm:inline">Sort</span>
+            </div>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
               aria-label="Sort meetings"
-              className="rounded-[3px] border border-input bg-card px-2 py-1 font-mono text-[11px] text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 focus:outline-none"
+              className="h-[38px] rounded-md border border-input bg-card px-2 font-mono text-[11px] text-foreground uppercase focus:border-ring focus:ring-2 focus:ring-ring/20 focus:outline-none"
             >
               {SORTS.map(({ key, label }) => (
                 <option key={key} value={key}>
@@ -527,15 +483,21 @@ export function MeetingsPage() {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
         </div>
 
-        <Card className="divide-y divide-border overflow-hidden">
+        {filter === 'progress' && counts.remaining > 0 && (
+          <p className="mt-3 font-mono text-[10px] tracking-[0.1em] text-muted-foreground uppercase">~{formatRemaining(counts.remaining)} of transcription left</p>
+        )}
+
+        <div className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
+          {meetings !== null && visible.length > 0 && <TableHead />}
+
           {meetings === null && !error && (
-            <div className="space-y-4 p-5">
+            <div className="space-y-4 p-4">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <Skeleton className="size-10 rounded-[3px]" />
+                <div key={i} className="flex items-center gap-3">
+                  <Skeleton className="size-9 rounded-[3px]" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-3.5 w-1/3" />
                     <Skeleton className="h-3 w-1/4" />
@@ -546,9 +508,7 @@ export function MeetingsPage() {
           )}
 
           {meetings === null && error && (
-            <div className="px-5 py-12 text-center text-base text-muted-foreground">
-              Meetings will appear here once the server is reachable.
-            </div>
+            <div className="px-5 py-12 text-center text-base text-muted-foreground">Meetings will appear here once the server is reachable.</div>
           )}
 
           {meetings !== null && visible.length === 0 && (
@@ -588,25 +548,27 @@ export function MeetingsPage() {
           )}
 
           {groups.map((group) => (
-            <div key={group.label ?? 'all'} className="divide-y divide-border">
+            <div key={group.label ?? 'all'} className="border-b border-border last:border-b-0">
               {group.label && <GroupHeader label={group.label} />}
-              {group.items.map((meeting) => (
-                <MeetingRow
-                  key={meeting.id}
-                  meeting={meeting}
-                  pending={sync.pending[meeting.id] ?? 0}
-                  editing={editingId === meeting.id}
-                  draft={draft}
-                  onDraft={setDraft}
-                  onStartRename={() => startRename(meeting)}
-                  onCommitRename={() => void commitRename(meeting)}
-                  onCancelRename={cancelRename}
-                  onDelete={() => setPendingDelete(meeting)}
-                />
-              ))}
+              <div className="divide-y divide-border">
+                {group.items.map((meeting) => (
+                  <MeetingRow
+                    key={meeting.id}
+                    meeting={meeting}
+                    pending={sync.pending[meeting.id] ?? 0}
+                    editing={editingId === meeting.id}
+                    draft={draft}
+                    onDraft={setDraft}
+                    onStartRename={() => startRename(meeting)}
+                    onCommitRename={() => void commitRename(meeting)}
+                    onCancelRename={cancelRename}
+                    onDelete={() => setPendingDelete(meeting)}
+                  />
+                ))}
+              </div>
             </div>
           ))}
-        </Card>
+        </div>
       </section>
 
       <AlertDialog open={pendingDelete !== null} onOpenChange={(open) => !open && setPendingDelete(null)}>

@@ -83,7 +83,7 @@ export function UploadPage() {
   const accept = config.allowed_extensions.join(',') + ',audio/*'
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
+    <div className="max-w-3xl space-y-5">
       <div>
         <div className="eyebrow">Ingest / 02</div>
         <h1 className="mt-2 text-[28px] font-bold tracking-[-0.03em] text-foreground">Upload audio</h1>

@@ -34,6 +34,7 @@
   --color-warning-soft: var(--warning-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
+  --color-sidebar: var(--sidebar);
 
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -79,6 +80,8 @@
   --warning-soft: #ececea;
   --info: #3f3f3c;
   --info-soft: #ececea;
+
+  --sidebar: #f7f7f5;
 
   --grid-line: rgba(10, 10, 10, 0.035);
   --grid-size: 24px;

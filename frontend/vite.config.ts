@@ -16,7 +16,8 @@ export default defineConfig(({ mode }) => {
     server: {
       host: https ? true : 'localhost',
       port: 5173,
-      proxy: { '/api': { target: 'http://127.0.0.1:8000', changeOrigin: true } },
+      // API_TARGET=http://127.0.0.1:8010 npm run dev  -> use a backend on another port
+      proxy: { '/api': { target: process.env.API_TARGET ?? 'http://127.0.0.1:8000', changeOrigin: true } },
     },
   }
 })
