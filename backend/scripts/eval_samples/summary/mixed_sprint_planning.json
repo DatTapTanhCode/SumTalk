@@ -1,0 +1,41 @@
+{
+  "id": "mixed_sprint_planning",
+  "_note": "SYNTHETIC placeholder written for the script. Replace with real samples + Son's reference summaries (#95).",
+  "title": "Sprint 3 planning",
+  "category": "mixed",
+  "language": "vi",
+  "segments": [
+    {"start": 0.0, "text": "Ok mọi người, hôm nay mình planning cho Sprint 3 nhé.", "language": "vi"},
+    {"start": 6.5, "text": "Sprint này có hai story chính: summary và translation.", "language": "vi"},
+    {"start": 12.0, "text": "For the summary we will reuse the prompts from the benchmark.", "language": "en"},
+    {"start": 18.2, "text": "Nhật lo phần prompt và map-reduce cho transcript dài.", "language": "vi"},
+    {"start": 24.0, "text": "Hào sẽ làm summary step sau transcription và API.", "language": "vi"},
+    {"start": 30.4, "text": "Do we run the model locally with Ollama or call a cloud API?", "language": "en"},
+    {"start": 36.0, "text": "Chốt là dùng Ollama local với Gemma, cấu hình qua file env để đổi được.", "language": "vi"},
+    {"start": 43.1, "text": "Translation thì dịch theo batch hai mươi segment một lần.", "language": "vi"},
+    {"start": 49.7, "text": "Duy làm tab Translation với bảng hai cột và nút Export TXT, SRT.", "language": "vi"},
+    {"start": 56.0, "text": "Deadline demo là thứ Năm ngày 30 tháng 10.", "language": "vi"},
+    {"start": 61.5, "text": "We still need to decide how to evaluate translation quality.", "language": "en"},
+    {"start": 67.0, "text": "Đăng sẽ đề xuất metric, có thể là chrF và BLEU.", "language": "vi"}
+  ],
+  "reference": {
+    "overview": "Nhóm lên kế hoạch Sprint 3 với hai story summary và translation, phân công người làm và chốt dùng Ollama local với Gemma.",
+    "key_points": [
+      "Sprint 3 gồm hai story: summary và translation",
+      "Summary dùng lại prompt từ benchmark",
+      "Translation dịch theo batch 20 segment",
+      "Deadline demo là thứ Năm 30/10"
+    ],
+    "decisions": [
+      "Dùng Ollama local với Gemma, cấu hình qua file env",
+      "Dịch theo batch 20 segment một lần"
+    ],
+    "action_items": [
+      {"task": "Làm prompt và map-reduce cho transcript dài", "owner": "Nhật"},
+      {"task": "Làm summary step sau transcription và API", "owner": "Hào"},
+      {"task": "Làm tab Translation và nút Export TXT/SRT", "owner": "Duy"},
+      {"task": "Đề xuất metric đánh giá bản dịch", "owner": "Đăng"}
+    ],
+    "open_questions": ["Đánh giá chất lượng bản dịch bằng cách nào"]
+  }
+}

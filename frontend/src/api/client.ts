@@ -1,4 +1,17 @@
-import type { ClientConfig, ExportFormat, Health, Meeting, Transcript, TranscriptKind, UploadSession } from './types'
+import type {
+  ClientConfig,
+  ExportFormat,
+  Health,
+  Meeting,
+  Summary,
+  Transcript,
+  TranscriptKind,
+  Translation,
+  TranslationExportFormat,
+  TranslationExportMode,
+  TranslationInfo,
+  UploadSession,
+} from './types'
 
 /** The server answered with an error status. */
 export class ApiError extends Error {
@@ -90,4 +103,19 @@ export const api = {
 
   audioUrl: (id: string, download = false) => `/api/meetings/${id}/audio${download ? '?download=true' : ''}`,
   exportUrl: (id: string, format: ExportFormat) => `/api/meetings/${id}/export?format=${format}`,
+
+  // Summary (#71). getSummary throws ApiError 404 while the meeting has no summary.
+  getSummary: (id: string) => request<Summary>(`/api/meetings/${id}/summary`),
+  regenerateSummary: (id: string, language?: string) =>
+    request<Summary>(`/api/meetings/${id}/summary/regenerate`, json('POST', language ? { language } : {})),
+
+  // Translation (#64, #65). createTranslation returns the saved one when it already exists (no re-translation).
+  listTranslations: (id: string) => request<TranslationInfo[]>(`/api/meetings/${id}/translations`),
+  getTranslation: (id: string, lang: string) => request<Translation>(`/api/meetings/${id}/translations/${lang}`),
+  createTranslation: (id: string, targetLang: string) =>
+    request<Translation>(`/api/meetings/${id}/translations`, json('POST', { target_lang: targetLang })),
+  retryTranslation: (id: string, lang: string) =>
+    request<Translation>(`/api/meetings/${id}/translations/${lang}/retry`, { method: 'POST' }),
+  translationExportUrl: (id: string, lang: string, format: TranslationExportFormat, mode: TranslationExportMode = 'translated') =>
+    `/api/meetings/${id}/translations/${lang}/export?${new URLSearchParams({ format, mode })}`,
 }

@@ -3,7 +3,7 @@
 Recording : PCM chunks --run_live (after every chunk)--> "live" segments
             finalize --> audio.wav --transcribe_meeting--> "final" segments (replace the live ones)
 Upload    : original file --convert--> audio.wav --transcribe_meeting--> "final" segments
-v2 stages (translation, summary) will run after transcribe_meeting.
+After transcribe_meeting: summary (automatic) and translation (on request) run in services/ai_jobs.py.
 """
 
 import logging
@@ -15,7 +15,7 @@ from sqlalchemy import delete, func, select
 from ..config import SAMPLE_RATE, get_settings
 from ..db import SessionLocal
 from ..models import Meeting, MeetingStatus, Segment, utcnow
-from . import audio, storage
+from . import ai_jobs, audio, storage
 from .jobs import Worker, meeting_lock
 from .transcriber import TranscribedSegment, transcriber
 
@@ -210,6 +210,7 @@ def finalize_recording(meeting_id: str) -> None:
         transcribe_meeting(meeting_id)
     else:
         _update(meeting_id, status=MeetingStatus.DONE, progress=1.0, completed_at=utcnow())
+        ai_jobs.after_transcription(meeting_id)
 
 
 def process_upload(meeting_id: str) -> None:
@@ -245,6 +246,7 @@ def transcribe_meeting(meeting_id: str) -> None:
     with SessionLocal() as db:
         db.execute(delete(Segment).where(Segment.meeting_id == meeting_id, Segment.kind == "final"))
         db.commit()
+    ai_jobs.reset_for_transcription(meeting_id)
 
     try:
         samples = audio.load_wav(path)
@@ -277,6 +279,7 @@ def transcribe_meeting(meeting_id: str) -> None:
         meeting.status, meeting.progress, meeting.completed_at = MeetingStatus.DONE, 1.0, utcnow()
         db.commit()
     live_partials.pop(meeting_id, None)
+    ai_jobs.after_transcription(meeting_id)
 
 
 def _save_final(meeting_id: str, batch: list[TranscribedSegment], first_idx: int, progress: float) -> bool:
@@ -312,7 +315,9 @@ batch_worker = Worker(
 def start_workers() -> None:
     live_worker.start()
     batch_worker.start()
+    ai_jobs.ai_worker.start()
     _resume_unfinished()
+    ai_jobs.resume_unfinished()
     if settings.preload_model:
         threading.Thread(target=_preload_model, name="model-preload", daemon=True).start()
 
@@ -320,6 +325,7 @@ def start_workers() -> None:
 def stop_workers() -> None:
     live_worker.stop()
     batch_worker.stop()
+    ai_jobs.ai_worker.stop()
 
 
 def _preload_model() -> None:

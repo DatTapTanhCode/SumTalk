@@ -1,4 +1,4 @@
-import { CloudUpload, Cpu, ListChecks, LoaderCircle, Mic, TriangleAlert, Upload, WifiOff, Zap } from 'lucide-react'
+import { CloudUpload, Cpu, ListChecks, LoaderCircle, Mic, Plus, TriangleAlert, Upload, WifiOff, Zap } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { sessionStore } from '../audio/session'
 import { cn, formatClock } from '../lib/format'
@@ -68,7 +68,8 @@ function Dot({ className }: { className?: string }) {
   return <span className={cn('size-1.5 shrink-0 rounded-[1px]', className)} />
 }
 
-function ConnectionChip() {
+/** Connection readout. `quiet` hides it while everything is fine (mobile top bar). */
+function ConnectionChip({ className, quiet = false }: { className?: string; quiet?: boolean }) {
   const sync = useStore(syncStore)
   const { reachable } = useStore(healthStore)
   const pending = Object.values(sync.pending).reduce((a, b) => a + b, 0)
@@ -77,78 +78,80 @@ function ConnectionChip() {
   if (offline) {
     return (
       <Readout
-        className="border-border bg-card text-foreground"
+        className={cn('border-border bg-card text-foreground', className)}
         title="Recordings are kept on this device and upload automatically when the connection is back."
       >
         <WifiOff className="size-3" />
         <Dot className="bg-live" />
-        <span className="hidden sm:inline">{sync.online ? 'No server' : 'Offline'}</span>
+        {sync.online ? 'No server' : 'Offline'}
         {pending > 0 && <span className="tabular-nums">· {pending}</span>}
       </Readout>
     )
   }
   if (pending > 0) {
     return (
-      <Readout className="border-border bg-card text-foreground" title="Uploading recorded audio">
+      <Readout className={cn('border-border bg-card text-foreground', className)} title="Uploading recorded audio">
         <CloudUpload className="size-3" />
         <span className="tabular-nums">{pending}</span>
-        <span className="hidden sm:inline">queued</span>
+        queued
       </Readout>
     )
   }
+  if (quiet) return null
   return (
-    <Readout className="hidden border-border bg-card text-muted-foreground sm:inline-flex" title="Connected">
+    <Readout className={cn('border-border bg-card text-muted-foreground', className)} title="Connected">
       <Dot className="bg-online" />
-      <span className="hidden sm:inline">Online</span>
+      Online
     </Readout>
   )
 }
 
-function ModelChip() {
+function ModelChip({ className }: { className?: string }) {
   const { stt, reachable } = useStore(healthStore)
   if (!stt || reachable === false) return null
   if (stt.status === 'error') {
     return (
-      <Readout className="border-live/40 bg-card text-live" title={stt.error ?? ''}>
+      <Readout className={cn('border-live/40 bg-card text-live', className)} title={stt.error ?? ''}>
         <TriangleAlert className="size-3" />
-        <span className="hidden sm:inline">Speech model error</span>
+        Speech model error
       </Readout>
     )
   }
   if (stt.status !== 'ready') {
     return (
-      <Readout className="border-border bg-card text-muted-foreground" title="The first start downloads the Whisper model">
+      <Readout className={cn('border-border bg-card text-muted-foreground', className)} title="The first start downloads the Whisper model">
         <LoaderCircle className="size-3 animate-spin" />
-        <span className="hidden sm:inline">Loading model</span>
+        Loading model
       </Readout>
     )
   }
   const gpu = stt.device === 'cuda'
   return (
-    <span className="hidden lg:contents">
-      <Readout
-        className="border-border bg-card text-muted-foreground"
-        title={`faster-whisper · ${stt.model} · ${stt.device} · ${stt.compute_type}`}
-      >
-        {gpu ? <Zap className="size-3 text-foreground" /> : <Cpu className="size-3" />}
-        Whisper {stt.model} · {gpu ? 'GPU' : 'CPU'}
-      </Readout>
-    </span>
+    <Readout
+      className={cn('border-border bg-card text-muted-foreground', className)}
+      title={`faster-whisper · ${stt.model} · ${stt.device} · ${stt.compute_type}`}
+    >
+      {gpu ? <Zap className="size-3 text-foreground" /> : <Cpu className="size-3" />}
+      Whisper {stt.model} · {gpu ? 'GPU' : 'CPU'}
+    </Readout>
   )
 }
 
-function RecordingPill() {
+function RecordingPill({ className }: { className?: string }) {
   const session = useStore(sessionStore)
   const { pathname } = useLocation()
   if ((session.phase !== 'recording' && session.phase !== 'paused') || pathname === '/record') return null
   return (
     <Link
       to="/record"
-      className="inline-flex items-center gap-2 rounded-md bg-live px-2 py-1 font-mono text-[11px] font-semibold tracking-[0.12em] text-white uppercase transition-colors hover:bg-live/90"
+      className={cn(
+        'inline-flex items-center gap-2 rounded-md bg-live px-2 py-1 font-mono text-[11px] font-semibold tracking-[0.12em] text-white uppercase transition-colors hover:bg-live/90',
+        className,
+      )}
     >
       <span className={cn('size-1.5 rounded-[1px] bg-white', session.phase === 'recording' && 'animate-pulse')} />
       {session.phase === 'paused' ? 'Paused' : 'Rec'}
-      <span className="digital text-xl tracking-normal tabular-nums">{formatClock(session.seconds)}</span>
+      <span className="digital ml-auto text-xl tracking-normal tabular-nums">{formatClock(session.seconds)}</span>
     </Link>
   )
 }
@@ -158,45 +161,80 @@ export function Layout() {
   const recording = session.phase === 'recording' || session.phase === 'paused'
 
   return (
-    <div className="min-h-dvh">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
-          <Link to="/" className="flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-[-0.02em] text-foreground">
-            <Logo className="size-8" live={session.phase === 'recording'} />
-            SumTalk
-            <span className="rounded-[3px] border border-border px-1 py-px font-mono text-[10px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-              poc
-            </span>
+    <div className="min-h-dvh md:pl-60">
+      {/* Desktop sidebar */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-background/80 backdrop-blur-md md:flex">
+        <Link to="/" className="flex h-14 shrink-0 items-center gap-2 px-4 text-[15px] font-semibold tracking-[-0.02em] text-foreground">
+          <Logo className="size-8" live={session.phase === 'recording'} />
+          SumTalk
+          <span className="rounded-[3px] border border-border px-1 py-px font-mono text-[10px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+            poc
+          </span>
+        </Link>
+
+        <div className="px-3 pt-2 pb-4">
+          <Link
+            to="/record"
+            className="flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary text-[13px] font-semibold text-primary-foreground transition-colors hover:bg-primary/85"
+          >
+            <Plus className="size-4" /> New recording
           </Link>
-          <nav className="hidden h-full items-center gap-0.5 md:flex">
-            {NAV.map(({ to, label, icon: Icon, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
-                className={cn(
-                  'relative inline-flex h-full items-center gap-2 px-3 text-[15px] font-medium tracking-tight transition-colors',
-                  'after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-foreground after:opacity-0 after:transition-opacity',
-                  'text-muted-foreground hover:text-foreground aria-[current=page]:font-semibold aria-[current=page]:text-foreground aria-[current=page]:after:opacity-100',
-                )}
-              >
-                <Icon className="size-3.5" />
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="ml-auto flex items-center gap-1.5">
-            <RecordingPill />
+        </div>
+
+        <div className="eyebrow px-4 pb-2 text-[10px]">Menu</div>
+        <nav className="flex flex-col gap-0.5 px-3">
+          {NAV.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                cn(
+                  'row-rule flex h-9 items-center gap-2.5 rounded-md px-3 text-[15px] font-medium tracking-tight transition-colors',
+                  isActive
+                    ? 'bg-card font-semibold text-foreground shadow-[inset_2px_0_0_0_var(--foreground)] hover:shadow-[inset_2px_0_0_0_var(--foreground)]'
+                    : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground',
+                )
+              }
+            >
+              <Icon className="size-3.5" />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="px-3 pt-4">
+          <RecordingPill className="w-full" />
+        </div>
+
+        <div className="mt-auto space-y-2 border-t border-border px-3 py-3">
+          <div className="eyebrow text-[10px]">System</div>
+          <div className="flex flex-col items-start gap-1.5">
             <ConnectionChip />
             <ModelChip />
           </div>
         </div>
+      </aside>
+
+      {/* Mobile top bar */}
+      <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md md:hidden">
+        <div className="flex h-14 items-center gap-2 px-4">
+          <Link to="/" className="flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-[-0.02em] text-foreground">
+            <Logo className="size-8" live={session.phase === 'recording'} />
+            SumTalk
+          </Link>
+          <div className="ml-auto flex items-center gap-1.5">
+            <RecordingPill />
+            <ConnectionChip quiet />
+          </div>
+        </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 pt-6 pb-28 md:pb-12">
+      <main className="mx-auto max-w-6xl px-4 pt-6 pb-28 md:px-8 md:pt-8 md:pb-12">
         <Outlet />
       </main>
 
+      {/* Mobile bottom navigation */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
         <div className="mx-auto grid max-w-md grid-cols-3">
           {NAV.map(({ to, label, icon: Icon, end }) => (

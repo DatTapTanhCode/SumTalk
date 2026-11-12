@@ -1,0 +1,19 @@
+{
+  "id": "mixed_to_vi",
+  "_note": "SYNTHETIC placeholder. Replace with real samples + Son's reference translations (#96).",
+  "category": "mixed",
+  "target_lang": "vi",
+  "segments": [
+    {"id": 1, "text": "Ok, mình sẽ deploy bản mới lên staging chiều nay.", "language": "vi"},
+    {"id": 2, "text": "The CI pipeline failed because of a flaky test.", "language": "en"},
+    {"id": 3, "text": "Vậy thì rerun pipeline rồi check lại log nhé.", "language": "vi"},
+    {"id": 4, "text": "Can we merge the PR before the sprint review?", "language": "en"}
+  ],
+  "references": {
+    "1": "Ok, mình sẽ deploy bản mới lên staging chiều nay.",
+    "2": "CI pipeline bị lỗi vì một test chập chờn (flaky test).",
+    "3": "Vậy thì rerun pipeline rồi check lại log nhé.",
+    "4": "Mình có thể merge PR trước buổi sprint review không?"
+  },
+  "terms": ["deploy", "staging", "CI pipeline", "flaky test", "PR", "sprint review", "merge"]
+}

@@ -1,9 +1,8 @@
 import { Pause, Play, RotateCcw, RotateCw } from 'lucide-react'
 import { useEffect, useState, type RefObject } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
-import { formatClock } from '@/lib/format'
+import { cn, formatClock } from '@/lib/format'
 
 const RATES = [1, 1.25, 1.5, 2]
 
@@ -15,6 +14,7 @@ export function AudioPlayer({
   playing,
   onTimeUpdate,
   onPlayingChange,
+  className,
 }: {
   audioRef: RefObject<HTMLAudioElement | null>
   src: string
@@ -23,6 +23,7 @@ export function AudioPlayer({
   playing: boolean
   onTimeUpdate: (seconds: number) => void
   onPlayingChange: (playing: boolean) => void
+  className?: string
 }) {
   const [rate, setRate] = useState(1)
   const [mediaDuration, setMediaDuration] = useState(0)
@@ -56,7 +57,7 @@ export function AudioPlayer({
   }
 
   return (
-    <Card className="sticky top-12 z-20 flex flex-wrap items-center gap-2 bg-card/95 px-2.5 py-2 backdrop-blur sm:gap-3 sm:px-3">
+    <div className={cn('flex flex-wrap items-center gap-2 px-2.5 py-2 sm:gap-3 sm:px-3', className)}>
       <audio
         ref={audioRef}
         src={src}
@@ -97,6 +98,6 @@ export function AudioPlayer({
           {formatClock(position)} / {formatClock(duration)}
         </span>
       </div>
-    </Card>
+    </div>
   )
 }

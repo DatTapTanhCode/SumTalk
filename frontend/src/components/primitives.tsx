@@ -45,6 +45,39 @@ export function Notice({
   )
 }
 
+/** Micro-label above an input: TITLE / SPOKEN LANGUAGE. */
+export function FieldLabel({ htmlFor, children }: { htmlFor?: string; children: ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">
+      {children}
+    </label>
+  )
+}
+
+/** Page title row: eyebrow + heading + description on the left, actions on the right. */
+export function PageHeader({
+  eyebrow,
+  title,
+  description,
+  actions,
+}: {
+  eyebrow?: ReactNode
+  title: ReactNode
+  description?: ReactNode
+  actions?: ReactNode
+}) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="min-w-0">
+        {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+        <h1 className={cn(eyebrow && 'mt-2', 'text-[28px] font-bold tracking-[-0.03em] text-foreground')}>{title}</h1>
+        {description && <p className="mt-1 max-w-2xl text-base text-muted-foreground">{description}</p>}
+      </div>
+      {actions && <div className="flex shrink-0 gap-2">{actions}</div>}
+    </div>
+  )
+}
+
 /** Input styling for the pages that still use a raw <input> or <select>. */
 export const inputClass =
   'w-full rounded-md border border-input bg-card px-3 py-2 text-base text-foreground placeholder:text-muted-foreground transition-[color,box-shadow,border-color] focus:border-ring focus:ring-2 focus:ring-ring/20 focus:outline-none disabled:bg-secondary disabled:text-muted-foreground'

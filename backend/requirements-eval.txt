@@ -1,0 +1,2 @@
+sacrebleu>=2.4   # chrF++ / BLEU for scripts/eval_translation.py
+# bert-score    # optional: python scripts/eval_summary.py --bertscore (large download)

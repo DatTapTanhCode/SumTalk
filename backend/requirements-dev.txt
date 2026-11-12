@@ -1,3 +1,5 @@
 -r requirements.txt
 pytest>=8
 httpx2  # used by FastAPI's TestClient
+srt>=3.5  # tests parse the exported subtitles
+ruff>=0.6

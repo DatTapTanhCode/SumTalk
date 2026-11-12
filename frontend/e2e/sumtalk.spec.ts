@@ -23,7 +23,8 @@ test('records a meeting in the browser with a live transcript, then saves it', a
   await expect(page.getByText('Ready', { exact: true })).toBeVisible({ timeout: 60_000 })
   await expect(page.getByRole('heading', { name: 'Browser recording test' })).toBeVisible()
   await expect(page.getByText(/sprint backlog/i).first()).toBeVisible()
-  await expect(page.locator('audio')).toBeVisible()
+  await expect(page.locator('audio')).toBeAttached() // the <audio> element is hidden behind the custom player
+  await expect(page.getByRole('button', { name: 'Play' })).toBeVisible()
 })
 
 test('records microphone + meeting (tab/system) audio mixed together', async ({ page }) => {
@@ -38,7 +39,7 @@ test('records microphone + meeting (tab/system) audio mixed together', async ({ 
   await page.waitForTimeout(3000)
   await page.getByRole('button', { name: 'Stop and save' }).click()
   await expect(page.getByText('Ready', { exact: true })).toBeVisible({ timeout: 60_000 })
-  await expect(page.getByText('Recorded · mic + meeting audio')).toBeVisible()
+  await expect(page.getByText('Mic + meeting audio').first()).toBeVisible()
 })
 
 test('uploads an existing audio file and creates a meeting from it', async ({ page }) => {

@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   Calendar,
   Check,
+  ChevronRight,
   CircleAlert,
   Clock,
   CloudOff,
@@ -12,6 +13,7 @@ import {
   Languages,
   LoaderCircle,
   Mic,
+  MoreHorizontal,
   Pencil,
   RefreshCw,
   Search,
@@ -26,7 +28,9 @@ import { sessionStore } from '../audio/session'
 import { AudioPlayer } from '@/components/AudioPlayer'
 import { LanguageSelect } from '../components/LanguageSelect'
 import { StatusBadge } from '../components/StatusBadge'
+import { SummaryPanel } from '../components/SummaryPanel'
 import { TranscriptView } from '../components/TranscriptView'
+import { TranslationPanel } from '../components/TranslationPanel'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,17 +51,40 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Notice, ProgressBar } from '../components/primitives'
+import { FieldLabel, Notice, ProgressBar } from '../components/primitives'
 import { useMeeting } from '../hooks/useMeeting'
+import { copyText } from '../lib/clipboard'
 import { cn, formatBytes, formatClock, formatDateTime, formatDuration } from '../lib/format'
 import { languageName } from '../lib/languages'
 import { healthStore } from '../lib/server'
 import { useStore } from '../lib/store'
 import { discardRecording, retryRecording, syncStore } from '../offline/sync'
+
+/** "Meetings > Title" trail above the page title. */
+function Breadcrumb({ title }: { title: string }) {
+  return (
+    <nav
+      className="flex min-w-0 items-center gap-1.5 font-mono text-[11px] tracking-[0.1em] text-muted-foreground uppercase"
+      aria-label="Breadcrumb"
+    >
+      <Link to="/" className="inline-flex items-center gap-1.5 hover:text-foreground">
+        <ArrowLeft className="size-3.5 md:hidden" />
+        Meetings
+      </Link>
+      <ChevronRight className="hidden size-3 shrink-0 md:block" />
+      <span className="hidden truncate text-foreground md:block">{title}</span>
+    </nav>
+  )
+}
 
 function Meta({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
@@ -102,22 +129,11 @@ function EditableTitle({ meeting, onSaved }: { meeting: Meeting; onSaved: (m: Me
     )
   }
   return (
-    <button onClick={() => setEditing(true)} className="group flex w-full min-w-0 items-center gap-2 text-left">
+    <button onClick={() => setEditing(true)} className="group flex w-full min-w-0 items-center gap-2 text-left" title="Rename">
       <h1 className="min-w-0 truncate text-[28px] font-bold tracking-[-0.03em] text-foreground">{meeting.title}</h1>
       <Pencil className="size-4 shrink-0 text-muted-foreground/50 group-hover:text-muted-foreground" />
     </button>
   )
-}
-
-function copyText(text: string): Promise<void> {
-  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text)
-  const area = document.createElement('textarea')
-  area.value = text
-  document.body.appendChild(area)
-  area.select()
-  document.execCommand('copy')
-  area.remove()
-  return Promise.resolve()
 }
 
 function Detail({ label, children }: { label: string; children: ReactNode }) {
@@ -153,6 +169,7 @@ function LocalOnly({ id }: { id: string }) {
   const live = session.meetingId === id
   return (
     <div className="space-y-5">
+      <Breadcrumb title={recording.title} />
       <div>
         <h1 className="text-[28px] font-bold tracking-[-0.03em] text-foreground">{recording.title}</h1>
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
@@ -307,10 +324,12 @@ function StatusPanel({
               <Sparkles className="size-4 text-primary" />
               {stt?.status === 'loading' ? 'Loading the speech model…' : kind === 'live' ? 'Improving the transcript…' : 'Transcribing…'}
             </span>
-            <span className="font-mono text-muted-foreground tabular-nums">{Math.round(meeting.progress * 100)}%</span>
+            <span className="digital text-[18px] text-muted-foreground">{Math.round(meeting.progress * 100)}%</span>
           </div>
           <ProgressBar value={meeting.progress} />
-          {kind === 'live' && <p className="text-xl text-muted-foreground">Showing the live draft until the accurate full-file transcript is ready.</p>}
+          {kind === 'live' && (
+            <p className="text-[13px] text-muted-foreground">Showing the live draft until the accurate full-file transcript is ready.</p>
+          )}
         </Card>
       )
     case 'failed':
@@ -346,21 +365,7 @@ const EXPORTS: { format: ExportFormat; label: string }[] = [
   { format: 'json', label: 'JSON (.json)' },
 ]
 
-function ComingSoon({ children, label }: { children: ReactNode; label: string }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="cursor-not-allowed">
-          <TabsTrigger value={label} disabled>
-            {children}
-            <sup className="text-[10px]">v2</sup>
-          </TabsTrigger>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>Not built yet — planned for version 2</TooltipContent>
-    </Tooltip>
-  )
-}
+type Tab = 'transcript' | 'translation' | 'summary'
 
 export function MeetingPage({ id }: { id: string }) {
   const navigate = useNavigate()
@@ -375,6 +380,7 @@ export function MeetingPage({ id }: { id: string }) {
   const [retranscribing, setRetranscribing] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [tab, setTab] = useState<Tab>('transcript')
 
   // The sync engine just finished uploading/finalizing this recording: show the new status now.
   useEffect(() => {
@@ -434,40 +440,54 @@ export function MeetingPage({ id }: { id: string }) {
       ? 'Mic + meeting audio'
       : 'Microphone'
 
-  const deleteButton = (className?: string) => (
-    <Button
-      variant="ghost"
-      size="sm"
-      className={cn('justify-start text-live hover:bg-live-soft hover:text-live', className)}
-      onClick={() => setConfirmingDelete(true)}
-    >
-      <Trash2 className="size-4" /> Delete meeting
-    </Button>
-  )
+  const languageLabel = language
+    ? `${spoken.length > 1 ? spoken.map(languageName).join(' + ') : languageName(language)}${
+        meeting.language
+          ? ''
+          : ` (auto-detected${spoken.length <= 1 && meeting.language_probability ? ` ${Math.round(meeting.language_probability * 100)}%` : ''})`
+      }`
+    : null
 
   return (
     <div className="space-y-5">
-      <Link to="/" className="inline-flex items-center gap-1.5 text-base text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-4" /> All meetings
-      </Link>
-
       <div className="space-y-2">
-        <EditableTitle key={meeting.title} meeting={meeting} onSaved={setMeeting} />
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-          <StatusBadge status={meeting.status} progress={meeting.progress} />
-          <Meta icon={meeting.source === 'upload' ? <FileAudio className="size-4" /> : <Mic className="size-4" />}>{source}</Meta>
-          <Meta icon={<Calendar className="size-4" />}>{formatDateTime(meeting.meeting_at ?? meeting.created_at)}</Meta>
-          {meeting.duration_sec > 0 && <Meta icon={<Clock className="size-4" />}>{formatDuration(meeting.duration_sec)}</Meta>}
-          {language && (
-            <Meta icon={<Languages className="size-4" />}>
-              {spoken.length > 1 ? spoken.map(languageName).join(' + ') : languageName(language)}
-              {!meeting.language && (
-                <span className="text-muted-foreground/70">
-                  (auto-detected{spoken.length <= 1 && meeting.language_probability ? ` ${Math.round(meeting.language_probability * 100)}%` : ''})
-                </span>
+        <Breadcrumb title={meeting.title} />
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1 space-y-2">
+            <EditableTitle key={meeting.title} meeting={meeting} onSaved={setMeeting} />
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              <StatusBadge status={meeting.status} progress={meeting.progress} />
+              <Meta icon={meeting.source === 'upload' ? <FileAudio className="size-4" /> : <Mic className="size-4" />}>{source}</Meta>
+              <Meta icon={<Calendar className="size-4" />}>{formatDateTime(meeting.meeting_at ?? meeting.created_at)}</Meta>
+              {meeting.duration_sec > 0 && <Meta icon={<Clock className="size-4" />}>{formatDuration(meeting.duration_sec)}</Meta>}
+              {languageLabel && <Meta icon={<Languages className="size-4" />}>{languageLabel}</Meta>}
+            </div>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="icon-sm" aria-label="More actions">
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              {meeting.has_audio && (
+                <DropdownMenuItem disabled={busy} onSelect={() => setRetranscribing(true)}>
+                  <RefreshCw className="size-4" /> Transcribe again…
+                </DropdownMenuItem>
               )}
-            </Meta>
-          )}
+              {meeting.has_audio && (
+                <DropdownMenuItem asChild>
+                  <a href={api.audioUrl(meeting.id, true)} download>
+                    <FileAudio className="size-4" /> Download audio (.wav)
+                  </a>
+                </DropdownMenuItem>
+              )}
+              {meeting.has_audio && <DropdownMenuSeparator />}
+              <DropdownMenuItem variant="destructive" onSelect={() => setConfirmingDelete(true)}>
+                <Trash2 className="size-4" /> Delete meeting
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -484,82 +504,68 @@ export function MeetingPage({ id }: { id: string }) {
       )}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">
-        <div className="min-w-0 space-y-4">
-          {meeting.has_audio && (
-            <AudioPlayer
-              audioRef={audioRef}
-              src={api.audioUrl(meeting.id)}
-              currentTime={currentTime}
-              durationSec={meeting.duration_sec}
-              playing={playing}
-              onTimeUpdate={setCurrentTime}
-              onPlayingChange={setPlaying}
-            />
-          )}
-
-          <Card className="overflow-hidden">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-3 py-2.5 sm:px-4">
-              <Tabs value="transcript">
-                <TabsList>
-                  <TabsTrigger value="transcript">
-                    Transcript
-                    {transcript.kind === 'live' && <span className="ml-1 text-xl font-normal text-live">live draft</span>}
-                  </TabsTrigger>
-                  <ComingSoon label="translation">Translation</ComingSoon>
-                  <ComingSoon label="summary">Summary</ComingSoon>
-                </TabsList>
-              </Tabs>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search transcript"
-                    aria-label="Search transcript"
-                    className="w-44 py-1.5 pl-9 sm:w-48"
-                  />
-                </div>
-                <Button variant="secondary" size="sm" onClick={copy} disabled={!transcript.segments.length} aria-label="Copy transcript">
-                  {copied ? <Check className="size-4 text-success" /> : <Copy className="size-4" />}
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" size="sm">
-                      <Download className="size-4" />
-                      <span className="hidden sm:inline">Export</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    {EXPORTS.map(({ format, label }) => (
-                      <DropdownMenuItem key={format} asChild>
-                        <a href={api.exportUrl(meeting.id, format)} download className="gap-2">
-                          <FileText className="size-4 text-muted-foreground" />
-                          {label}
-                        </a>
-                      </DropdownMenuItem>
-                    ))}
-                    {meeting.has_audio && (
-                      <DropdownMenuItem asChild>
-                        <a href={api.audioUrl(meeting.id, true)} download className="gap-2">
-                          <FileAudio className="size-4 text-muted-foreground" /> Audio (.wav)
-                        </a>
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                {meeting.has_audio && !busy && (
-                  <Button variant="secondary" size="sm" onClick={() => setRetranscribing(true)}>
-                    <RefreshCw className="size-4" />
-                    <span className="hidden sm:inline">Re-transcribe</span>
-                  </Button>
-                )}
+        <Card className="flex min-w-0 flex-col overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-3 py-2.5 sm:px-4">
+            <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+              <TabsList>
+                <TabsTrigger value="transcript">
+                  Transcript
+                  {transcript.kind === 'live' && (
+                    <span className="font-mono text-[10px] font-normal tracking-[0.08em] text-live uppercase">live</span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="summary">Summary</TabsTrigger>
+                <TabsTrigger value="translation">Translation</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <div className={cn('flex flex-wrap items-center gap-2', tab !== 'transcript' && 'hidden')}>
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search transcript"
+                  aria-label="Search transcript"
+                  className="w-44 py-1.5 pl-9 sm:w-48"
+                />
               </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={copy}
+                disabled={!transcript.segments.length}
+                aria-label="Copy transcript"
+                title="Copy transcript"
+              >
+                {copied ? <Check className="size-4 text-success" /> : <Copy className="size-4" />}
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="sm">
+                    <Download className="size-4" />
+                    <span className="hidden sm:inline">Export</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {EXPORTS.map(({ format, label }) => (
+                    <DropdownMenuItem key={format} asChild>
+                      <a href={api.exportUrl(meeting.id, format)} download className="gap-2">
+                        <FileText className="size-4 text-muted-foreground" />
+                        {label}
+                      </a>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            <div
-              data-scroll
-              className="max-h-[65vh] overflow-y-auto px-1 py-3 lg:max-h-[calc(100dvh-17rem)] sm:px-2"
-            >
+          </div>
+
+          <div data-scroll className="max-h-[60vh] min-h-64 overflow-y-auto px-1 py-3 sm:px-2 lg:max-h-[calc(100dvh-20rem)]">
+            {tab === 'summary' ? (
+              <SummaryPanel meeting={meeting} segments={transcript.segments} onSeek={meeting.has_audio ? seek : undefined} />
+            ) : tab === 'translation' ? (
+              <TranslationPanel meeting={meeting} onSeek={meeting.has_audio ? seek : undefined} />
+            ) : (
               <TranscriptView
                 segments={transcript.segments}
                 partial={transcript.partial}
@@ -575,38 +581,41 @@ export function MeetingPage({ id }: { id: string }) {
                   </div>
                 }
               />
-            </div>
-          </Card>
+            )}
+          </div>
 
-          <div className="lg:hidden">{deleteButton()}</div>
-        </div>
+          {meeting.has_audio && (
+            <AudioPlayer
+              className="border-t border-border bg-sidebar"
+              audioRef={audioRef}
+              src={api.audioUrl(meeting.id)}
+              currentTime={currentTime}
+              durationSec={meeting.duration_sec}
+              playing={playing}
+              onTimeUpdate={setCurrentTime}
+              onPlayingChange={setPlaying}
+            />
+          )}
+        </Card>
 
-        <aside className="hidden space-y-4 lg:sticky lg:top-16 lg:block">
+        <aside className="hidden lg:sticky lg:top-8 lg:block">
           <Card className="p-4">
             <h2 className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">Details</h2>
             <dl className="mt-3 space-y-2.5 text-base">
-              <Detail label="Source">{source}</Detail>
-              <Detail label="Duration">{formatDuration(meeting.duration_sec)}</Detail>
-              {meeting.meeting_at && <Detail label="Meeting">{formatDateTime(meeting.meeting_at)}</Detail>}
-              <Detail label="Created">{formatDateTime(meeting.created_at)}</Detail>
-              {meeting.completed_at && <Detail label="Finished">{formatDateTime(meeting.completed_at)}</Detail>}
-              {meeting.size_bytes ? <Detail label="Size">{formatBytes(meeting.size_bytes)}</Detail> : null}
-              {meeting.total_chunks ? <Detail label="Chunks">{`${meeting.received_chunks} / ${meeting.total_chunks}`}</Detail> : null}
-              {language && (
-                <Detail label="Language">
-                  {languageName(language)}
-                  {!meeting.language && meeting.language_probability
-                    ? ` · ${Math.round(meeting.language_probability * 100)}%`
-                    : ''}
-                </Detail>
-              )}
+            <Detail label="Source">{source}</Detail>
+            <Detail label="Duration">{formatDuration(meeting.duration_sec)}</Detail>
+            {meeting.meeting_at && <Detail label="Meeting">{formatDateTime(meeting.meeting_at)}</Detail>}
+            <Detail label="Created">{formatDateTime(meeting.created_at)}</Detail>
+            {meeting.completed_at && <Detail label="Finished">{formatDateTime(meeting.completed_at)}</Detail>}
+            {meeting.size_bytes ? <Detail label="Size">{formatBytes(meeting.size_bytes)}</Detail> : null}
+            {meeting.total_chunks ? <Detail label="Chunks">{`${meeting.received_chunks} / ${meeting.total_chunks}`}</Detail> : null}
+            {language && (
+              <Detail label="Language">
+                {languageName(language)}
+                {!meeting.language && meeting.language_probability ? ` · ${Math.round(meeting.language_probability * 100)}%` : ''}
+              </Detail>
+            )}
             </dl>
-          </Card>
-
-          <Card className="border-live/30 p-4">
-            <h2 className="font-mono text-[10px] tracking-[0.14em] text-live uppercase">Danger zone</h2>
-            <p className="mt-2 text-xl text-muted-foreground">Deleting removes the audio and transcript permanently.</p>
-            <div className="mt-3">{deleteButton('w-full')}</div>
           </Card>
         </aside>
       </div>
@@ -619,10 +628,7 @@ export function MeetingPage({ id }: { id: string }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={() => void remove()}
-            >
+            <AlertDialogAction variant="destructive" onClick={() => void remove()}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -638,9 +644,7 @@ export function MeetingPage({ id }: { id: string }) {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            <label htmlFor="retry-language" className="text-base font-medium text-foreground">
-              Spoken language
-            </label>
+            <FieldLabel htmlFor="retry-language">Spoken language</FieldLabel>
             <LanguageSelect id="retry-language" value={retryLanguage} onChange={setRetryLanguage} />
           </div>
           <DialogFooter>

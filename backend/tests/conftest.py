@@ -1,4 +1,4 @@
-"""Tests run against a temporary data folder with a fake transcriber, so they need no model or GPU."""
+"""Tests run against a temporary data folder with a fake transcriber and a mock LLM, so they need no model, GPU or network."""
 
 import os
 import sys
@@ -13,6 +13,8 @@ DATA_DIR = Path(tempfile.mkdtemp(prefix="sumtalk-test-"))
 os.environ["DATA_DIR"] = str(DATA_DIR)
 os.environ["PRELOAD_MODEL"] = "false"
 os.environ["FRONTEND_DIST"] = str(DATA_DIR / "no-frontend")
+os.environ["AI_MOCK"] = "true"  # summary + translation use the deterministic mock model, no network
+os.environ["AI_RETRY_BACKOFF_SEC"] = "0"
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.services.transcriber import TranscribedSegment, transcriber  # noqa: E402
