@@ -2,7 +2,8 @@
 
 **Kết luận hiện tại (12/11/2026):** đủ điều kiện phát hành bản **v0.4 cho đợt test nội bộ và UAT**. Các test tự động
 đều đạt và hiệu năng đạt mục tiêu. **Chưa đủ để nghiệm thu cuối**, vì còn thiếu 3 việc: chạy lại test E2E trình
-duyệt sau thay đổi Sprint 4, deploy thật lên AWS, và đo độ chính xác tiếng Việt trên mẫu UAT.
+duyệt sau thay đổi Sprint 4, deploy thật lên AWS, và đo độ chính xác tiếng Việt trên mẫu UAT. Bộ cài desktop
+đã được build lại và đạt smoke test.
 
 ## 1. Phạm vi và môi trường
 
@@ -21,7 +22,7 @@ duyệt sau thay đổi Sprint 4, deploy thật lên AWS, và đo độ chính x
 | ruff (lint) | – | sạch | – | |
 | Type check + build frontend | – | đạt | – | |
 | Playwright desktop – từ mã nguồn | 8 | 8 | 0 | cửa sổ, micro, âm thanh hệ thống, thoát sạch |
-| Playwright desktop – bản đóng gói | 8 | 8 | 0 | chạy trên `win-unpacked` của v0.4 trước khi thêm streaming; [CẦN ĐIỀN: chạy lại sau khi build lại bộ cài] |
+| Playwright desktop – bản đóng gói | 8 | 8 | 0 | bộ cài v0.4 build lại ngày 12/11/2026 (205 MB), có streaming và STT remote |
 | Playwright trình duyệt (Chrome, Edge) – E1 | 5 × 2 | [CẦN ĐIỀN] | | cần chạy lại sau khi đổi chunk 1 s |
 | Playwright Sprint 3 (`sprint3.spec.ts`) | [CẦN ĐIỀN] | | | server `AI_MOCK=true` |
 | Docker: build image, HTTPS, đăng nhập, `/v1` | 8 kiểm tra | 8 | 0 | stack chạy local với `SITE_ADDRESS=localhost` |
@@ -62,8 +63,7 @@ duyệt sau thay đổi Sprint 4, deploy thật lên AWS, và đo độ chính x
 | Test tự động đạt 100% | ✔ (backend, desktop, Docker); E2E trình duyệt cần chạy lại |
 | Không còn lỗi Critical/High | ✔ theo hiểu biết hiện tại; [CẦN ĐIỀN: xác nhận trên board] |
 | Hiệu năng đạt mục tiêu | ✔ |
-| Smoke test bản đóng gói và bản web | Bản đóng gói: cần build lại bộ cài v0.4; bản web: đạt local, chưa có trên AWS |
+| Smoke test bản đóng gói và bản web | Bản đóng gói: ✔ (8/8); bản web: đạt khi chạy local, chưa có trên AWS |
 | PO và Sponsor đồng ý | [CẦN ĐIỀN] |
 
-**Khuyến nghị:** build lại bộ cài, chạy lại E2E trình duyệt và Sprint 3, deploy lên AWS, chạy UAT 1 tuần, rồi
-nghiệm thu v1.0.
+**Khuyến nghị:** chạy lại E2E trình duyệt và Sprint 3, deploy lên AWS, chạy UAT 1 tuần, rồi nghiệm thu v1.0.
