@@ -55,6 +55,10 @@ export interface ClientConfig {
   max_upload_mb: number
   allowed_extensions: string[]
   live_transcription: boolean
+  summary_languages: string[]
+  translation_languages: string[]
+  default_summary_language: string
+  ai_mock: boolean
 }
 
 export interface Health {
@@ -69,3 +73,64 @@ export interface Health {
 }
 
 export type ExportFormat = 'txt' | 'srt' | 'vtt' | 'json'
+
+// ---- Sprint 3: summary (#67) + translation (#60)
+
+export type AIJobStatus = 'pending' | 'running' | 'done' | 'failed'
+
+export interface ActionItem {
+  task: string
+  owner: string | null
+  due: string | null
+  /** idx of the transcript segments that mention it */
+  segment_ids: number[]
+}
+
+export interface Minutes {
+  overview: string
+  key_points: string[]
+  decisions: string[]
+  action_items: ActionItem[]
+  open_questions: string[]
+}
+
+export interface Summary {
+  status: AIJobStatus
+  language: string
+  content: Minutes | null
+  error: string | null
+  model: string | null
+  mode: 'empty' | 'single' | 'map_reduce' | null
+  calls: number
+  input_tokens: number
+  output_tokens: number
+  latency_sec: number
+  cost_usd: number
+  updated_at: string
+}
+
+export interface TranslationInfo {
+  target_lang: string
+  status: AIJobStatus
+  progress: number
+  error: string | null
+  updated_at: string
+}
+
+export interface TranslatedSegment {
+  segment_id: number
+  start: number
+  end: number
+  speaker: string | null
+  original: string
+  translation: string | null
+  skipped: boolean
+}
+
+export interface Translation extends TranslationInfo {
+  model: string | null
+  segments: TranslatedSegment[]
+}
+
+export type TranslationExportFormat = 'txt' | 'srt'
+export type TranslationExportMode = 'translated' | 'bilingual'

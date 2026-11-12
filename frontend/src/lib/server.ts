@@ -10,6 +10,10 @@ const DEFAULT_CONFIG: ClientConfig = {
   max_upload_mb: 1024,
   allowed_extensions: ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.oga', '.opus', '.webm', '.flac', '.wma', '.amr', '.3gp', '.mp4', '.mov', '.mkv'],
   live_transcription: true,
+  summary_languages: ['vi', 'en'],
+  translation_languages: ['vi', 'en'],
+  default_summary_language: 'vi',
+  ai_mock: false,
 }
 
 function cachedConfig(): ClientConfig {
