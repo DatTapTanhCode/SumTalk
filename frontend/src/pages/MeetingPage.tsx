@@ -63,6 +63,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FieldLabel, Notice, ProgressBar } from '../components/primitives'
 import { useMeeting } from '../hooks/useMeeting'
 import { copyText } from '../lib/clipboard'
+import { isDesktop } from '../lib/desktop'
 import { cn, formatBytes, formatClock, formatDateTime, formatDuration } from '../lib/format'
 import { languageName } from '../lib/languages'
 import { healthStore } from '../lib/server'
@@ -203,10 +204,12 @@ function LocalOnly({ id }: { id: string }) {
           title={live ? 'Recording in progress' : sync.online ? 'Uploading from this device…' : 'Saved on this device'}
         >
           {live
-            ? 'This meeting is being recorded in this browser.'
+            ? `This meeting is being recorded in this ${isDesktop ? 'window' : 'browser'}.`
             : sync.online
               ? `${pending} chunk${pending === 1 ? '' : 's'} left to upload. Transcription starts automatically afterwards.`
-              : `${pending} chunk${pending === 1 ? '' : 's'} will upload automatically when you are back online. Keep this browser installed and don't clear its data.`}
+              : isDesktop
+                ? `${pending} chunk${pending === 1 ? '' : 's'} saved on this computer will be processed automatically when the SumTalk engine is back.`
+                : `${pending} chunk${pending === 1 ? '' : 's'} will upload automatically when you are back online. Keep this browser installed and don't clear its data.`}
         </Notice>
       )}
 

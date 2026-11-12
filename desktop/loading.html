@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+    <title>SumTalk</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f2f2f0;
+        --fg: #0a0a0a;
+        --muted: #6b6b66;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+      }
+      svg {
+        width: 72px;
+        height: 72px;
+      }
+      .dot {
+        animation: level 1.2s ease-in-out infinite;
+      }
+      @keyframes level {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.25;
+        }
+      }
+      h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      p {
+        margin: 0;
+        font: 11px/1.4 ui-monospace, 'Cascadia Mono', Consolas, monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="6" fill="#0a0a0a" />
+        <g fill="#fafaf8">
+          <rect class="dot" style="animation-delay: 0s" x="2.2" y="10.9" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0s" x="2.2" y="16.7" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.15s" x="8" y="5.1" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.15s" x="8" y="10.9" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.15s" x="8" y="16.7" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.15s" x="8" y="22.5" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.3s" x="13.8" y="5.1" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.3s" x="13.8" y="10.9" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.3s" x="13.8" y="16.7" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.45s" x="19.6" y="10.9" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.45s" x="19.6" y="16.7" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.45s" x="19.6" y="22.5" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.6s" x="25.4" y="16.7" width="4.4" height="4.4" />
+          <rect class="dot" style="animation-delay: 0.6s" x="25.4" y="22.5" width="4.4" height="4.4" />
+        </g>
+      </svg>
+      <h1>SumTalk</h1>
+      <p id="status" role="status">Starting…</p>
+    </main>
+    <script>
+      window.setStatus = (text) => {
+        document.getElementById('status').textContent = text
+      }
+    </script>
+  </body>
+</html>

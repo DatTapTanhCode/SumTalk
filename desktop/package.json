@@ -1,0 +1,59 @@
+{
+  "name": "sumtalk-desktop",
+  "productName": "SumTalk",
+  "version": "0.3.0",
+  "description": "SumTalk - meeting transcription, summary & translation (Windows desktop app)",
+  "author": "SumTalk team",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node scripts/smoke-test.js",
+    "build:web": "npm --prefix ../frontend run build",
+    "build:backend": "node scripts/build-backend.js",
+    "build:backend:gpu": "node scripts/build-backend.js --gpu",
+    "pack": "electron-builder --dir",
+    "dist": "npm run build:web && npm run build:backend && electron-builder",
+    "dist:gpu": "npm run build:web && npm run build:backend:gpu && electron-builder --dir"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.1"
+  },
+  "build": {
+    "appId": "com.sumtalk.desktop",
+    "productName": "SumTalk",
+    "copyright": "SumTalk team",
+    "directories": {
+      "output": "dist",
+      "buildResources": "resources"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "loading.html",
+      "lib/**",
+      "resources/icon.png",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "../frontend/dist", "to": "web" },
+      { "from": ".pybuild/dist/sumtalk-server", "to": "backend" },
+      { "from": "../backend/.env.example", "to": "sumtalk.env.example" }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SumTalk",
+      "artifactName": "SumTalk-Setup-${version}.exe",
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}
