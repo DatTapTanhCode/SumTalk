@@ -1,0 +1,12 @@
+# `ruff check` (Definition of Done). Python 3.10+ is supported, see README.
+line-length = 140
+target-version = "py310"
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = [
+    "B008",  # FastAPI dependencies: `db: Session = Depends(get_db)` is the documented pattern
+    "B904",  # HTTPException raised inside `except` on purpose (the original error is not useful to clients)
+    "B905",  # zip(strict=) - lists of equal length by construction
+    "E741",  # short names like `l` in small comprehensions (Sprint 1 code)
+]
