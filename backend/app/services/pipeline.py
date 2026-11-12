@@ -328,7 +328,12 @@ def transcribe_meeting(meeting_id: str) -> None:
     meeting = _update(meeting_id, status=MeetingStatus.TRANSCRIBING, progress=0.0, error=None)
     if meeting is None:
         return
-    path = storage.audio_path(meeting_id)
+    try:
+        path = storage.ensure_local_audio(meeting_id)  # fetched back from S3 when re-transcribing
+    except Exception as exc:
+        log.exception("Could not fetch the audio of %s", meeting_id)
+        _fail(meeting_id, f"Could not fetch the audio: {exc}")
+        return
     if not path.exists():
         _fail(meeting_id, "The audio file is missing.")
         return
@@ -390,6 +395,7 @@ def transcribe_meeting(meeting_id: str) -> None:
         meeting.status, meeting.progress, meeting.completed_at = MeetingStatus.DONE, 1.0, utcnow()
         db.commit()
     forget_live(meeting_id)
+    storage.archive_audio(meeting_id)  # STORAGE_BACKEND=s3: move the finished audio to S3
     ai_jobs.after_transcription(meeting_id)
 
 
@@ -431,6 +437,19 @@ def start_workers() -> None:
     ai_jobs.resume_unfinished()
     if settings.preload_model:
         threading.Thread(target=_preload_model, name="model-preload", daemon=True).start()
+    if storage.s3_enabled() and settings.s3_db_backup_hours > 0:
+        threading.Thread(target=_backup_loop, name="db-backup", daemon=True).start()
+
+
+def _backup_loop() -> None:
+    """STORAGE_BACKEND=s3: copy the database to S3 now and then (the audio itself is already there)."""
+    while True:
+        time.sleep(settings.s3_db_backup_hours * 3600)
+        try:
+            key = storage.backup_database(settings.data_dir / "app.db")
+            log.info("Database backed up to s3://%s/%s", settings.s3_bucket, key)
+        except Exception:
+            log.exception("Database backup to S3 failed")
 
 
 def stop_workers() -> None:

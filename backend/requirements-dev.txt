@@ -3,3 +3,5 @@ pytest>=8
 httpx2  # used by FastAPI's TestClient
 srt>=3.5  # tests parse the exported subtitles
 ruff>=0.6
+boto3>=1.34  # S3 storage tests
+moto[s3]>=5  # fake S3 for the tests

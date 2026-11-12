@@ -19,3 +19,6 @@ frontend/playwright-report/
 desktop/node_modules/
 desktop/.pybuild/
 desktop/dist/
+
+# Server deployment secrets
+deploy/.env

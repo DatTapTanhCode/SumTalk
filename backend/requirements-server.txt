@@ -1,0 +1,3 @@
+# Web server deployment (Docker image, AWS EC2): the app + S3 support.
+-r requirements.txt
+boto3>=1.34

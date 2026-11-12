@@ -50,7 +50,8 @@ a = Analysis(  # noqa: F821
     binaries=binaries,
     datas=datas,
     hiddenimports=hiddenimports,
-    excludes=["tkinter", "matplotlib", "IPython", "pytest", "ruff", "srt", "PyInstaller"],
+    # boto3/moto (S3, server only) would add ~100 MB to the desktop app.
+    excludes=["tkinter", "matplotlib", "IPython", "pytest", "ruff", "srt", "PyInstaller", "boto3", "botocore", "s3transfer", "moto"],
     noarchive=False,
 )
 pyz = PYZ(a.pure)  # noqa: F821

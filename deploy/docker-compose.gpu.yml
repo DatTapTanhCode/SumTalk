@@ -1,0 +1,15 @@
+# Add on a GPU instance (NVIDIA driver + NVIDIA Container Toolkit installed, e.g. the AWS
+# "Deep Learning Base OSS Nvidia Driver GPU AMI"):
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+services:
+  app:
+    build:
+      args:
+        GPU: "1"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
