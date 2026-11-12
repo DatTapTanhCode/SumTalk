@@ -1,4 +1,4 @@
-# SumTalk – Architecture (POC v1)
+# SumTalk – Architecture (POC v1 + Sprint 3: summary & translation)
 
 SumTalk records or imports a meeting and returns a transcript **in the language each person spoke**.
 v1 covers epic **E1 – Capture meetings** plus transcription. Translation (e.g. English → Vietnamese)
@@ -153,6 +153,10 @@ sequenceDiagram
 erDiagram
   MEETING ||--o{ SEGMENT : has
   MEETING ||--o| UPLOAD : "created by"
+  MEETING ||--o| SUMMARY : has
+  MEETING ||--o{ TRANSLATION : "one per language"
+  TRANSLATION ||--o{ SEGMENT_TRANSLATION : has
+  SEGMENT ||--o{ SEGMENT_TRANSLATION : "translated as"
   MEETING {
     string id PK "UUID (client-generated for recordings)"
     string title
@@ -186,7 +190,40 @@ erDiagram
     int total_parts
     string status "uploading | completed"
   }
+  SUMMARY {
+    int id PK
+    string meeting_id FK "unique"
+    string language "vi | en"
+    string status "pending | running | done | failed"
+    json content "Minutes (JSONB on PostgreSQL)"
+    string model
+    string mode "empty | single | map_reduce"
+    int input_tokens
+    int output_tokens
+    float cost_usd
+    string error
+    int generation "bumped per request; stale runs are discarded"
+  }
+  TRANSLATION {
+    int id PK
+    string meeting_id FK
+    string target_lang "unique with meeting_id"
+    string status "pending | running | done | failed"
+    int progress "0-100"
+    string model
+    string error
+  }
+  SEGMENT_TRANSLATION {
+    int id PK
+    int translation_id FK
+    int segment_id FK "unique with translation_id"
+    string text
+    bool skipped "already in the target language"
+  }
 ```
+
+New tables are created by `init_db()` (`create_all`) on start-up, like the Sprint 1 tables: there is no
+Alembic in the repo yet. Statuses are strings (not DB enums) to match the existing tables.
 
 ```mermaid
 stateDiagram-v2
@@ -236,13 +273,64 @@ Interactive docs: `http://localhost:8000/docs`.
 | `PUT /api/uploads/{id}/parts/{n}` | One part (exact size checked) |
 | `POST /api/uploads/{id}/complete` | Join parts, create the meeting, queue processing |
 | `DELETE /api/uploads/{id}` | Cancel |
+| `GET /api/meetings/{id}/summary` | `{status, language, content, error, updated_at, …}`; 404 when there is none |
+| `POST /api/meetings/{id}/summary/regenerate` | `{language?}` → 202, replaces the summary when done; 409 while running or before the transcript |
+| `POST /api/meetings/{id}/translations` | `{target_lang}` → 200 with the saved translation if it exists (never re-translated), else 202 and start |
+| `GET /api/meetings/{id}/translations` | Languages already translated, with status/progress |
+| `GET /api/meetings/{id}/translations/{lang}` | `{status, progress, error, segments: [{segment_id, start, end, speaker, original, translation, skipped}]}` |
+| `POST /api/meetings/{id}/translations/{lang}/retry` | Only when `failed`; keeps the segments already translated |
+| `GET /api/meetings/{id}/translations/{lang}/export?format=txt\|srt&mode=translated\|bilingual` | Download; TXT has a UTF-8 BOM; 409 until done |
 
-## 9. From POC to product
+## 9. Summary & translation (Sprint 3)
+
+```mermaid
+flowchart LR
+  T[transcribe_meeting] -->|done| S[ai worker: run_summary_job]
+  U[POST /translations] --> TR[ai worker: run_translation_job]
+  S --> L[(LLMClient)]
+  TR --> L
+  L -->|AI_MOCK=false| O[OpenAI-compatible API: Ollama / cloud]
+  L -->|AI_MOCK=true| M[MockLLMClient]
+```
+
+- **Code:** `app/ai/` has no dependency on the database or the job queue: `llm_client.py` (OpenAI-compatible
+  client with timeout + retry on 429/5xx, mock client, token/cost accounting), `jsonutil.py` (JSON out of a
+  model answer, one repair retry), `summary/` (schema, prompts, `summarize`), `translation/` (prompts,
+  `detect_language`, `translate_batch`). `services/ai_jobs.py` runs them as background jobs.
+- **Summary:** queued automatically when the final transcript is ready, in the language used last time for
+  the meeting (or `DEFAULT_SUMMARY_LANGUAGE`). Transcript lines are sent as `[segment idx] [hh:mm:ss] text`.
+  Up to `SUMMARY_CHUNK_CHARS`: one call. Longer: the lines are cut at segment boundaries into chunks that
+  overlap by 2 segments, each chunk is summarized (map), then the partial minutes are merged (reduce; in
+  groups first if they do not fit one prompt). `action_items[].segment_ids` are kept for Sprint 4 (#79).
+- **Translation:** final segments in time order. Segments already in the target language (Whisper's
+  per-segment label, checked with a Vietnamese-letter heuristic) are stored as `skipped` without an LLM call.
+  The rest go in batches of `TRANSLATION_BATCH_SEGMENTS` as JSON `[{id, text}]` with the 2 previous lines as
+  context; ids missing from the answer are requested again on their own. Each batch is saved with the
+  progress, so a retry only translates what is missing. `translate_batch` works for one segment, for live
+  translation in Sprint 4 (#84).
+- **Reliability:** a job is retried as a whole `AI_JOB_RETRIES` times with backoff, then marked `failed` with
+  the error; `AI_JOB_TIME_LIMIT_SEC` is checked between model calls and each HTTP call has `LLM_TIMEOUT_SEC`,
+  so nothing stays `running`. Interrupted jobs are queued again on start-up. Summary and translation run on
+  their own worker thread, so a failure never re-runs speech-to-text.
+- **Re-transcribe:** translations are deleted (they point at the old segments) and the summary is rebuilt.
+- **Budget (R6):** every run stores calls, input/output tokens and an estimated cost
+  (`LLM_PRICE_INPUT_PER_1M`, `LLM_PRICE_OUTPUT_PER_1M`); the server log prints one line per summary.
+- **Quality evaluation:** `backend/scripts/eval_summary.py` (ROUGE-L, decision coverage, language check,
+  optional BERTScore) and `eval_translation.py` (chrF++, BLEU, English-term preservation), CSV + Markdown.
+
+Differences from the Sprint 3 spec, because the repo is built differently: no Celery/Redis (in-process worker
+thread, same retry/time-limit behaviour), SQLite only with `create_all` instead of Alembic, routes under
+`/api/meetings/...` like the existing API instead of `/api/v1`, no speaker field (diarization is not built:
+`speaker` is always `null`), no `preferred_language` on meetings so translation is never started
+automatically, the meeting status is not given a `summarizing` stage (the summary has its own status), and
+there was no `benchmark/` folder to copy prompts from, so they were written in `app/ai/`.
+
+## 10. From POC to product
 
 | Topic | POC v1 | Next step |
 |---|---|---|
-| Translation (v2) | – | New pipeline stage after `transcribe_meeting`: translate each final segment to the user's language (LLM or NLLB), store as `segment_translations` |
-| Summary (v2) | – | LLM summary + action items from the final transcript |
+| Translation | Sprint 3: on request, per segment, any OpenAI-compatible LLM | Live translation while recording (#84), automatic translation to a user's preferred language |
+| Summary | Sprint 3: automatic after transcription, vi / en, map-reduce | Action items view with links to the transcript (#79) |
 | Mobile background recording | Screen kept awake, offline queue | Capacitor/React Native wrapper with a background audio session / foreground service, same API |
 | Storage | Local disk, upload through the API | S3/MinIO with presigned multipart URLs (browser uploads straight to storage) |
 | Jobs | Threads in the API process | Celery/RQ + Redis, separate GPU workers; faster-whisper batched pipeline for long files |
