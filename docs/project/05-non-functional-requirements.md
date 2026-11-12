@@ -5,6 +5,7 @@ trạng" ghi kết quả đo thật ngày 12/11/2026 (laptop RTX 4050). Ô `[C�
 
 > Một phần các yêu cầu này đã có trong tài liệu Requirements & UI/UX của Sprint 1.
 > [CẦN ĐIỀN: đối chiếu và giữ mã yêu cầu cũ nếu có.]
+> Đặc tả giao diện theo bản hiện tại (v0.4): [22 – Đặc tả UI/UX](22-ui-ux-spec.md).
 
 ## 1. Hiệu năng
 

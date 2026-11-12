@@ -34,6 +34,7 @@ tự nên làm. Các file có ★ là 6 file ưu tiên làm mới.
 | 19 | [Test Summary Report](19-test-summary-report.md) | E. Kết thúc | |
 | 20 | [Release Notes](20-release-notes.md) | E. Kết thúc | |
 | 21 | [Báo cáo tổng kết / Lessons Learned](21-lessons-learned.md) | E. Kết thúc | |
+| 22 | [Đặc tả UI/UX (theo giao diện v0.4)](22-ui-ux-spec.md) | B. Yêu cầu (bổ sung) | |
 
 Tài liệu kỹ thuật liên quan (chỉ tham khảo, không nằm trong bộ này): [README](../../README.md),
 [ARCHITECTURE](../ARCHITECTURE.md), [hướng dẫn deploy AWS](../deploy/AWS-EC2-S3.md),
