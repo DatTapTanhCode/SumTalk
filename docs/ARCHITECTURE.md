@@ -52,6 +52,7 @@ Everything runs locally: no cloud service, no API key. The first start downloads
 | Speech-to-text | **faster-whisper** (OpenAI Whisper re-implemented on CTranslate2), Silero VAD | Free, offline, 99 languages incl. Vietnamese, word timestamps; 4× faster than the reference implementation. `large-v3-turbo` on NVIDIA GPUs, `small` on CPU |
 | Audio conversion | PyAV (FFmpeg libraries, installed with faster-whisper) | Any format → standard WAV without installing FFmpeg separately |
 | Jobs | In-process worker threads | Enough for one machine; same interface as Celery/RQ |
+| Desktop app | Electron 45 (Chromium) + backend frozen with PyInstaller, NSIS installer (electron-builder) | Reuses the web app and the Python backend unchanged; Chromium keeps every audio API, and adds system-audio loopback capture on Windows (section 11) |
 
 ## 3. Recording flow (US1.1, US1.2)
 
@@ -90,6 +91,8 @@ sequenceDiagram
 **Meeting audio for online calls.** "Microphone + meeting audio" asks the browser to share the
 Meet/Teams/Zoom tab (or the entire screen) *with audio*. Both streams are mixed with the Web Audio API,
 so the transcript contains the local speaker and the remote participants. Desktop Chrome/Edge only.
+In the Windows desktop app the same `getDisplayMedia()` call is answered by the app with the system
+audio output (loopback), so no tab has to be shared and calls in native Zoom/Teams apps work too.
 
 **Phones.** The page keeps the screen awake (Wake Lock) while recording, flushes audio to IndexedDB
 continuously and asks for persistent storage. A web page cannot keep the microphone running with the
@@ -337,3 +340,48 @@ there was no `benchmark/` folder to copy prompts from, so they were written in `
 | Database | SQLite | PostgreSQL + Alembic migrations |
 | Security | None (localhost) | Accounts, per-user access, HTTPS certificates, retention policy for audio |
 | Speakers | – | Diarization (who spoke when), e.g. pyannote |
+| Desktop app | Windows, CPU in the installer, GPU as a folder build, no auto-update | Code signing, auto-update (electron-updater), GPU libraries downloaded on first start, macOS build |
+
+## 11. Desktop app (Windows)
+
+```mermaid
+flowchart LR
+  subgraph Electron["SumTalk.exe - Electron"]
+    MAIN["Main process (desktop/main.js)<br/>window · menu · permissions<br/>getDisplayMedia → screen + loopback audio"]
+    WIN["Window (Chromium)<br/>same React app as the browser<br/>preload: window.sumtalkDesktop"]
+  end
+  BE["sumtalk-server.exe (PyInstaller)<br/>or backend/.venv + run.py<br/>FastAPI · Whisper · SQLite"]
+  DATA[("%LOCALAPPDATA%\SumTalk<br/>data · sumtalk.env · logs")]
+
+  MAIN -- "spawn --port 47821 --parent-watch<br/>stdin pipe kept open" --> BE
+  MAIN -- "poll GET /api/health,<br/>then load http://127.0.0.1:47821" --> WIN
+  WIN -- "/api/* (unchanged)" --> BE
+  BE --> DATA
+```
+
+- **No second code base.** The window loads the app from the backend exactly like a browser does, so
+  every API call, the offline queue and the recorder are the same code. The page only learns it is in the
+  desktop app through `window.sumtalkDesktop` (no Node.js access: context isolation + sandbox), and uses it
+  to skip the service worker and to adapt the meeting-audio wording.
+- **Start-up.** Single-instance lock → loading screen → free port (47821 first: the page's IndexedDB and
+  localStorage belong to the origin, port included, so it must stay the same between runs) → spawn the
+  backend → wait for `/api/health` (the Whisper model keeps loading in the background, as in the browser
+  version) → load the app. Missing files or a backend that exits during start-up show an error with the
+  last log lines.
+- **Shutdown.** The backend is started with `--parent-watch`: it reads its stdin until EOF and then stops
+  Uvicorn gracefully. Electron closes that pipe when the last window has closed (`will-quit`); if the app
+  crashes, Windows closes it anyway, so no server is left running. After 8 s Electron kills the process
+  tree. Interrupted jobs resume on the next start (`_resume_unfinished`).
+- **Permissions.** Microphone, clipboard, wake lock… are granted only to the backend's origin. Other
+  links open in the default browser. `getDisplayMedia()` is answered without a picker with the primary
+  screen + `audio: 'loopback'`; the recorder drops the video track as before.
+- **Recording safety.** `backgroundThrottling: false` keeps chunk uploads running while minimised. The
+  Record page's `beforeunload` guard becomes a native "A recording is in progress" dialog
+  (`will-prevent-unload`).
+- **Packaging.** `desktop/sumtalk-server.spec` freezes `backend/run.py` (collects the CTranslate2, PyAV/FFmpeg,
+  ONNX Runtime and tokenizer binaries and the Silero VAD model). `config.py` detects the frozen build and
+  defaults the data folder to `%LOCALAPPDATA%\SumTalk\data`; Electron also passes `DATA_DIR`,
+  `FRONTEND_DIST` and `SUMTALK_ENV_FILE` explicitly. electron-builder puts the web build in
+  `resources/web`, the backend in `resources/backend` and builds a per-user NSIS installer. The CUDA
+  libraries (~2 GB) only go into the `--gpu` folder build; `transcriber.py` also looks for them inside the
+  bundle.
