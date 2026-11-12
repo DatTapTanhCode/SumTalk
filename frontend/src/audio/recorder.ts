@@ -1,4 +1,5 @@
 import type { CaptureMode } from '../api/types'
+import { desktop } from '../lib/desktop'
 
 export const TARGET_RATE = 16_000
 
@@ -20,8 +21,12 @@ export function recordingUnsupportedReason(): string | null {
   return null
 }
 
-/** Sharing a tab's / the system's audio only works in desktop Chromium browsers (Chrome, Edge...). */
+/**
+ * Sharing a tab's / the system's audio only works in desktop Chromium browsers (Chrome, Edge...).
+ * The Windows desktop app records the computer's sound output directly (no sharing dialog).
+ */
 export function canCaptureMeetingAudio(): boolean {
+  if (desktop) return desktop.platform === 'win32' && Boolean(navigator.mediaDevices?.getDisplayMedia)
   const ua = navigator.userAgent
   return Boolean(navigator.mediaDevices?.getDisplayMedia) && /Chrome\//.test(ua) && !/Android|iPhone|iPad|iPod|Mobile/i.test(ua)
 }
@@ -30,7 +35,11 @@ function describeMediaError(error: unknown, what: string): RecorderError {
   const name = error instanceof DOMException ? error.name : ''
   switch (name) {
     case 'NotAllowedError':
-      return new RecorderError(`Permission to use the ${what} was denied. Allow it from the icon in the address bar and try again.`)
+      return new RecorderError(
+        desktop
+          ? `Permission to use the ${what} was denied. In Windows Settings > Privacy & security > Microphone, turn on "Let desktop apps access your microphone", then try again.`
+          : `Permission to use the ${what} was denied. Allow it from the icon in the address bar and try again.`,
+      )
     case 'NotFoundError':
       return new RecorderError(`No ${what} was found on this device.`)
     case 'NotReadableError':
@@ -92,7 +101,9 @@ export class AudioRecorder {
         meeting.getVideoTracks().forEach((track) => track.stop())
         if (meeting.getAudioTracks().length === 0) {
           throw new RecorderError(
-            'No audio was shared. Choose the meeting tab (or Entire screen) and turn on "Share tab audio" / "Share system audio".',
+            desktop
+              ? "Could not capture this computer's sound output. Record with the microphone only."
+              : 'No audio was shared. Choose the meeting tab (or Entire screen) and turn on "Share tab audio" / "Share system audio".',
           )
         }
       }

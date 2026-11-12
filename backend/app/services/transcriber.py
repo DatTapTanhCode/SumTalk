@@ -46,11 +46,17 @@ class TranscribedSegment:
 
 def _register_nvidia_libraries() -> None:
     """The optional nvidia-cublas/cudnn wheels install their DLLs under site-packages/nvidia/*/(bin|lib)."""
+    bases: list[Path] = []
+    bundle = getattr(sys, "_MEIPASS", None)  # desktop app built with --gpu: the DLLs are copied in here
+    if bundle and (Path(bundle) / "nvidia").is_dir():
+        bases.append(Path(bundle) / "nvidia")
     try:
         import nvidia  # namespace package from the nvidia-* wheels
+
+        bases.extend(Path(p) for p in nvidia.__path__ if Path(p) not in bases)
     except ImportError:
-        return
-    for base in map(Path, nvidia.__path__):
+        pass
+    for base in bases:
         if sys.platform == "win32":
             for bin_dir in base.glob("*/bin"):
                 os.add_dll_directory(str(bin_dir))

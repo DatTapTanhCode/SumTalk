@@ -21,6 +21,7 @@ import { Card } from '@/components/ui/card'
 import { Notice, PageHeader, inputClass } from '../components/primitives'
 import { useMeeting } from '../hooks/useMeeting'
 import { useWakeLock } from '../hooks/useWakeLock'
+import { isDesktop } from '../lib/desktop'
 import { cn, defaultMeetingTitle, formatClock } from '../lib/format'
 import { languageName } from '../lib/languages'
 import { configStore, healthStore } from '../lib/server'
@@ -240,12 +241,22 @@ export function RecordPage() {
                   icon={<MonitorSpeaker className="size-4" />}
                   title="Microphone + meeting audio"
                   description={
-                    meetingAudio
-                      ? 'Online meetings: also records what others say in the Meet / Teams / Zoom tab.'
-                      : 'Needs desktop Chrome or Edge.'
+                    isDesktop
+                      ? meetingAudio
+                        ? 'Online meetings: also records what others say in Zoom / Teams / Meet - everything this computer plays.'
+                        : 'Only available on Windows.'
+                      : meetingAudio
+                        ? 'Online meetings: also records what others say in the Meet / Teams / Zoom tab.'
+                        : 'Needs desktop Chrome or Edge.'
                   }
                 />
-                {mode === 'mic+system' && (
+                {mode === 'mic+system' && isDesktop && (
+                  <Notice icon={<Info className="size-4" />}>
+                    Records the sound coming out of this computer as well. Use headphones so the meeting audio is not
+                    picked up twice, and mute other apps (music, videos).
+                  </Notice>
+                )}
+                {mode === 'mic+system' && !isDesktop && (
                   <Notice icon={<Info className="size-4" />}>
                     When the browser asks, pick the meeting tab (or <b>Entire screen</b>) and turn on <b>Share tab audio</b> /{' '}
                     <b>Share system audio</b>.
