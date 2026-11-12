@@ -100,19 +100,23 @@ screen locked on iOS – that needs the native app wrapper planned after the POC
 
 ## 4. Live transcription
 
-Every chunk queues a live job for the meeting. The job transcribes the audio received since the last
-committed point (a window of 2.5–25 s) with fast settings (beam size 1, word timestamps), then decides
-what is final:
+The recorder sends 1 s chunks; every chunk queues a live job for the meeting. The job transcribes the
+audio received since the last committed point (a window of 1–15 s) with fast settings (beam size 1, word
+timestamps), then decides what is final:
 
 | Situation in the window | Action |
 |---|---|
 | No speech | Skip ahead, keep the last second (speech may be starting) |
 | Pause after the last sentence | Commit everything |
 | Last sentence still running into the window edge | Commit the earlier segments **and** every finished sentence inside the last one (split on `. ? !` using word times); the unfinished rest is shown greyed-out as `partial` and transcribed again with more audio |
-| One sentence longer than 25 s | Cut at the window edge |
+| Window past 8 s, nobody pauses | Commit the words the last **two passes agree on** (LocalAgreement-2) as a line, resume at the next word – keeps every pass short |
+| Window at 15 s | Commit every word that has ended, resume at the next word (never inside a word) |
 
-Result: text appears ~3 s after it is spoken, sentence by sentence, without words cut at chunk
-boundaries. After **Stop**, the whole file is transcribed again with accurate settings (beam size 5)
+The part still being spoken is returned as `partial`, with `partial_stable` = its start that two passes
+agreed on; the page shows the stable words in normal ink and the rest in grey italics, polling every
+0.7 s while recording. Measured on the dev laptop (RTX 4050, `large-v3-turbo`): new words show about
+1 s after they are spoken, a finished sentence is committed 1.9 s after it ends on average (max 2.3 s),
+the same through the remote engine (section 12). `LIVE_INTERVAL_SEC` spaces passes out for paid APIs. After **Stop**, the whole file is transcribed again with accurate settings (beam size 5)
 and replaces the live draft (`FINAL_PASS=true`).
 
 ## 5. Languages – always the original language
@@ -385,3 +389,48 @@ flowchart LR
   `resources/web`, the backend in `resources/backend` and builds a per-user NSIS installer. The CUDA
   libraries (~2 GB) only go into the `--gpu` folder build; `transcriber.py` also looks for them inside the
   bundle.
+
+## 12. Speech engines: local or remote (long files, no model on clients)
+
+```mermaid
+flowchart LR
+  subgraph Client["Desktop app / CPU server (STT_PROVIDER=remote)"]
+    P["pipeline.py<br/>live passes · sections"]
+    R["stt_remote.py<br/>Silero VAD → blocks ≤ 30 s<br/>4 requests in parallel"]
+    P --> R
+  end
+  subgraph GPU["SumTalk server with GPU (STT_PROVIDER=local)"]
+    V1["/v1/audio/transcriptions<br/>OpenAI-compatible, API keys"]
+    W["faster-whisper large-v3-turbo<br/>per-utterance language"]
+    V1 --> W
+  end
+  R -- "WAV block + Bearer key" --> V1
+  R -. "or" .-> G["Groq / OpenAI / speaches<br/>(same API)"]
+```
+
+- **`STT_PROVIDER=local`** (default): faster-whisper on the machine, as before.
+- **`STT_PROVIDER=remote`**: `transcriber.transcribe()` keeps its interface but `stt_remote.RemoteTranscriber`
+  sends the audio to `STT_BASE_URL` (`POST /audio/transcriptions`, `verbose_json`, word timestamps). Nothing
+  is downloaded: Silero VAD (2 MB, inside faster-whisper) splits the audio at pauses into blocks of at most
+  `STT_BLOCK_SEC`, so silence is never sent, every request stays far below the 25 MB limit of public APIs, and
+  the language is detected per block. Retries on 429/5xx with back-off; a refused key shows as an error in the
+  header.
+- **This server as an engine**: with `STT_SERVER_API_KEYS` set, `/v1/audio/transcriptions` and `/v1/models`
+  answer like OpenAI's API, backed by the local Whisper. Each segment carries its own `language`, so a remote
+  client keeps the per-utterance language of mixed meetings. The desktop installer can be built with
+  `SUMTALK_DEFAULT_STT_PROVIDER=remote` + URL + key, so customers install it and start without a model.
+- **Long files**: `transcribe_meeting` cuts `audio.wav` into sections of `LONG_SECTION_SEC` (300 s) at the
+  quietest 50 ms near each boundary, reads one section at a time (`audio.read_wav`), passes the previous
+  section's text as the prompt and saves segments as they come. Measured with an 11.6-minute file: first lines
+  after 3–5 s; done in 57 s on the local GPU (12× real time) and 18 s through the remote engine (39×, blocks
+  in parallel). An hour is therefore 1.5–5 minutes on a GPU.
+- **Live at length**: chunk sizes come from one directory scan (`storage.chunk_index`, `chunk_stats`), so the
+  cost of a pass does not grow with the length of the recording.
+
+| Engine | Accuracy | Live latency | Client install | Cost |
+|---|---|---|---|---|
+| Local GPU `large-v3-turbo` | best | ~1–2 s | 1.6 GB model + NVIDIA GPU | free |
+| Local CPU `small` | lower | grows on long sentences | 0.5 GB model | free |
+| Remote: SumTalk GPU server | = local GPU | ~1–2 s + network | nothing | EC2 GPU hours |
+| Remote: Groq `whisper-large-v3-turbo` | ≈ local GPU | ~1–2 s + network | nothing | per audio hour (check the provider's price) |
+
