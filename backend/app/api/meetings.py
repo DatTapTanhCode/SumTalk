@@ -4,7 +4,7 @@ from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
@@ -46,7 +46,7 @@ def transcript_kind(db: Session, meeting: Meeting) -> str:
 
 def to_out(db: Session, meeting: Meeting) -> MeetingOut:
     out = MeetingOut.model_validate(meeting)
-    out.has_audio = storage.audio_path(meeting.id).exists()
+    out.has_audio = storage.has_audio(meeting.id)
     out.transcript_kind = transcript_kind(db, meeting)
     return out
 
@@ -203,7 +203,10 @@ def read_audio(meeting_id: str, download: bool = False, db: Session = Depends(ge
     meeting = get_meeting(db, meeting_id)
     path = storage.audio_path(meeting.id)
     if not path.exists():
-        raise HTTPException(404, "Audio is not ready yet")
+        url = storage.audio_url(meeting.id, f"{_safe_name(meeting.title)}.wav", download)
+        if url is None:
+            raise HTTPException(404, "Audio is not ready yet")
+        return RedirectResponse(url, status_code=307)  # archived in S3: the browser streams it from there
     return FileResponse(
         path,
         media_type="audio/wav",
@@ -218,7 +221,7 @@ def retranscribe(meeting_id: str, body: RetranscribeIn, db: Session = Depends(ge
     meeting = get_meeting(db, meeting_id)
     if meeting.status in (MeetingStatus.RECORDING, MeetingStatus.UPLOADING, *MeetingStatus.ACTIVE):
         raise HTTPException(409, "The meeting is still being processed")
-    if not storage.audio_path(meeting.id).exists():
+    if not storage.has_audio(meeting.id):
         raise HTTPException(409, "The meeting has no audio")
     if "language" in body.model_fields_set:
         meeting.language = body.language

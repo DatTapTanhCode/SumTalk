@@ -75,6 +75,19 @@ class Settings(BaseSettings):
     # lines appear after seconds and memory stays flat whatever the length.
     long_section_sec: float = 300.0
 
+    # --- Where finished audio is kept ---
+    # local = data/meetings on this disk. s3 = after transcription, audio.wav and the uploaded original go to
+    # S3 and the local copies are removed; playback/download use short-lived presigned URLs. Credentials come
+    # from the usual AWS chain (EC2 instance role, AWS_* variables, ~/.aws).
+    storage_backend: str = "local"
+    s3_bucket: str = ""
+    s3_prefix: str = "sumtalk/"
+    s3_region: str = ""
+    s3_endpoint_url: str = ""  # MinIO / tests; empty = AWS
+    s3_keep_local_copy: bool = False
+    s3_url_expiry_sec: int = 3 * 3600
+    s3_db_backup_hours: float = 6.0  # copy the SQLite database to S3 every N hours (0 = off)
+
     # --- Recording / upload limits ---
     chunk_seconds: float = 1.0  # length of the PCM chunks the browser sends while recording
     max_chunk_bytes: int = 4 * 1024 * 1024
