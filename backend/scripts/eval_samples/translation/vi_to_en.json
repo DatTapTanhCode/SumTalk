@@ -1,0 +1,17 @@
+{
+  "id": "vi_to_en",
+  "_note": "SYNTHETIC placeholder. Replace with real samples + Son's reference translations (#96).",
+  "category": "vi",
+  "target_lang": "en",
+  "segments": [
+    {"id": 1, "text": "Tuần này nhóm mình tập trung hoàn thiện tính năng tóm tắt.", "language": "vi"},
+    {"id": 2, "text": "Bạn nào rảnh thì review giúp pull request của Đạt nhé.", "language": "vi"},
+    {"id": 3, "text": "Cuộc họp tiếp theo vào chiều thứ Ba.", "language": "vi"}
+  ],
+  "references": {
+    "1": "This week our team is focusing on finishing the summary feature.",
+    "2": "Whoever is free, please help review Dat's pull request.",
+    "3": "The next meeting is on Tuesday afternoon."
+  },
+  "terms": ["pull request"]
+}

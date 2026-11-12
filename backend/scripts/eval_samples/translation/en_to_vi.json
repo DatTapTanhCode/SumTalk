@@ -1,0 +1,19 @@
+{
+  "id": "en_to_vi",
+  "_note": "SYNTHETIC placeholder. Replace with real samples + Son's reference translations (#96).",
+  "category": "en",
+  "target_lang": "vi",
+  "segments": [
+    {"id": 1, "text": "Good morning everyone, let's start the daily stand-up.", "language": "en"},
+    {"id": 2, "text": "Yesterday I fixed the login bug on the staging server.", "language": "en"},
+    {"id": 3, "text": "Today I will write unit tests for the export API.", "language": "en"},
+    {"id": 4, "text": "No blockers for now.", "language": "en"}
+  ],
+  "references": {
+    "1": "Chào buổi sáng mọi người, chúng ta bắt đầu buổi stand-up hằng ngày nhé.",
+    "2": "Hôm qua tôi đã sửa lỗi đăng nhập trên server staging.",
+    "3": "Hôm nay tôi sẽ viết unit test cho API export.",
+    "4": "Hiện tại chưa có vướng mắc gì."
+  },
+  "terms": ["stand-up", "staging", "unit test", "API", "export"]
+}
