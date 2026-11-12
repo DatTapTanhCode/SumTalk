@@ -75,6 +75,41 @@ def contiguous_chunks(meeting_id: str) -> list[Path]:
     return result
 
 
+def chunk_index(meeting_id: str) -> list[tuple[Path, int]]:
+    """contiguous_chunks() with each chunk's size in bytes, from one directory scan.
+    Live transcription calls this after every chunk, so an hour (3600 chunks) must stay cheap."""
+    folder = meeting_dir(meeting_id) / "chunks"
+    if not folder.exists():
+        return []
+    found: dict[int, tuple[Path, int]] = {}
+    with os.scandir(folder) as entries:
+        for entry in entries:
+            stem, _, ext = entry.name.partition(".")
+            if ext == "pcm" and stem.isdigit():
+                found[int(stem)] = (Path(entry.path), entry.stat().st_size)
+    result: list[tuple[Path, int]] = []
+    seq = 0
+    while seq in found:
+        result.append(found[seq])
+        seq += 1
+    return result
+
+
+def chunk_stats(meeting_id: str) -> tuple[int, int]:
+    """(number of chunks received, total bytes), from one directory scan."""
+    folder = meeting_dir(meeting_id) / "chunks"
+    if not folder.exists():
+        return 0, 0
+    count = size = 0
+    with os.scandir(folder) as entries:
+        for entry in entries:
+            stem, _, ext = entry.name.partition(".")
+            if ext == "pcm" and stem.isdigit():
+                count += 1
+                size += entry.stat().st_size
+    return count, size
+
+
 def remove_chunks(meeting_id: str) -> None:
     shutil.rmtree(meeting_dir(meeting_id) / "chunks", ignore_errors=True)
 

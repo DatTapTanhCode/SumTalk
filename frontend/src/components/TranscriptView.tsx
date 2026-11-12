@@ -24,6 +24,7 @@ function highlight(text: string, query: string): ReactNode {
 export function TranscriptView({
   segments,
   partial,
+  partialStable,
   mainLanguage,
   currentTime,
   playing = false,
@@ -34,6 +35,7 @@ export function TranscriptView({
 }: {
   segments: Segment[]
   partial?: string | null
+  partialStable?: string | null
   mainLanguage?: string | null
   currentTime?: number
   playing?: boolean
@@ -137,8 +139,16 @@ export function TranscriptView({
       {partial && !trimmedQuery && (
         <div className="flex gap-3 py-2 pr-3 pl-2.5">
           <span className="w-16 shrink-0" />
-          <p className="flex-1 text-[16px] leading-[1.75] text-muted-foreground italic">
-            {partial}
+          <p className="flex-1 text-[16px] leading-[1.75] text-muted-foreground">
+            {/* Settled words in normal ink, the end that may still change in grey italics. */}
+            {partialStable && partial.startsWith(partialStable) ? (
+              <>
+                <span className="text-foreground">{partialStable}</span>
+                <span className="italic">{partial.slice(partialStable.length)}</span>
+              </>
+            ) : (
+              <span className="italic">{partial}</span>
+            )}
             <span className="ml-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-[blink_1.05s_steps(1)_infinite] bg-foreground" />
           </p>
         </div>

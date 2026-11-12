@@ -6,7 +6,7 @@ const CONFIG_KEY = 'sumtalk.config'
 
 const DEFAULT_CONFIG: ClientConfig = {
   sample_rate: 16000,
-  chunk_seconds: 3,
+  chunk_seconds: 1,
   max_upload_mb: 1024,
   allowed_extensions: ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.oga', '.opus', '.webm', '.flac', '.wma', '.amr', '.3gp', '.mp4', '.mov', '.mkv'],
   live_transcription: true,
