@@ -1,9 +1,25 @@
+import os
+import sys
 from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
+
+# True inside the packaged desktop app (backend frozen with PyInstaller): the code then lives in a
+# read-only install folder, so data goes to the user's profile instead of next to the code.
+FROZEN = bool(getattr(sys, "frozen", False))
+
+
+def _default_data_dir() -> Path:
+    if FROZEN:
+        return Path(os.environ.get("LOCALAPPDATA") or Path.home() / ".local" / "share") / "SumTalk" / "data"
+    return BACKEND_DIR / "data"
+
+
+# backend/.env, then the file the desktop app points to (SUMTALK_ENV_FILE) - later files win.
+_ENV_FILES = tuple(p for p in (BACKEND_DIR / ".env", os.environ.get("SUMTALK_ENV_FILE")) if p)
 
 # Recording chunks are raw PCM in this exact format (the browser converts to it).
 SAMPLE_RATE = 16_000
@@ -14,9 +30,9 @@ CHANNELS = 1
 class Settings(BaseSettings):
     """All settings can be overridden with environment variables or backend/.env."""
 
-    model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=_ENV_FILES, env_file_encoding="utf-8", extra="ignore")
 
-    data_dir: Path = BACKEND_DIR / "data"
+    data_dir: Path = _default_data_dir()
     frontend_dist: Path = BACKEND_DIR.parent / "frontend" / "dist"
 
     # --- Speech-to-text (faster-whisper) ---

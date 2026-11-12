@@ -1,0 +1,3 @@
+# Only needed to package the desktop app (build-desktop.bat): freezes the backend into sumtalk-server.exe.
+-r requirements.txt
+pyinstaller>=6.11
