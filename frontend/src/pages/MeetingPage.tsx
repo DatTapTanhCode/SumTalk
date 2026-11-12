@@ -572,6 +572,7 @@ export function MeetingPage({ id }: { id: string }) {
               <TranscriptView
                 segments={transcript.segments}
                 partial={transcript.partial}
+                partialStable={transcript.partial_stable}
                 mainLanguage={language}
                 currentTime={meeting.has_audio ? currentTime : undefined}
                 playing={playing}

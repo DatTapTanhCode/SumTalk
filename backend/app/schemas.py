@@ -78,6 +78,7 @@ class TranscriptOut(BaseModel):
     kind: str  # live | final
     segments: list[SegmentOut]
     partial: str | None = None  # text still being spoken (live only, not committed yet)
+    partial_stable: str | None = None  # start of `partial` two passes agreed on: will not change
 
 
 class ChunkAck(BaseModel):
@@ -106,7 +107,7 @@ class UploadOut(BaseModel):
 
 class ClientConfig(BaseModel):
     sample_rate: int
-    chunk_seconds: int
+    chunk_seconds: float
     max_upload_mb: int
     allowed_extensions: list[str]
     live_transcription: bool

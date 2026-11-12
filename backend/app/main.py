@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .api import ai, meetings, system, uploads
+from .api import ai, meetings, stt_server, system, uploads
 from .config import get_settings
 from .db import init_db
 from .services import pipeline
@@ -41,13 +41,14 @@ app.include_router(system.router)
 app.include_router(meetings.router)
 app.include_router(uploads.router)
 app.include_router(ai.router)
+app.include_router(stt_server.router)
 
 
 class SinglePageApp(StaticFiles):
     """Serves the built web app; unknown paths return index.html so client-side routes work on reload."""
 
     async def get_response(self, path, scope):
-        if path.replace("\\", "/").split("/")[0] == "api":  # Starlette hands us OS separators on Windows
+        if path.replace("\\", "/").split("/")[0] in ("api", "v1"):  # Starlette hands us OS separators on Windows
             raise StarletteHTTPException(404)
         try:
             return await super().get_response(path, scope)

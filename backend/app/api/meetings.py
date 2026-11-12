@@ -22,7 +22,7 @@ from ..schemas import (
 )
 from ..services import storage
 from ..services.jobs import meeting_lock
-from ..services.pipeline import batch_worker, live_partials, live_worker
+from ..services.pipeline import batch_worker, forget_live, live_partials, live_worker
 
 router = APIRouter(prefix="/api/meetings", tags=["meetings"])
 settings = get_settings()
@@ -109,7 +109,7 @@ def delete_meeting(meeting_id: str, db: Session = Depends(get_db)):
         storage.delete_meeting_files(meeting.id)
         for upload_id in upload_ids:
             storage.delete_upload_files(upload_id)
-    live_partials.pop(meeting.id, None)
+    forget_live(meeting.id)
     return Response(status_code=204)
 
 
@@ -142,9 +142,9 @@ def _store_chunk(meeting_id: str, seq: int, data: bytes) -> ChunkAck:
         path = storage.chunk_path(meeting.id, seq)
         if not (path.exists() and path.stat().st_size == len(data)):
             storage.write_atomic(path, data)
-        chunks = storage.list_chunks(meeting.id)
-        meeting.received_chunks = len(chunks)
-        meeting.duration_sec = sum(p.stat().st_size for p in chunks.values()) / SAMPLE_WIDTH / SAMPLE_RATE
+        count, size = storage.chunk_stats(meeting.id)
+        meeting.received_chunks = count
+        meeting.duration_sec = size / SAMPLE_WIDTH / SAMPLE_RATE
         db.commit()
         live_worker.submit("live", meeting.id)
         return ChunkAck(seq=seq, received_chunks=meeting.received_chunks)
@@ -193,8 +193,9 @@ def read_transcript(meeting_id: str, kind: str | None = None, after: int = -1, d
     meeting = get_meeting(db, meeting_id)
     active = transcript_kind(db, meeting)
     segments = _active_segments(db, meeting, active, after if kind == active else -1)
-    partial = live_partials.get(meeting.id) if active == "live" and meeting.status == MeetingStatus.RECORDING else None
-    return TranscriptOut(kind=active, segments=segments, partial=partial or None)
+    live = live_partials.get(meeting.id) if active == "live" and meeting.status == MeetingStatus.RECORDING else None
+    stable, partial = live or ("", "")
+    return TranscriptOut(kind=active, segments=segments, partial=partial or None, partial_stable=stable or None)
 
 
 @router.get("/{meeting_id}/audio")

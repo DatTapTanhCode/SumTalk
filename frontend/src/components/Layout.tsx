@@ -1,4 +1,4 @@
-import { CloudUpload, Cpu, ListChecks, LoaderCircle, Mic, Plus, TriangleAlert, Upload, WifiOff, Zap } from 'lucide-react'
+import { Cloud, CloudUpload, Cpu, ListChecks, LoaderCircle, Mic, Plus, TriangleAlert, Upload, WifiOff, Zap } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { sessionStore } from '../audio/session'
 import { cn, formatClock } from '../lib/format'
@@ -126,13 +126,14 @@ function ModelChip({ className }: { className?: string }) {
     )
   }
   const gpu = stt.device === 'cuda'
+  const remote = stt.device === 'remote' // STT_PROVIDER=remote: compute_type holds the API host
   return (
     <Readout
       className={cn('border-border bg-card text-muted-foreground', className)}
-      title={`faster-whisper · ${stt.model} · ${stt.device} · ${stt.compute_type}`}
+      title={remote ? `Speech API · ${stt.model} · ${stt.compute_type}` : `faster-whisper · ${stt.model} · ${stt.device} · ${stt.compute_type}`}
     >
-      {gpu ? <Zap className="size-3 text-foreground" /> : <Cpu className="size-3" />}
-      Whisper {stt.model} · {gpu ? 'GPU' : 'CPU'}
+      {remote ? <Cloud className="size-3 text-foreground" /> : gpu ? <Zap className="size-3 text-foreground" /> : <Cpu className="size-3" />}
+      {remote ? `${stt.model} · Server` : `Whisper ${stt.model} · ${gpu ? 'GPU' : 'CPU'}`}
     </Readout>
   )
 }

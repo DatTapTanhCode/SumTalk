@@ -38,6 +38,8 @@ export interface Transcript {
   kind: TranscriptKind
   segments: Segment[]
   partial: string | null
+  /** Start of `partial` that two live passes agreed on: it will not change any more. */
+  partial_stable?: string | null
 }
 
 export interface UploadSession {

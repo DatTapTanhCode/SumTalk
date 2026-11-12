@@ -54,7 +54,8 @@ export function useMeeting(id: string) {
     const loop = async () => {
       const current = await refresh()
       if (cancelled) return
-      const delay = current === null ? 3000 : isActive(current.status) ? 1500 : 0
+      // While recording, poll often so new words show up about a second after they are spoken.
+      const delay = current === null ? 3000 : current.status === 'recording' ? 700 : isActive(current.status) ? 1500 : 0
       if (delay) timer = window.setTimeout(loop, delay)
     }
     void loop()

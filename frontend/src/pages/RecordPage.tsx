@@ -120,6 +120,7 @@ function LivePanel({ meetingId }: { meetingId: string }) {
           <TranscriptView
             segments={transcript.segments}
             partial={transcript.partial}
+            partialStable={transcript.partial_stable}
             mainLanguage={language}
             follow
             empty={
@@ -178,7 +179,7 @@ export function RecordPage() {
         description={
           recording
             ? 'Stop saves the recording as a new meeting.'
-            : `Audio is saved on this device first and uploaded every ${config.chunk_seconds} seconds, so nothing is lost if the connection drops.`
+            : `Audio is saved on this device first and uploaded every ${config.chunk_seconds === 1 ? 'second' : `${config.chunk_seconds} seconds`}, so nothing is lost if the connection drops.`
         }
       />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">

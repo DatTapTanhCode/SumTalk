@@ -95,7 +95,7 @@ Development with hot reload: `dev.bat`, or `python run.py --reload` + `npm run d
 
 | Screen | Features |
 |---|---|
-| **Record** | Start / pause / resume / stop with timer and level meter. Source: *Microphone*, or *Microphone + meeting audio* (shares the Meet/Teams/Zoom tab or the whole screen with sound – desktop Chrome/Edge). Live transcript ~3 s behind speech, sentence by sentence. Audio is stored on the device first and uploaded in 3 s chunks. |
+| **Record** | Start / pause / resume / stop with timer and level meter. Source: *Microphone*, or *Microphone + meeting audio* (shares the Meet/Teams/Zoom tab or the whole screen with sound – desktop Chrome/Edge). Live transcript word by word, ~1–2 s behind speech (settled words in black, the end still being corrected in grey). Audio is stored on the device first and uploaded in 1 s chunks. |
 | **Offline / phone** | Keeps recording without a connection; chunks wait in IndexedDB and upload by themselves when the network returns (also after closing the tab). Screen kept awake while recording. Installable as an app (PWA). |
 | **Upload** | Drag & drop MP3, WAV, M4A, AAC, OGG/Opus, WEBM, FLAC, WMA, AMR, MP4/MOV/MKV (audio track). Type and size (1 GB) checked before sending; sent in 8 MB parts, 3 in parallel, resumes after network drops. Server converts everything to one standard format (16 kHz mono WAV). |
 | **Meeting** | Status and progress, audio player synced with the transcript (click a line to jump), search, copy, export TXT / SRT / VTT / JSON / WAV, rename, re-transcribe with a fixed language, delete. Per-line language badge for mixed-language meetings. |
@@ -122,6 +122,27 @@ start.bat --lan --https       :: or: python backend/run.py --lan --https  ->  ht
 
 Accept the certificate warning once. Anyone on that network can then use the app – there is no login
 in the POC.
+
+## Speech engine: on this PC or on a server
+
+Whisper can run on the machine (`STT_PROVIDER=local`, the default) or behind an **OpenAI-compatible API**
+(`STT_PROVIDER=remote`) – then nothing is downloaded and a PC without a GPU gets GPU accuracy and speed:
+
+```ini
+# backend/.env (or %LOCALAPPDATA%\SumTalk\sumtalk.env in the installed app)
+STT_PROVIDER=remote
+STT_BASE_URL=https://<your SumTalk server>/v1     # or https://api.groq.com/openai/v1 , https://api.openai.com/v1
+STT_API_KEY=<key>
+STT_MODEL=whisper-large-v3-turbo                  # OpenAI: whisper-1
+```
+
+A SumTalk server with a GPU becomes that engine for every desktop app with `STT_SERVER_API_KEYS=key1,key2`
+(it then answers `POST /v1/audio/transcriptions` like OpenAI's API). Long files are cut at pauses and sent in
+parallel; an 11.6-minute file took 18 s through a GPU server, with the first lines after 3 s. Details and
+measurements: [ARCHITECTURE.md §12](docs/ARCHITECTURE.md#12-speech-engines-local-or-remote-long-files-no-model-on-clients).
+To ship the desktop installer already pointing at your server: `set SUMTALK_DEFAULT_STT_PROVIDER=remote`,
+`set SUMTALK_DEFAULT_STT_BASE_URL=...`, `set SUMTALK_DEFAULT_STT_API_KEY=...` before `build-desktop.bat`
+(anyone with the installer can read the key – use one you can revoke).
 
 ## Configuration
 
