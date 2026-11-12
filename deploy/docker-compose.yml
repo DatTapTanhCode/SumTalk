@@ -1,0 +1,46 @@
+# SumTalk on one server (e.g. AWS EC2): the app + Caddy (automatic HTTPS, login page for the test phase).
+#   cd deploy && cp .env.example .env   (fill it in)
+#   docker compose up -d --build                                          CPU instance
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build   GPU instance
+# Step-by-step guide: docs/deploy/AWS-EC2-S3.md
+
+services:
+  app:
+    build:
+      context: ..
+      args:
+        GPU: "${GPU:-0}"
+    image: sumtalk:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - sumtalk-data:/data
+    expose:
+      - "8000"
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }
+
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_ADDRESS: "${SITE_ADDRESS:?set SITE_ADDRESS in deploy/.env}"
+      BASIC_AUTH_USER: "${BASIC_AUTH_USER:-sumtalk}"
+      BASIC_AUTH_HASH: "${BASIC_AUTH_HASH:?set BASIC_AUTH_HASH in deploy/.env}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  sumtalk-data:
+  caddy-data:
+  caddy-config:

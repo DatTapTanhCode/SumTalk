@@ -1,0 +1,19 @@
+# HTTPS certificate from Let's Encrypt / ZeroSSL, renewed automatically. Browsers only allow the
+# microphone on https, so this is required for recording.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# OpenAI-compatible transcription API for desktop apps: protected by its own API keys
+	# (STT_SERVER_API_KEYS), so no login page here.
+	handle /v1/* {
+		reverse_proxy app:8000
+	}
+
+	# Everything else (web app + /api) is behind a login for the test phase: the POC has no accounts.
+	handle {
+		basic_auth {
+			{$BASIC_AUTH_USER} {$BASIC_AUTH_HASH}
+		}
+		reverse_proxy app:8000
+	}
+}

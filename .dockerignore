@@ -1,0 +1,14 @@
+.git
+**/node_modules
+**/__pycache__
+**/*.pyc
+backend/.venv
+backend/.env
+backend/data
+backend/scripts/eval_out
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+desktop
+deploy/.env
+HANDOFF.md
