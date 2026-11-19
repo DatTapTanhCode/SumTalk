@@ -9,6 +9,12 @@
 		reverse_proxy app:8000
 	}
 
+	# Guests need the read-only share API, its page, and the compiled app assets.
+	@shared path /share/* /api/shared/* /assets/* /icon.svg /manifest.webmanifest /icon-192.png /icon-512.png
+	handle @shared {
+		reverse_proxy app:8000
+	}
+
 	# Everything else (web app + /api) is behind a login for the test phase: the POC has no accounts.
 	handle {
 		basic_auth {

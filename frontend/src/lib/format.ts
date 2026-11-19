@@ -41,7 +41,7 @@ export function formatDateTime(iso: string): string {
 }
 
 export function defaultMeetingTitle(date = new Date()): string {
-  const day = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  const day = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
   const time = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
   return `Meeting ${day}, ${time}`
 }

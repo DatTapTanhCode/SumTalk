@@ -123,6 +123,22 @@ start.bat --lan --https       :: or: python backend/run.py --lan --https  ->  ht
 Accept the certificate warning once. Anyone on that network can then use the app – there is no login
 in the POC.
 
+### Private libraries and guest links
+
+SumTalk identifies a library by a persistent cookie in the browser profile that created the recordings and uploads. Use the same browser profile and site address to return to that library. Clearing its cookies or using a different profile starts a separate library.
+
+Open a meeting to rename it, add or remove private tags, or choose **Share**. Recordings default to their recording date and time. Browser uploads use the file’s last-modified time as an estimate. On the Meetings page, combine a title search, a tag, and inclusive local calendar dates, then choose the sort order. A guest link shows the minutes, action items, transcript and completed translations. Audio is optional. Turning the link off invalidates subsequent page-data and audio requests. Creating another link generates a new URL.
+
+For teammates on other devices, use a hosted SumTalk server or start the web server with `--https --lan` and use its LAN address. A loopback URL works only on the computer hosting SumTalk.
+
+**Upgrading an existing library.** Older meetings have no recorded owner. They remain private and retain their audio and transcripts. An administrator can assign them to a library. Create a meeting in the intended owner's browser and copy its ID from the meeting page URL. On the server, using the same data directory, run:
+
+```sh
+python backend/run.py --assign-legacy OLD_MEETING_ID NEW_OWNED_MEETING_ID
+```
+
+For a formerly single-user installation, use `all` in place of `OLD_MEETING_ID` to assign all remaining unowned meetings to that browser.
+
 ## Speech engine: on this PC or on a server
 
 Whisper can run on the machine (`STT_PROVIDER=local`, the default) or behind an **OpenAI-compatible API**

@@ -28,6 +28,10 @@ class UTCDateTime(TypeDecorator):
         return value
 
 
+def default_title(when: datetime) -> str:
+    return when.strftime("Meeting %Y-%m-%d %H:%M") + (when.strftime(" %Z") or " UTC")
+
+
 class MeetingStatus:
     RECORDING = "recording"  # browser is still sending audio chunks
     UPLOADING = "uploading"  # a file upload is in progress
@@ -44,6 +48,7 @@ class Meeting(Base):
     __tablename__ = "meetings"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    owner_id: Mapped[str | None] = mapped_column(String(64), index=True)
     title: Mapped[str] = mapped_column(String(200))
     source: Mapped[str] = mapped_column(String(16))  # recording | upload
     status: Mapped[str] = mapped_column(String(16), index=True)
@@ -71,6 +76,30 @@ class Meeting(Base):
     segments: Mapped[list["Segment"]] = relationship(
         back_populates="meeting", cascade="all, delete-orphan", passive_deletes=True
     )
+
+    tag_rows: Mapped[list["MeetingTag"]] = relationship(
+        cascade="all, delete-orphan", passive_deletes=True, order_by="MeetingTag.key"
+    )
+
+    @property
+    def tags(self) -> list[str]:
+        return [tag.name for tag in self.tag_rows]
+
+
+class MeetingTag(Base):
+    __tablename__ = "meeting_tags"
+
+    meeting_id: Mapped[str] = mapped_column(ForeignKey("meetings.id", ondelete="CASCADE"), primary_key=True)
+    key: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String(64))
+
+
+class MeetingShare(Base):
+    __tablename__ = "meeting_shares"
+
+    meeting_id: Mapped[str] = mapped_column(ForeignKey("meetings.id", ondelete="CASCADE"), primary_key=True)
+    token: Mapped[str] = mapped_column(String(64), unique=True)
+    include_audio: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class Segment(Base):

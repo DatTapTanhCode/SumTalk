@@ -142,7 +142,8 @@ export function RecordPage() {
   const config = useStore(configStore)
   const navigate = useNavigate()
   const [title, setTitle] = useState('')
-  const [meetingAt, setMeetingAt] = useState(() => new Date())
+  const [pickedDay, setPickedDay] = useState<Date | null>(null)
+  const meetingAt = pickedDay ?? new Date()
   const [language, setLanguage] = useState<string | null>(() => localStorage.getItem(LANGUAGE_KEY))
   const [mode, setMode] = useState<CaptureMode>('mic')
 
@@ -156,18 +157,20 @@ export function RecordPage() {
   const start = () => {
     if (language) localStorage.setItem(LANGUAGE_KEY, language)
     else localStorage.removeItem(LANGUAGE_KEY)
+    const when = new Date()
+    if (pickedDay) when.setFullYear(pickedDay.getFullYear(), pickedDay.getMonth(), pickedDay.getDate())
     void startRecording({
-      title: title.trim() || defaultMeetingTitle(meetingAt),
+      title: title.trim() || defaultMeetingTitle(when),
       language,
       captureMode: mode,
-      meetingAt: meetingAt.toISOString(),
+      meetingAt: when.toISOString(),
     })
   }
 
   const stop = async () => {
     const id = await stopRecording()
     setTitle('')
-    setMeetingAt(new Date())
+    setPickedDay(null)
     if (id) navigate(`/meetings/${id}`)
   }
 
@@ -216,7 +219,7 @@ export function RecordPage() {
                 <label htmlFor="meeting-at" className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">
                   Date
                 </label>
-                <DatePicker id="meeting-at" value={meetingAt} onChange={setMeetingAt} />
+                <DatePicker id="meeting-at" value={meetingAt} onChange={setPickedDay} />
                 <p className="text-[11px] text-muted-foreground">When the meeting took place. Defaults to today.</p>
               </div>
 
