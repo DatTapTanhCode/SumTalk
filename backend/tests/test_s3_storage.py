@@ -45,6 +45,16 @@ def test_finished_audio_moves_to_s3_and_plays_from_a_presigned_url(client, s3):
     location = response.headers["location"]
     assert BUCKET in location and "audio.wav" in location and "attachment" in location
 
+    share_path = f"/api/meetings/{meeting['id']}/share"
+    token = client.put(share_path, json={"include_audio": True}).json()["token"]
+    shared_audio = f"/api/shared/{token}/audio"
+    chunk = client.get(shared_audio, headers={"Range": "bytes=0-3"}, follow_redirects=False)
+    assert chunk.status_code == 206 and chunk.content == b"RIFF"
+    assert chunk.headers["content-range"].startswith("bytes 0-3/")
+    assert not storage.audio_path(meeting["id"]).exists()
+    client.delete(share_path).raise_for_status()
+    assert client.get(shared_audio).status_code == 404
+
     # Re-transcribing fetches the audio back from S3, then archives it again.
     assert client.post(f"/api/meetings/{meeting['id']}/retranscribe", json={"language": "en"}).status_code == 200
     assert wait_for_status(client, meeting["id"])["status"] == "done"

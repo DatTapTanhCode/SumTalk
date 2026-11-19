@@ -41,6 +41,7 @@ export async function uploadAudioFile(
   const { signal, onProgress } = options
   const session = await api.createUpload({
     filename: file.name,
+    meeting_at: new Date(file.lastModified || Date.now()).toISOString(),
     size_bytes: file.size,
     mime_type: file.type || null,
     title: options.title,

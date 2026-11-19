@@ -44,7 +44,11 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'title', label: 'Title A–Z' },
 ]
 
-const DAY_ORDER = ['Today', 'Yesterday', 'Last 7 days', 'Earlier']
+function inDateRange(iso: string, from: string, to: string) {
+  const date = new Date(iso)
+  const day = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-')
+  return (!from || day >= from) && (!to || day <= to)
+}
 
 /** Columns of the desktop table: name | date | duration | language | status | actions. */
 const ROW_GRID = 'md:grid md:grid-cols-[minmax(0,1fr)_10rem_5.5rem_7rem_9rem_2rem] md:items-center md:gap-4'
@@ -172,6 +176,7 @@ function MeetingRow({
           {editing ? (
             <input
               autoFocus
+              maxLength={200}
               value={draft}
               onChange={(e) => onDraft(e.target.value)}
               onBlur={onCommitRename}
@@ -187,6 +192,11 @@ function MeetingRow({
             />
           ) : (
             <div className="truncate text-[15px] font-semibold text-foreground">{meeting.title}</div>
+          )}
+          {meeting.tags.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-1">
+              {meeting.tags.map((tag) => <span key={tag} className="max-w-full truncate rounded bg-secondary px-1.5 text-xs">{tag}</span>)}
+            </div>
           )}
           {/* On phones the columns collapse into one meta line. */}
           <div className="mt-1 flex flex-wrap gap-x-2 font-mono text-[10px] tracking-[0.06em] text-muted-foreground uppercase md:hidden">
@@ -258,6 +268,9 @@ export function MeetingsPage() {
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<StatusFilter>('all')
+  const [tag, setTag] = useState('')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
   const [sort, setSort] = useState<SortKey>('newest')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
@@ -282,7 +295,15 @@ export function MeetingsPage() {
   }, [load])
 
   const serverIds = useMemo(() => new Set(meetings?.map((m) => m.id)), [meetings])
-  const localOnly = sync.recordings.filter((r) => !serverIds.has(r.id))
+  const tags = useMemo(() => [...new Set((meetings ?? []).flatMap((m) => m.tags))].sort((a, b) => a.localeCompare(b)), [meetings])
+  const localOnly = sync.recordings.filter((r) => !serverIds.has(r.id) && !tag
+    && (filter === 'all' || filter === 'progress') && r.title.toLowerCase().includes(query.trim().toLowerCase())
+    && inDateRange(r.meetingAt ?? r.startedAt, from, to)).sort((a, b) => {
+      if (sort === 'title') return a.title.localeCompare(b.title)
+      if (sort === 'longest') return b.totalSamples - a.totalSamples
+      const delta = Date.parse(a.meetingAt ?? a.startedAt) - Date.parse(b.meetingAt ?? b.startedAt)
+      return sort === 'oldest' ? delta : -delta
+    })
 
   const counts = useMemo(() => {
     const list = meetings ?? []
@@ -299,27 +320,29 @@ export function MeetingsPage() {
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
-    const list = (meetings ?? []).filter((m) => matchesFilter(m, filter) && m.title.toLowerCase().includes(q))
+    const list = (meetings ?? []).filter((m) => matchesFilter(m, filter) && m.title.toLowerCase().includes(q)
+      && (!tag || m.tags.includes(tag)) && inDateRange(meetingTime(m), from, to))
     const newestFirst = (a: Meeting, b: Meeting) => Date.parse(meetingTime(b)) - Date.parse(meetingTime(a))
     if (sort === 'newest') list.sort(newestFirst)
     else if (sort === 'oldest') list.sort((a, b) => newestFirst(b, a))
     else if (sort === 'longest') list.sort((a, b) => b.duration_sec - a.duration_sec)
     else list.sort((a, b) => a.title.localeCompare(b.title))
     return list
-  }, [meetings, filter, query, sort])
+  }, [meetings, filter, query, sort, tag, from, to])
 
   const groups = useMemo(() => {
     if (sort !== 'newest' && sort !== 'oldest') return [{ label: null as string | null, items: visible }]
     const buckets = new Map<string, Meeting[]>()
     for (const meeting of visible) {
       const key = dayBucket(meetingTime(meeting))
-      buckets.set(key, [...(buckets.get(key) ?? []), meeting])
+      if (!buckets.has(key)) buckets.set(key, [])
+      buckets.get(key)!.push(meeting)
     }
-    return DAY_ORDER.filter((label) => buckets.has(label)).map((label) => ({ label, items: buckets.get(label) ?? [] }))
+    return Array.from(buckets, ([label, items]) => ({ label, items }))
   }, [visible, sort])
 
   const total = meetings?.length ?? 0
-  const filtering = filter !== 'all' || query.trim() !== ''
+  const filtering = filter !== 'all' || query.trim() !== '' || !!tag || !!from || !!to
 
   const startRename = (meeting: Meeting) => {
     renameCancelled.current = false
@@ -366,6 +389,9 @@ export function MeetingsPage() {
   const clearFilters = () => {
     setFilter('all')
     setQuery('')
+    setTag('')
+    setFrom('')
+    setTo('')
   }
 
   return (
@@ -486,6 +512,22 @@ export function MeetingsPage() {
           </div>
         </div>
 
+        <div className="mt-3 flex flex-wrap items-end gap-3 text-sm">
+          <label className="grid gap-1">Tag
+            <select className="h-9 rounded-md border border-input bg-card px-2" value={tag} onChange={(e) => setTag(e.target.value)}>
+              <option value="">All tags</option>
+              {tags.map((name) => <option key={name}>{name}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1">From
+            <Input type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} />
+          </label>
+          <label className="grid gap-1">Through
+            <Input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} />
+          </label>
+          {filtering && <Button size="sm" variant="ghost" onClick={clearFilters}>Reset filters</Button>}
+        </div>
+
         {filter === 'progress' && counts.remaining > 0 && (
           <p className="mt-3 font-mono text-[10px] tracking-[0.1em] text-muted-foreground uppercase">~{formatRemaining(counts.remaining)} of transcription left</p>
         )}
@@ -511,7 +553,7 @@ export function MeetingsPage() {
             <div className="px-5 py-12 text-center text-base text-muted-foreground">Meetings will appear here once the server is reachable.</div>
           )}
 
-          {meetings !== null && visible.length === 0 && (
+          {meetings !== null && visible.length === 0 && localOnly.length === 0 && (
             <div className="flex flex-col items-center px-5 py-14 text-center">
               <div className="grid size-11 place-items-center rounded-md border border-border bg-card text-muted-foreground">
                 <Inbox className="size-5" />

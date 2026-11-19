@@ -235,7 +235,7 @@ function Bullets({ items, empty }: { items: string[]; empty: string }) {
   )
 }
 
-function MinutesView({ minutes, segments, onSeek }: { minutes: Minutes; segments: Segment[]; onSeek?: (s: number) => void }) {
+export function MinutesView({ minutes, segments, onSeek }: { minutes: Minutes; segments: Segment[]; onSeek?: (s: number) => void }) {
   const startOf = (idx: number) => segments.find((s) => s.idx === idx)?.start
   return (
     <div className="space-y-6 px-3 pb-4 sm:px-2" data-testid="summary">

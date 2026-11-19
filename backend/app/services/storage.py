@@ -204,6 +204,26 @@ def audio_url(meeting_id: str, filename: str, download: bool) -> str | None:
     )
 
 
+def open_archived_audio(meeting_id: str, byte_range: str | None):
+    """Read the requested range from S3 without handing a guest a reusable S3 URL."""
+    if not s3_enabled() or not _marker(meeting_id).exists():
+        raise FileNotFoundError
+    from botocore.exceptions import ClientError
+
+    params = {"Bucket": settings.s3_bucket, "Key": _key(meeting_id, "audio.wav")}
+    if byte_range:
+        params["Range"] = byte_range
+    try:
+        return _s3().get_object(**params)
+    except ClientError as exc:
+        code = exc.response["Error"]["Code"]
+        if code in ("InvalidRange", "InvalidArgument"):
+            raise ValueError("Invalid audio range") from exc
+        if code == "NoSuchKey":
+            raise FileNotFoundError from exc
+        raise
+
+
 def ensure_local_audio(meeting_id: str) -> Path:
     """audio.wav on the local disk, fetched back from S3 if it was archived (e.g. to re-transcribe)."""
     path = audio_path(meeting_id)
