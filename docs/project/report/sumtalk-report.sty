@@ -1,0 +1,171 @@
+% =============================================================================
+%  sumtalk-report.sty - shared style for the SumTalk project documents 01-06
+%  Look and feel follows the HCMUT / CSE report template (main (49).pdf):
+%  Latin Modern 12pt, A4, margins 3/2/2.5/2.5 cm, 1.5 line spacing,
+%  booktabs tables with captions above, BK logo header on normal pages.
+%  Notes for authors: see STYLE-GUIDE.md in this folder.
+% =============================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sumtalk-report}[2026/11/24 SumTalk project report style]
+
+% ---------- Language and fonts (pdfLaTeX + vntex) ----------
+\RequirePackage[T5]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{lmodern}
+\RequirePackage[vietnamese]{babel}
+\RequirePackage{icomma}          % 0,1 in math mode: decimal comma without a space
+\RequirePackage{microtype}
+
+% ---------- Page ----------
+\RequirePackage[a4paper,left=3cm,right=2cm,top=3cm,bottom=2.5cm,
+  headheight=30pt,headsep=14pt,footskip=28pt]{geometry}
+\RequirePackage{setspace}
+\onehalfspacing
+
+% ---------- Content packages ----------
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{graphicx}
+\graphicspath{{figures/}{./}}
+\RequirePackage{xcolor}
+\RequirePackage{booktabs,tabularx,array,multirow,longtable}
+\RequirePackage{float}
+\RequirePackage{needspace}           % \needspace{..} keeps a heading with what follows
+\RequirePackage{flafter}             % a float never appears before the text that calls it
+% Let tables and figures ([htbp]) fill pages instead of leaving half-empty pages.
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.6}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\RequirePackage{caption}
+\RequirePackage{enumitem}
+\RequirePackage{etoolbox}
+\RequirePackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,calc}
+\RequirePackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% ---------- Colours ----------
+\definecolor{primaryblue}{RGB}{20,60,110}    % links, chart lines (from the template)
+\definecolor{titleblue}{RGB}{31,73,125}      % project title on the cover
+\definecolor{accentblue}{RGB}{219,234,254}   % light fill for diagrams
+\definecolor{todored}{RGB}{190,30,45}        % [CAN DIEN] placeholders
+\definecolor{chartgray}{RGB}{120,120,120}
+
+% ---------- Lists ----------
+\setlist[itemize]{topsep=2pt,itemsep=2pt,parsep=0pt}
+\setlist[enumerate]{topsep=2pt,itemsep=2pt,parsep=0pt}
+\setlist[itemize,2]{label=--}
+
+% ---------- Tables ----------
+% Captions above tables, below figures. Cells are ragged-right (never justified).
+\captionsetup{labelsep=colon,skip=6pt}
+\captionsetup[table]{position=top}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Q}[1]{>{\centering\arraybackslash}p{#1}}
+\renewcommand{\arraystretch}{1.15}
+\AtBeginEnvironment{table}{\setstretch{1.1}}
+\AtBeginEnvironment{longtable}{\setstretch{1.1}}
+\newcommand{\thead}[1]{\textbf{#1}}
+
+% ---------- Placeholders and small helpers ----------
+% \canDien            -> [CẦN ĐIỀN]
+% \canDien[MSSV]      -> [CẦN ĐIỀN: MSSV]
+\NewDocumentCommand{\canDien}{o}{%
+  \textcolor{todored}{[CẦN ĐIỀN\IfValueT{#1}{: #1}]}}
+% Unnumbered bold heading inside a section (like "Industry Context" in the template)
+\newcommand{\heading}[1]{\par\medskip\noindent\textbf{#1}\par\nopagebreak}
+% Cross-reference to another document of the set, e.g. \docref{03}{Kế hoạch quản lý dự án}
+\newcommand{\docref}[2]{Tài liệu~#1 -- \emph{#2}}
+
+% ---------- Header / footer ----------
+\RequirePackage{fancyhdr}
+\RequirePackage{lastpage}
+% Normal pages: BK logo + university in bold typewriter; course and page in the footer.
+\fancypagestyle{report}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0.4pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \fancyhead[L]{\setstretch{1}%
+    \raisebox{-2pt}{\includegraphics[height=0.95cm]{hcmut.png}}\hspace{0.8em}%
+    \parbox[b]{0.8\textwidth}{\ttfamily\bfseries Trường Đại học Bách Khoa -- ĐHQG-HCM\\
+      Khoa Khoa học và Kỹ thuật Máy tính}}%
+  \fancyfoot[L]{\ttfamily\footnotesize \CourseNameNormal{} -- Năm học \AcademicYear}%
+  \fancyfoot[R]{\ttfamily\footnotesize Trang \thepage/\pageref*{LastPage}}}
+% Chapter openings and front matter: plain running title, page n/N, rules only.
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0.4pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \fancyhead[L]{\small \ProjectName{} -- \DocRunningTitle}%
+  \fancyhead[R]{\small \thepage/\pageref*{LastPage}}}
+\pagestyle{report}
+
+% ---------- Cover ----------
+% Needs (defined in sumtalk-info.tex or the document):
+%   \CourseName \Instructor \TeamMembers \DocTitle \DocTitleEn \CoverDate
+\newcommand{\makereportcover}{%
+  \begin{titlepage}
+  \hypersetup{pageanchor=false}%
+  \centering
+  {\large ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH\par}
+  {\large TRƯỜNG ĐẠI HỌC BÁCH KHOA\par}
+  {\large KHOA KHOA HỌC VÀ KỸ THUẬT MÁY TÍNH\par}
+  \vspace{1.2cm}
+  \includegraphics[width=4cm]{hcmut.png}\par
+  \vspace{1cm}
+  \rule{0.75\linewidth}{0.5pt}\par
+  \vspace{0.5cm}
+  {\bfseries\Large \CourseName\par}
+  \vspace{0.7cm}
+  {\color{titleblue}\bfseries\huge \MakeUppercase{\ProjectName}\par}
+  \vspace{0.25cm}
+  {\color{titleblue}\bfseries\LARGE \DocTitle\par}
+  \vspace{0.2cm}
+  {\large\itshape \DocTitleEn\par}
+  \vspace{0.5cm}
+  \rule{0.75\linewidth}{0.5pt}\par
+  \vspace{1cm}
+  \begin{minipage}{0.75\linewidth}
+    \setstretch{1.3}%
+    \textbf{Giảng viên hướng dẫn:} \Instructor\par
+    \textbf{Nhóm thực hiện:}
+    \begin{enumerate}[leftmargin=2em]
+      \TeamMembers
+    \end{enumerate}
+  \end{minipage}
+  \vfill
+  {\footnotesize\bfseries \CoverDate\par}
+  \end{titlepage}
+  \hypersetup{pageanchor=true}}
+
+% ---------- Document control page ----------
+% Needs \DocCode \DocVersion \DocStatus \DocAuthor \DocReviewers \DocReaders
+\newcommand{\docinfotable}{%
+  \begin{table}[H]
+    \centering
+    \begin{tabularx}{0.9\linewidth}{@{}P{4.2cm}L@{}}
+      \toprule
+      Dự án & \ProjectName{} -- ghi âm, phiên âm, tóm tắt và dịch biên bản cuộc họp \\
+      Tài liệu & \DocTitleNormal{} (\DocTitleEn) \\
+      Mã tài liệu & \DocCode \\
+      Phiên bản & \DocVersion \\
+      Trạng thái & \DocStatus \\
+      Người lập & \DocAuthor \\
+      Người duyệt & \DocReviewers \\
+      Người đọc chính & \DocReaders \\
+      \bottomrule
+    \end{tabularx}
+  \end{table}}
+
+% ---------- Links (load last) ----------
+\RequirePackage[unicode]{hyperref}
+\RequirePackage{bookmark}
+% Like the template: links work but print black; only URLs are blue.
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=primaryblue}
+
+\endinput
