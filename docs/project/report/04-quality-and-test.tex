@@ -1,0 +1,806 @@
+% =============================================================================
+%  Tài liệu 04 - Chất lượng và kiểm thử (Quality & Test Document)
+%  Build: latexmk 04-quality-and-test.tex   (pdfLaTeX, output in build/)
+% =============================================================================
+\documentclass[12pt,a4paper]{report}
+\usepackage{sumtalk-report}
+\input{sumtalk-info}
+
+\newcommand{\DocTitle}{CHẤT LƯỢNG VÀ KIỂM THỬ}
+\newcommand{\DocTitleNormal}{Chất lượng và kiểm thử}
+\newcommand{\DocTitleEn}{Quality \& Test Document}
+\newcommand{\DocRunningTitle}{Chất lượng và kiểm thử}
+\newcommand{\DocCode}{SUMTALK-QTD}
+\newcommand{\DocVersion}{2.1 -- 24/11/2026}
+\newcommand{\DocStatus}{Chờ duyệt}
+\newcommand{\DocAuthor}{\canDien[Project Manager]}
+\newcommand{\DocReviewers}{QC, Product Owner, Project Manager}
+\newcommand{\DocReaders}{QC, Product Owner, Project Manager}
+\newcommand{\CoverDate}{TP. HỒ CHÍ MINH, THÁNG 11/2026}
+\hypersetup{pdftitle={SumTalk -- Chất lượng và kiểm thử},pdfauthor={Nhóm SumTalk}}
+
+% A user-visible label of the app (kept in English, bold, as in the md version).
+\newcommand{\ui}[1]{\textbf{#1}}
+% "Passed" mark used in the result tables.
+\newcommand{\pass}{$\checkmark$}
+% UI symbols quoted from the app (pdfLaTeX has no glyph for them by default).
+\DeclareUnicodeCharacter{25BE}{\ensuremath{\blacktriangledown}}
+\DeclareUnicodeCharacter{2026}{\ldots}
+
+\begin{document}
+
+\makereportcover
+
+% ============================================================ Front matter
+\chapter*{Thông tin tài liệu}
+\addcontentsline{toc}{chapter}{Thông tin tài liệu}
+
+\docinfotable
+
+\section*{Lịch sử phiên bản}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}Q{1.6cm}Q{2.3cm}LP{3.2cm}@{}}
+    \toprule
+    \thead{Phiên bản} & \thead{Ngày} & \thead{Nội dung thay đổi} & \thead{Người thực hiện} \\
+    \midrule
+    1.0 & 12/11/2026 & Bản đầu, gồm hai tài liệu riêng: Quality \& Test Plan và Test Summary Report & \canDien \\
+    2.0 & 13/11/2026 & Gộp thành một tài liệu, đánh lại số mục (CR-08) & \canDien \\
+    2.1 & 24/11/2026 & Chuyển sang định dạng báo cáo PDF (LaTeX), sắp xếp lại thành năm chương và một phụ lục;
+      thêm sơ đồ các tầng kiểm thử và biểu đồ kết quả & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\needspace{8\baselineskip}
+\heading{Quy ước trong tài liệu}
+\begin{itemize}
+  \item \canDien[\ldots]: số liệu đã có ở Azure Boards, dashboard chi phí hoặc biên bản họp nhưng chưa chép
+        vào tài liệu, hoặc kết quả kiểm thử QC chưa điền; cần bổ sung trước khi trình duyệt.
+  \item \textbf{Số liệu kiểm thử} (số test, kết quả đo hiệu năng) lấy từ repo ngày 12/11/2026 trên bản v0.4.
+  \item \textbf{Mã story}: \#60, \#67, \#99, \#100 là ID trên Azure Boards; S-xx và T-xx là mã test case của QC
+        (Phụ lục~\ref{app:testcases}).
+  \item \textbf{Nhãn giao diện} được giữ nguyên tiếng Anh và in đậm (ví dụ \ui{Summary}); Phụ lục~\ref{app:testcases}
+        giữ nguyên tiếng Anh như bản QC đang dùng.
+\end{itemize}
+
+\tableofcontents
+
+\chapter*{Tóm tắt}
+\addcontentsline{toc}{chapter}{Tóm tắt}
+
+Tài liệu này đặt \textbf{kế hoạch chất lượng và kiểm thử} của SumTalk cạnh \textbf{kết quả kiểm thử} để đối
+chiếu trực tiếp. Phần kế hoạch xác định năm mục tiêu chất lượng, Definition of Done gồm tám điều kiện cho mọi
+story, chiến lược kiểm thử ở tám cấp (từ unit test chạy mỗi commit tới UAT trước phát hành), thang bốn mức lỗi
+và các tiêu chí bắt đầu, kết thúc, phát hành.
+
+Phần kết quả trên bản v0.4 (ngày 12/11/2026) cho thấy mọi bộ test tự động đã chạy đều đạt: \textbf{88/88} test
+backend, \textbf{8/8} smoke test desktop cả từ mã nguồn lẫn bản đóng gói, \textbf{8/8} kiểm tra Docker, lint
+sạch. Hiệu năng đạt mục tiêu với khoảng cách lớn: chữ hiện khoảng \textbf{1\,s} sau khi nói, file 11,6 phút xử
+lý xong trong \textbf{17,8--56,7\,s}, app desktop khởi động trong 1,4--1,9\,s. Kết luận: bản v0.4 \textbf{đủ
+điều kiện cho đợt test nội bộ và UAT}, nhưng \textbf{chưa đủ để nghiệm thu cuối} vì còn ba việc: chạy lại test
+E2E trình duyệt sau thay đổi của Sprint 4, deploy thật lên AWS, và đo độ chính xác tiếng Việt trên mẫu UAT.
+Phụ lục liệt kê 23 test case E2E của Sprint 3 cho tóm tắt (\#99) và dịch (\#100).
+
+\textbf{Từ khoá:} quality plan, test plan, Definition of Done, kiểm thử tự động, Playwright, pytest, test summary
+report, tiêu chí phát hành, test case E2E.
+
+\chapter*{Danh mục từ viết tắt}
+\addcontentsline{toc}{chapter}{Danh mục từ viết tắt}
+
+\begin{center}
+  \setstretch{1.1}
+  \begin{tabular}{@{}P{2.2cm}P{13.2cm}@{}}
+    \toprule
+    \thead{Viết tắt} & \thead{Ý nghĩa} \\
+    \midrule
+    AC     & Acceptance Criteria -- tiêu chí chấp nhận của story \\
+    API    & Application Programming Interface -- giao diện lập trình ứng dụng \\
+    AWS    & Amazon Web Services (EC2: máy chủ ảo; S3: lưu trữ đối tượng) \\
+    BA     & Business Analyst -- chuyên viên phân tích nghiệp vụ \\
+    BLEU   & Bilingual Evaluation Understudy -- chỉ số đánh giá bản dịch máy \\
+    chrF++ & Character n-gram F-score -- chỉ số đánh giá bản dịch theo n-gram ký tự và từ \\
+    CPU    & Central Processing Unit -- bộ xử lý trung tâm \\
+    DoD    & Definition of Done -- tiêu chí hoàn thành \\
+    E2E    & End-to-End -- kiểm thử đầu cuối \\
+    GPU    & Graphics Processing Unit -- bộ xử lý đồ hoạ, dùng để chạy model \\
+    HTTPS  & Hypertext Transfer Protocol Secure -- giao thức web có mã hoá \\
+    LLM    & Large Language Model -- mô hình ngôn ngữ lớn \\
+    NFR    & Non-Functional Requirement -- yêu cầu phi chức năng \\
+    PM     & Project Manager -- quản lý dự án \\
+    PO     & Product Owner -- chủ sản phẩm \\
+    QC     & Quality Control -- kiểm soát chất lượng \\
+    ROUGE  & Recall-Oriented Understudy for Gisting Evaluation -- chỉ số đánh giá bản tóm tắt \\
+    SRT    & SubRip Text -- định dạng file phụ đề \\
+    STT    & Speech-to-Text -- chuyển giọng nói thành văn bản \\
+    UAT    & User Acceptance Testing -- kiểm thử chấp nhận của người dùng \\
+    WER    & Word Error Rate -- tỷ lệ lỗi từ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listfigurename}
+\listoffigures
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listtablename}
+\listoftables
+
+% ============================================================ Chapter 1
+\chapter{Giới thiệu}
+\label{chap:intro}
+
+\section{Bối cảnh}
+
+Đặc tả yêu cầu phần mềm~\cite{srs} đã đặt ra acceptance criteria cho từng user story và 37 yêu cầu phi chức năng
+đo được. Kế hoạch quản lý dự án~\cite{pmp} dành một nhánh WBS cho kiểm thử và phát hành, gồm test tự động, test
+E2E của Sprint 3 (\#99, \#100) và UAT. Tài liệu này cho biết các yêu cầu đó được kiểm tra bằng cách nào, khi nào
+một story được coi là xong, và bản phát hành hiện tại đã đạt tới đâu.
+
+\section{Mục đích và người đọc của tài liệu}
+
+Tài liệu đặt kế hoạch chất lượng và kiểm thử cạnh kết quả kiểm thử để đối chiếu trực tiếp: mục tiêu chất lượng,
+Definition of Done, chiến lược kiểm thử, quản lý lỗi, tiêu chí phát hành, rồi kết quả đo được trên bản v0.4 và bộ
+test case E2E. Người đọc chính là QC (lập và chạy test, báo lỗi), Product Owner (chấp nhận story theo Definition of
+Done, đồng ý phát hành) và Project Manager (theo dõi chất lượng như một phần của tiến độ). Kết luận ở
+Chương~\ref{chap:summary} là đầu vào cho quyết định nghiệm thu trong \docref{06}{Báo cáo kết thúc dự
+án}~\cite{pcr}.
+
+\section{Cấu trúc tài liệu}
+
+Phần còn lại của tài liệu gồm bốn chương và một phụ lục:
+\begin{itemize}
+  \item \textbf{Chương~\ref{chap:quality} -- Kế hoạch chất lượng:} mục tiêu chất lượng, Definition of Done và các
+        hoạt động rà soát.
+  \item \textbf{Chương~\ref{chap:testplan} -- Kế hoạch kiểm thử:} chiến lược kiểm thử theo cấp, quản lý lỗi, tiêu
+        chí bắt đầu, kết thúc và phát hành.
+  \item \textbf{Chương~\ref{chap:summary} -- Báo cáo tổng kết kiểm thử:} môi trường, kết quả test tự động, hiệu
+        năng, test thủ công, lỗi còn tồn và đánh giá theo tiêu chí phát hành.
+  \item \textbf{Chương~\ref{chap:conclusion} -- Kết luận và phê duyệt.}
+  \item \textbf{Phụ lục~\ref{app:testcases} -- Test case E2E Sprint 3} cho tóm tắt (\#99) và dịch (\#100).
+\end{itemize}
+
+% ============================================================ Chapter 2
+\chapter{Kế hoạch chất lượng}
+\label{chap:quality}
+
+\textbf{Chất lượng được giữ bằng bốn lớp: Definition of Done cho mọi story, test tự động ở ba tầng (pytest,
+Playwright trình duyệt, Playwright desktop), test thủ công theo test case của QC, và tiêu chí phát hành rõ
+ràng.} Tính đến 12/11/2026, 88 test backend đều đạt, ruff sạch và smoke test desktop đạt 8/8.
+
+\section{Mục tiêu chất lượng}
+
+Năm thuộc tính chất lượng được theo dõi, mỗi thuộc tính có mục tiêu và cách đo cụ thể
+(Bảng~\ref{tab:quality-goals}). Mục tiêu về độ chính xác AI và hiệu năng lấy trực tiếp từ các yêu cầu phi chức
+năng trong~\cite{srs}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Mục tiêu chất lượng}
+  \label{tab:quality-goals}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{2.9cm}LP{5.4cm}@{}}
+    \toprule
+    \thead{Thuộc tính} & \thead{Mục tiêu} & \thead{Đo bằng} \\
+    \midrule
+    Đúng chức năng & 100\% acceptance criteria của các story trong sprint đạt & Test case QC, test E2E \\
+    Độ chính xác AI & Theo NFR-A1--A5 trong đặc tả yêu cầu~\cite{srs}
+      & \path{eval_summary.py}, \path{eval_translation.py}, WER trên mẫu UAT \\
+    Hiệu năng & Live $\leq$ 3--5\,s; 1 giờ audio $\leq$ 10 phút trên GPU & Script đo độ trễ, upload file dài \\
+    Ổn định & 0 lỗi Critical/High còn mở khi phát hành & Azure Boards (Bug) \\
+    Bảo trì & Lint sạch, test tự động chạy $<$ 1 phút & ruff, pytest \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Definition of Done}
+\label{sec:dod}
+
+Một story chỉ được tính là Done khi thoả cả tám điều kiện dưới đây. Danh sách này áp dụng chung cho mọi story,
+và là căn cứ để Product Owner chấp nhận story ở Sprint Review.
+\begin{itemize}[label=$\square$]
+  \item Code đã merge vào nhánh feature của sprint, có review của ít nhất 1 người khác.
+  \item Đạt toàn bộ acceptance criteria; PO đã xem demo.
+  \item Có test tự động cho logic mới (pytest hoặc Playwright); toàn bộ test cũ vẫn đạt.
+  \item \texttt{ruff check} sạch; frontend \texttt{npm run build} (gồm type check) đạt.
+  \item Không còn Bug mức Critical/High liên quan tới story.
+  \item README/ARCHITECTURE được cập nhật nếu thay đổi cách chạy, cấu hình hoặc kiến trúc.
+  \item Không có bí mật (key, mật khẩu) trong commit.
+  \item Task trên Azure Boards đã cập nhật giờ thực tế và chuyển trạng thái Done.
+\end{itemize}
+Nhóm đã có DoD và các task QC riêng: \canDien[đối chiếu DoD ở trên với DoD đã thống nhất, giữ bản của nhóm nếu
+khác].
+
+\section{Rà soát chất lượng}
+
+Ngoài kiểm thử, ba hoạt động rà soát gắn với quy trình Scrum giúp phát hiện lỗi sớm và tránh lặp lại lỗi cũ:
+\begin{itemize}
+  \item \textbf{Code review:} mọi thay đổi đi qua Pull Request trên nhánh feature trước khi merge.
+  \item \textbf{Sprint Review:} demo trên bản build thật (bản web hoặc bộ cài), không demo trên máy dev đã sửa tay.
+  \item \textbf{Retrospective:} xem lại các lỗi lọt qua test và bổ sung test tự động cho đúng lỗi đó.
+\end{itemize}
+
+% ============================================================ Chapter 3
+\chapter{Kế hoạch kiểm thử}
+\label{chap:testplan}
+
+\textbf{Kiểm thử được tổ chức theo tám cấp, phần lớn tự động.} Unit test và test API chạy ở mỗi commit; test E2E
+trên trình duyệt và desktop chạy mỗi sprint hoặc trước khi build bộ cài; test thủ công và UAT chốt chặn cuối trước
+phát hành. Một bản chỉ được phát hành khi không còn lỗi Critical/High và PO, Sponsor đồng ý.
+
+\section{Chiến lược kiểm thử}
+
+Bảng~\ref{tab:strategy} mô tả phạm vi, công cụ, người thực hiện và thời điểm của từng cấp kiểm thử. Các phụ
+thuộc bên ngoài (STT, LLM, S3) được thay bằng bản giả trong test tự động, nên bộ test chạy nhanh và cho kết quả
+ổn định.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Chiến lược kiểm thử theo cấp}
+  \label{tab:strategy}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}P{2.3cm}LP{3.5cm}P{1.9cm}P{2.2cm}@{}}
+    \toprule
+    \thead{Cấp} & \thead{Phạm vi} & \thead{Công cụ} & \thead{Ai} & \thead{Khi nào} \\
+    \midrule
+    Unit / component & Logic live (LocalAgreement), chia đoạn file dài, parse API STT, prompt/JSON LLM, xuất file
+      & pytest (STT giả, LLM mock, S3 giả lập bằng moto) & Dev & Mỗi commit \\
+    API / tích hợp & Endpoint meetings, uploads, summary, translation, \path{/v1}, S3 & pytest, FastAPI TestClient
+      & Dev & Mỗi commit \\
+    E2E trình duyệt & Ghi âm (micro, micro + âm thanh họp), offline rồi đồng bộ, upload, file sai định dạng; tóm
+      tắt, dịch (Sprint 3) & Playwright trên Chrome và Edge thật, file WAV giả làm micro & QC & Mỗi sprint \\
+    E2E desktop & Cửa sổ, micro, âm thanh hệ thống, thoát sạch, bản đóng gói
+      & Playwright Electron (\path{desktop/scripts/smoke-test.js}) & Dev desktop & Trước khi build bộ cài \\
+    Hiệu năng & Độ trễ live, thời gian xử lý file dài & Script mô phỏng ghi âm thời gian thực, upload file dài
+      & Dev STT & Khi đổi engine hoặc model \\
+    Chất lượng AI & ROUGE-L, độ phủ quyết định, chrF++, BLEU, giữ thuật ngữ & \path{backend/scripts/eval_*.py}
+      & Dev AI, BA (mẫu tham chiếu) & Khi đổi model hoặc prompt \\
+    Thủ công / UAT & Test case~\cite{testcases}, điện thoại, Firefox/Safari, bản web AWS & Thao tác tay
+      & QC, người dùng thử & Cuối sprint, trước phát hành \\
+    Deploy & Build image, HTTPS, đăng nhập, \path{/v1}, S3 & Docker local, checklist hướng dẫn deploy
+      & Dev ops & Trước khi deploy \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Hình~\ref{fig:test-layers} xếp các cấp trên thành ba tầng theo tần suất chạy. Tầng dưới cùng chạy nhiều nhất và
+rẻ nhất; tầng trên cùng chạy ít nhất nhưng là nơi duy nhất có người dùng thật. Ba loại kiểm tra chuyên biệt
+(hiệu năng, chất lượng AI, deploy) không chạy theo lịch cố định mà theo sự kiện.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      layer/.style={draw=primaryblue,fill=accentblue,align=center,font=\footnotesize,
+                    minimum height=1.25cm,inner sep=3pt,execute at begin node=\setstretch{1.05}},
+      note/.style={font=\footnotesize\itshape,text=chartgray,anchor=west,align=left,
+                   execute at begin node=\setstretch{1.05}},
+      lead/.style={chartgray,densely dotted}]
+    % Three stacked layers, widest (most frequent, cheapest) at the bottom
+    \node[layer,minimum width=10cm] (l1) at (5,0.625)
+      {\textbf{Unit / component, API / tích hợp}\\ pytest với STT giả, LLM mock, S3 giả lập bằng moto};
+    \node[layer,minimum width=7.6cm,fill=accentblue!55] (l2) at (5,1.875)
+      {\textbf{E2E trình duyệt, E2E desktop}\\ Playwright trên Chrome, Edge và Electron};
+    \node[layer,minimum width=5.2cm,draw=todored,fill=todored!10] (l3) at (5,3.125)
+      {\textbf{Thủ công, UAT}\\ QC và người dùng thử};
+    % When each layer runs
+    \draw[lead] (l1.east) -- (10.6,0.625);
+    \draw[lead] (l2.east) -- (10.6,1.875);
+    \draw[lead] (l3.east) -- (10.6,3.125);
+    \node[note] at (10.6,0.625) {Mỗi commit\\ (tự động)};
+    \node[note] at (10.6,1.875) {Mỗi sprint, trước khi\\ build bộ cài (tự động)};
+    \node[note] at (10.6,3.125) {Cuối sprint, trước phát\\ hành (thao tác tay)};
+    % Event-driven checks
+    \node[draw=chartgray,dashed,rounded corners=2pt,align=left,font=\footnotesize,text width=14cm,
+          inner sep=4pt,anchor=north west] at (0,-0.35)
+      {\textbf{Theo sự kiện:} hiệu năng khi đổi engine hoặc model; chất lượng AI khi đổi model hoặc prompt; kiểm
+       tra deploy trước mỗi lần deploy.};
+  \end{tikzpicture}
+  \caption{Ba tầng kiểm thử theo tần suất chạy và các kiểm tra theo sự kiện}
+  \label{fig:test-layers}
+\end{figure}
+
+\section{Quản lý lỗi}
+
+Mỗi lỗi được xếp một trong bốn mức theo mức ảnh hưởng tới người dùng; hai mức cao nhất chặn phát hành
+(Bảng~\ref{tab:severity}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Mức độ lỗi và thời hạn xử lý}
+  \label{tab:severity}
+  \begin{tabularx}{\linewidth}{@{}P{2.2cm}LP{4.6cm}@{}}
+    \toprule
+    \thead{Mức} & \thead{Định nghĩa} & \thead{Thời hạn xử lý} \\
+    \midrule
+    Critical & Mất dữ liệu ghi âm, app không chạy, lộ dữ liệu & Ngay, chặn phát hành \\
+    High & Tính năng chính hỏng, không có cách né & Trong sprint, chặn phát hành \\
+    Medium & Lỗi có cách né, sai hiển thị quan trọng & Sprint sau \\
+    Low & Thẩm mỹ, câu chữ & Khi có thời gian \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Quy trình xử lý lỗi gồm bốn bước:
+\begin{enumerate}
+  \item QC tạo Bug trên Azure Boards, link tới story, kèm bước tái hiện, kết quả mong đợi, log hoặc ảnh chụp.
+  \item Dev sửa lỗi.
+  \item QC kiểm tra lại trên bản đã sửa.
+  \item QC đóng Bug.
+\end{enumerate}
+
+\section{Tiêu chí bắt đầu, kết thúc và phát hành}
+\label{sec:criteria}
+
+Ba cửa kiểm soát quyết định khi nào bắt đầu test một sprint, khi nào dừng, và khi nào được phát hành
+(Bảng~\ref{tab:criteria}). Tiêu chí phát hành được dùng để đánh giá bản v0.4 ở Mục~\ref{sec:release-eval}.
+
+% Last table of the chapter: [H] so it is not pushed onto a page of its own.
+\begin{table}[H]
+  \centering
+  \caption{Tiêu chí bắt đầu, kết thúc và phát hành}
+  \label{tab:criteria}
+  \begin{tabularx}{\linewidth}{@{}P{3.8cm}L@{}}
+    \toprule
+    \thead{Tiêu chí} & \thead{Nội dung} \\
+    \midrule
+    Bắt đầu test sprint & Story đạt DoD phía Dev, bản build chạy được, test case đã viết \\
+    Kết thúc test sprint & 100\% test case ưu tiên cao đã chạy; tỷ lệ đạt $\geq$ 95\%; không còn lỗi Critical/High \\
+    Phát hành (release) & Đạt tiêu chí kết thúc; có release notes~\cite{pcr}; smoke test bản đóng gói và bản web đạt;
+      PO và Sponsor đồng ý \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ Chapter 4
+\chapter{Báo cáo tổng kết kiểm thử}
+\label{chap:summary}
+
+\textbf{Kết luận (12/11/2026): bản v0.4 đủ điều kiện phát hành cho đợt test nội bộ và UAT, nhưng chưa đủ để
+nghiệm thu cuối.} Mọi test tự động đã chạy đều đạt và hiệu năng đạt mục tiêu; bộ cài desktop đã được build lại và
+đạt smoke test. Còn thiếu ba việc: chạy lại test E2E trình duyệt sau thay đổi của Sprint 4, deploy thật lên AWS,
+và đo độ chính xác tiếng Việt trên mẫu UAT.
+
+\section{Phạm vi và môi trường}
+
+Bảng~\ref{tab:environment} ghi phiên bản, máy và model được dùng khi kiểm thử. Toàn bộ số liệu trong chương được
+đo trên cấu hình này.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Phạm vi và môi trường kiểm thử}
+  \label{tab:environment}
+  \begin{tabularx}{\linewidth}{@{}P{3.8cm}L@{}}
+    \toprule
+    \thead{Mục} & \thead{Nội dung} \\
+    \midrule
+    Phiên bản & Nhánh \path{docs/project-management} (gồm toàn bộ code tới \path{feature/aws-deploy}) \\
+    Máy test & Windows 11, i7-13620H, RTX 4050 6\,GB, Python 3.13, Node 22, Chrome/Edge, Electron 45 \\
+    Model & Whisper \texttt{large-v3-turbo} (GPU), \texttt{small} (CPU); LLM mock trong test tự động \\
+    Kế hoạch tham chiếu & Chương~\ref{chap:testplan} và test case Sprint 3 (Phụ lục~\ref{app:testcases}) \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Kết quả test tự động}
+
+Kết quả của tám bộ test tự động được tổng hợp trong Bảng~\ref{tab:auto-results}. Sáu bộ đã có kết quả đều đạt
+100\%; hai bộ Playwright trên trình duyệt còn chờ chạy lại.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Kết quả test tự động trên bản v0.4}
+  \label{tab:auto-results}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}LQ{1.5cm}Q{1.5cm}Q{1.6cm}P{4.4cm}@{}}
+    \toprule
+    \thead{Bộ test} & \thead{Số test} & \thead{Đạt} & \thead{Không đạt} & \thead{Ghi chú} \\
+    \midrule
+    pytest backend (API, live, STT remote, \path{/v1}, S3, tóm tắt, dịch) & 88 & 88 & 0 & Khoảng 6\,s \\
+    ruff (lint) & -- & Sạch & -- & \\
+    Type check và build frontend & -- & Đạt & -- & \\
+    Playwright desktop -- từ mã nguồn & 8 & 8 & 0 & Cửa sổ, micro, âm thanh hệ thống, thoát sạch \\
+    Playwright desktop -- bản đóng gói & 8 & 8 & 0 & Bộ cài v0.4 build lại ngày 12/11/2026 (205\,MB), có
+      streaming và STT remote \\
+    Docker: build image, HTTPS, đăng nhập, \path{/v1} & 8 kiểm tra & 8 & 0 & Stack chạy local với
+      \texttt{SITE\_ADDRESS=}\allowbreak\texttt{localhost} \\
+    \midrule
+    Playwright trình duyệt (Chrome, Edge) -- E1 & 5 $\times$ 2 & \canDien & & Cần chạy lại sau khi đổi chunk 1\,s \\
+    Playwright Sprint 3 (\path{sprint3.spec.ts}) & \canDien & & & Server \texttt{AI\_MOCK=true} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Hình~\ref{fig:auto-results} minh hoạ cùng số liệu theo tỷ lệ. Bộ Playwright Sprint 3 chưa có số test nên không
+được vẽ.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.78\linewidth, height=5.4cm,
+        xbar stacked, bar width=0.42cm,
+        xmin=0, xmax=100, xtick={0,25,50,75,100},
+        xticklabel={\pgfmathprintnumber{\tick}\%},
+        symbolic y coords={PY,DS,DP,DK,E1}, ytick=data, y dir=reverse,
+        yticklabels={{pytest backend (88)},{Desktop -- mã nguồn (8)},{Desktop -- đóng gói (8)},
+                     {Docker (8)},{Trình duyệt E1 (10)}},
+        legend style={at={(0.5,-0.24)},anchor=north,legend columns=2,font=\small,draw=gray!40,
+                      /tikz/every even column/.append style={column sep=0.6cm}},
+        tick label style={font=\small}, enlarge y limits=0.15,
+        grid=major, ymajorgrids=false, grid style={gray!25}]
+      \addplot[fill=primaryblue, draw=primaryblue] coordinates {(100,PY) (100,DS) (100,DP) (100,DK) (0,E1)};
+      \addlegendentry{Đạt}
+      \addplot[fill=gray!25, draw=chartgray] coordinates {(0,PY) (0,DS) (0,DP) (0,DK) (100,E1)};
+      \addlegendentry{Chưa có kết quả (cần chạy lại)}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Tỷ lệ đạt của các bộ test tự động (số trong ngoặc là số test)}
+  \label{fig:auto-results}
+\end{figure}
+
+\section{Kết quả hiệu năng}
+
+Năm kịch bản hiệu năng được đo thực tế (Bảng~\ref{tab:perf}); tất cả đều đạt. Độ trễ live như nhau khi chạy GPU
+trên máy và khi dùng engine remote, nhưng với engine remote máy khách không phải tải model.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Kết quả hiệu năng đo thực tế}
+  \label{tab:perf}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{4.4cm}P{2.5cm}LQ{0.9cm}@{}}
+    \toprule
+    \thead{Kịch bản} & \thead{Mục tiêu} & \thead{Kết quả} & \thead{Đạt} \\
+    \midrule
+    Live, GPU local, file 17\,s phát theo thời gian thực & $\leq$ 3--5\,s
+      & Từ mới khoảng 1\,s; câu chốt trung bình 1,93\,s, tối đa 2,31\,s & \pass \\
+    Live qua engine remote (máy không có model) & Như trên
+      & Trung bình 1,93\,s, tối đa 2,31\,s; máy khách không tải model & \pass \\
+    File 11,6 phút -- remote & 1 giờ $\leq$ 10 phút & 17,8\,s (39$\times$ realtime), dòng đầu sau 3,1\,s & \pass \\
+    File 11,6 phút -- GPU local & Như trên & 56,7\,s (12$\times$ realtime), dòng đầu sau 4,6\,s & \pass \\
+    Khởi động app desktop & $\leq$ 10\,s & 1,4--1,9\,s & \pass \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Để so sánh các kịch bản có đơn vị khác nhau, Hình~\ref{fig:perf-ratio} quy mỗi kết quả \emph{xấu nhất} về phần
+trăm của ngưỡng mục tiêu, với ngưỡng live lấy cận chặt 3\,s. Mục tiêu ``1 giờ audio $\leq$ 10 phút'' tương ứng
+với ngưỡng $11{,}6 / 6 \approx 1{,}93$ phút (khoảng 116\,s) cho file 11,6 phút. Mọi cột đều dưới 100\%; độ trễ live
+là chỉ số sát ngưỡng nhất, ở mức khoảng 77\%.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.74\linewidth, height=5.6cm,
+        xbar, bar width=0.42cm,
+        xmin=0, xmax=110, xtick={0,25,50,75,100},
+        xticklabel={\pgfmathprintnumber{\tick}\%},
+        symbolic y coords={LL,LR,FR,FL,AP}, ytick=data, y dir=reverse,
+        yticklabels={{Live, GPU local},{Live, engine remote},{File 11,6 phút, remote},
+                     {File 11,6 phút, GPU local},{Khởi động app desktop}},
+        xlabel={Kết quả xấu nhất / ngưỡng mục tiêu},
+        nodes near coords, nodes near coords={\pgfmathprintnumber[fixed,precision=0]{\pgfplotspointmeta}\%},
+        every node near coord/.append style={font=\footnotesize},
+        tick label style={font=\small}, enlarge y limits=0.15,
+        grid=major, ymajorgrids=false, grid style={gray!25},
+        /pgf/number format/.cd, use comma, 1000 sep={.}]
+      \addplot[fill=primaryblue, draw=primaryblue]
+        coordinates {(77,LL) (77,LR) (15.3,FR) (48.9,FL) (19,AP)};
+      % x range is 0..110, so 100% sits at 100/110 of the axis width.
+      \draw[todored, dashed, thick] (rel axis cs:0.90909,0) -- (rel axis cs:0.90909,1);
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Kết quả hiệu năng theo phần trăm ngưỡng mục tiêu (đường đỏ: 100\%)}
+  \label{fig:perf-ratio}
+\end{figure}
+
+\section{Kết quả test thủ công}
+
+Kết quả test thủ công của QC được ghi trong Bảng~\ref{tab:manual}. Tại thời điểm báo cáo, các bộ test case thủ
+công chưa có kết quả trong tài liệu; bảng tính kết quả kiểm thử của QC~\cite{tsxlsx} cũng đang ghi các mục kiểm tra
+tay là ``Đang chờ''.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Kết quả test thủ công của QC}
+  \label{tab:manual}
+  \begin{tabularx}{\linewidth}{@{}LQ{2.3cm}Q{2.3cm}Q{1.8cm}Q{1.8cm}@{}}
+    \toprule
+    \thead{Bộ test case} & \thead{Tổng} & \thead{Đạt} & \thead{Không đạt} & \thead{Chưa chạy} \\
+    \midrule
+    \#99 Tóm tắt (S-01\ldots S-11) & 11 & \canDien & & \\
+    \#100 Dịch (T-01\ldots T-12) & 12 & \canDien & & \\
+    Điện thoại Android/iOS (T1.2.5) & \canDien & & & \\
+    UAT bản web trên AWS & \canDien & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Lỗi còn tồn và hạn chế đã biết}
+
+Bốn hạn chế đã biết đều ở mức Medium hoặc Low, nên không chặn phát hành (Bảng~\ref{tab:defects}). Hai hạn chế
+đầu tương ứng với rủi ro R13 và R12 đã được chấp nhận trong Risk Register~\cite{pmp}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Lỗi còn tồn và hạn chế đã biết}
+  \label{tab:defects}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{1.3cm}LQ{1.6cm}P{4.4cm}@{}}
+    \toprule
+    \thead{ID} & \thead{Mô tả} & \thead{Mức} & \thead{Trạng thái} \\
+    \midrule
+    L-01 & iOS dừng micro khi khoá màn hình (giới hạn của trình duyệt) & Medium & Chấp nhận (R13) \\
+    L-02 & Bộ cài chưa ký số, SmartScreen cảnh báo & Low & Chấp nhận (R12) \\
+    L-03 & Engine remote dùng API công cộng: ngôn ngữ được nhận theo block khoảng 30\,s, thô hơn engine local (theo câu)
+      & Low & Dùng server SumTalk GPU để giữ nhận ngôn ngữ theo câu \\
+    L-04 & Live: dòng có thể bị ngắt giữa câu khi nói liền $>$ 8\,s không nghỉ (bản cuối sau khi Stop sẽ chia lại câu)
+      & Low & Thiết kế có chủ ý \\
+    \canDien & Lỗi QC tìm thấy trên Azure Boards & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Đánh giá theo tiêu chí phát hành}
+\label{sec:release-eval}
+
+Bảng~\ref{tab:release-eval} đối chiếu bản v0.4 với tiêu chí phát hành ở Mục~\ref{sec:criteria}. Chỉ tiêu chí hiệu năng
+đạt trọn vẹn; ba tiêu chí đạt một phần hoặc còn chờ xác nhận, và chưa có sự đồng ý của PO, Sponsor.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Đánh giá bản v0.4 theo tiêu chí phát hành}
+  \label{tab:release-eval}
+  \begin{tabularx}{\linewidth}{@{}P{5.4cm}L@{}}
+    \toprule
+    \thead{Tiêu chí} & \thead{Trạng thái} \\
+    \midrule
+    Test tự động đạt 100\% & \pass{} Backend, desktop, Docker; E2E trình duyệt cần chạy lại \\
+    Không còn lỗi Critical/High & \pass{} Theo hiểu biết hiện tại; \canDien[xác nhận trên board] \\
+    Hiệu năng đạt mục tiêu & \pass \\
+    Smoke test bản đóng gói và bản web & Bản đóng gói: \pass{} (8/8); bản web: đạt khi chạy local, chưa có trên AWS \\
+    PO và Sponsor đồng ý & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\heading{Khuyến nghị}
+Chạy lại test E2E trình duyệt và bộ test Sprint 3, deploy lên AWS, chạy UAT trong 1 tuần, rồi nghiệm thu bản v1.0.
+
+% ============================================================ Chapter 5
+\chapter{Kết luận và phê duyệt}
+\label{chap:conclusion}
+
+\section{Tóm tắt}
+
+Tài liệu đã đặt kế hoạch chất lượng và kiểm thử cạnh kết quả trên bản v0.4:
+\begin{itemize}
+  \item \textbf{Kế hoạch:} năm mục tiêu chất lượng, Definition of Done gồm tám điều kiện, tám cấp kiểm thử chia
+        thành ba tầng theo tần suất, bốn mức lỗi và ba cửa kiểm soát bắt đầu, kết thúc, phát hành.
+  \item \textbf{Kết quả tự động:} 88/88 test backend, 8/8 smoke test desktop (mã nguồn và bản đóng gói), 8/8 kiểm
+        tra Docker, lint và build frontend đạt.
+  \item \textbf{Hiệu năng:} cả năm kịch bản đạt; kết quả xấu nhất của độ trễ live là 2,31\,s, khoảng 77\% ngưỡng 3\,s.
+  \item \textbf{Kết luận:} v0.4 đủ điều kiện cho test nội bộ và UAT; chưa đủ để nghiệm thu cuối.
+\end{itemize}
+
+\section{Việc cần làm trước khi nghiệm thu}
+
+\begin{enumerate}
+  \item Chạy lại Playwright trình duyệt (E1, Chrome và Edge) và bộ \path{sprint3.spec.ts}, rồi điền
+        Bảng~\ref{tab:auto-results}.
+  \item QC chạy 23 test case S-01\ldots S-11, T-01\ldots T-12 và test trên điện thoại; điền Bảng~\ref{tab:manual} và
+        bảng kết quả ở Phụ lục~\ref{app:testcases}.
+  \item Deploy bản web lên AWS, chạy smoke test và UAT trong 1 tuần; đo độ chính xác tiếng Việt trên mẫu UAT.
+  \item Xác nhận trên Azure Boards không còn lỗi Critical/High; bổ sung lỗi QC tìm thấy vào Bảng~\ref{tab:defects}.
+  \item Đối chiếu Definition of Done ở Mục~\ref{sec:dod} với DoD nhóm đã thống nhất; điền các ô \canDien{} còn lại.
+\end{enumerate}
+
+\needspace{14\baselineskip}
+\section{Phê duyệt}
+
+Nhóm dự án đề nghị QC, Product Owner và Project Manager phê duyệt kế hoạch chất lượng, kế hoạch kiểm thử và kết luận
+kiểm thử của bản v0.4 trình bày trong tài liệu này.
+
+\begin{table}[H]
+  \centering
+  \renewcommand{\arraystretch}{2.4}
+  \begin{tabularx}{\linewidth}{@{}P{3.6cm}LP{3.2cm}P{2.6cm}@{}}
+    \toprule
+    \thead{Vai trò} & \thead{Họ tên} & \thead{Chữ ký} & \thead{Ngày} \\
+    \midrule
+    QC & & & \\
+    Product Owner & & & \\
+    Project Manager & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ References
+\begin{thebibliography}{9}
+\addcontentsline{toc}{chapter}{\bibname}
+  \bibitem{srs} Nhóm SumTalk, \emph{Đặc tả yêu cầu phần mềm (Software Requirements Specification)},
+    Tài liệu 02, mã SUMTALK-SRS, phiên bản 2.1, 24/11/2026.
+  \bibitem{pmp} Nhóm SumTalk, \emph{Kế hoạch quản lý dự án (Project Management Plan)}, Tài liệu 03,
+    mã SUMTALK-PMP, phiên bản 2.1, 24/11/2026.
+  \bibitem{pcr} Nhóm SumTalk, \emph{Báo cáo kết thúc dự án (Project Closure Report)}, Tài liệu 06,
+    mã SUMTALK-PCR, phiên bản 2.0, 13/11/2026.
+  \bibitem{testcases} Nhóm SumTalk, \emph{Sprint 3 test cases (\#99, \#100)}, kho mã nguồn
+    \texttt{DatTapTanhCode/SumTalk}, tệp \path{docs/testing/sprint3-test-cases.md}.
+  \bibitem{tsxlsx} Nhóm SumTalk, \emph{Báo cáo kiểm thử SumTalk -- phiên bản v0.4} (bảng tính), kho mã nguồn
+    \texttt{DatTapTanhCode/SumTalk}, tệp \path{TEST_SUMMARY_13112026_SumTalk_v2.xlsx}, 13/11/2026.
+  \bibitem{rouge} C.-Y. Lin, ``ROUGE: A package for automatic evaluation of summaries,'' in \emph{Text
+    Summarization Branches Out}, Barcelona: Association for Computational Linguistics, 2004, pp.~74--81.
+  \bibitem{bleu} K. Papineni, S. Roukos, T. Ward, W.-J. Zhu, ``BLEU: a method for automatic evaluation of machine
+    translation,'' in \emph{Proceedings of the 40th Annual Meeting of the ACL}, 2002, pp.~311--318.
+  \bibitem{chrf} M. Popović, ``chrF++: words helping character n-grams,'' in \emph{Proceedings of the Second
+    Conference on Machine Translation}, 2017, pp.~612--618.
+\end{thebibliography}
+
+% ============================================================ Appendix
+\appendix
+\chapter{Test case E2E Sprint 3 (\#99, \#100)}
+\label{app:testcases}
+
+Phụ lục này chép lại bộ test case QC dùng hằng ngày~\cite{testcases}; nội dung giữ nguyên tiếng Anh như bản QC
+đang dùng. Mỗi test case ứng với một acceptance criterion (cột AC) của story \#67 hoặc \#60. Lỗi tìm thấy được ghi
+thành \textbf{Bug} trên Azure Boards, link tới story và test lại sau khi sửa. Các chỉ số ROUGE-L~\cite{rouge},
+BLEU~\cite{bleu} và chrF++~\cite{chrf} dùng trong \path{eval_summary.py} và \path{eval_translation.py} hỗ trợ cho
+các test case chất lượng S-04 và T-04.
+
+\section{Setup}
+
+The three ways to run the tests are listed in Table~\ref{tab:setup}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Test setup}
+  \label{tab:setup}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{3.6cm}L@{}}
+    \toprule
+    \thead{Run} & \thead{How} \\
+    \midrule
+    \textbf{Mock model} (predictable, no GPU) & \texttt{AI\_MOCK=true} in \path{backend/.env}, then \path{start.bat}.
+      Summary text starts with ``Bản tóm tắt thử nghiệm (mock)'' (vi) or ``Mock summary'' (en); a translated line is
+      the original prefixed with \texttt{[vi]} / \texttt{[en]}. \\
+    \textbf{Real model} (quality) & \texttt{AI\_MOCK=false}, \texttt{LLM\_BASE\_URL} + \texttt{SUMMARY\_MODEL} /
+      \texttt{TRANSLATION\_MODEL} set, Ollama running (or cloud key). \\
+    \textbf{Simulate a model failure} & \texttt{AI\_MOCK=false} and \path{LLM_BASE_URL=http://localhost:9/v1}
+      (nothing listens there). \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\textbf{Sample audio:} \path{frontend/e2e/fixtures/speech_en.mp3} (English, 17\,s), a Vietnamese recording, a mixed
+EN/VI recording, and a recording of 60 minutes or more (any meeting recording; the content does not matter).
+
+\textbf{Automated coverage:}
+\begin{itemize}
+  \item pytest, mock model: \path{backend/tests/test_summary_translation_api.py}, \path{test_ai_summary.py},
+        \path{test_ai_translation.py};
+  \item Playwright, server with \texttt{AI\_MOCK=true}: \path{frontend/e2e/sprint3.spec.ts}, run with
+        \texttt{npx playwright test e2e/sprint3.spec.ts}.
+\end{itemize}
+
+\section{\#99 -- Summary (story \#67)}
+
+\begingroup\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}P{1.1cm}Q{0.7cm}P{4.5cm}P{5.8cm}P{2.5cm}@{}}
+  \caption{Test cases \#99 -- Summary}\label{tab:tc-summary}\\
+  \toprule
+  \thead{ID} & \thead{AC} & \thead{Steps} & \thead{Expected} & \thead{Auto} \\
+  \midrule
+  \endfirsthead
+  \multicolumn{5}{@{}l}{\footnotesize\itshape Bảng~\thetable{} (tiếp theo)}\\
+  \toprule
+  \thead{ID} & \thead{AC} & \thead{Steps} & \thead{Expected} & \thead{Auto} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  S-01 & 1 & Upload \path{speech_en.mp3}. Wait for \ui{Ready}. Open the \ui{Summary} tab without clicking anything
+    else. & ``Summarizing…'' with a spinner, then the summary appears by itself (page polls every 3\,s).
+    & e2e, pytest \\
+  S-02 & 2 & Look at a finished summary. & Sections \ui{Overview, Key points, Decisions, Action items, Open
+    questions}. Empty sections say so (``No decisions were recorded.''). & e2e, pytest \\
+  S-03 & 3 & Regenerate ▾ $\rightarrow$ \ui{English}, confirm. Then Regenerate ▾ $\rightarrow$ \ui{Vietnamese}.
+    Repeat on the mixed EN/VI meeting. & Text is in the chosen language each time, also for the mixed meeting.
+    English technical terms (API, deploy, sprint…) stay in English in the Vietnamese summary.
+    & e2e (lang), manual (terms) \\
+  S-04 & 3 & Real model: compare the summary with the transcript. & No people, numbers, dates or decisions that are
+    not in the transcript. & manual / \path{eval_summary.py} \\
+  S-05 & 4 & Upload a recording of \textbf{$\geq$ 60 min}. & Summary ends as \textbf{done} (no error). In
+    \path{GET /api/meetings/{id}/summary}: \texttt{mode = "map\_reduce"}, \texttt{calls} = number of parts + 1.
+    & pytest (80k-char transcript) \\
+  S-06 & 5 & On a finished summary: Regenerate ▾ $\rightarrow$ a language. & A confirmation ``The current summary
+    will be replaced…'' appears. After confirming, the old text disappears and the new one replaces it. Cancel
+    keeps the old one. & e2e \\
+  S-07 & 5 & While a summary is being generated. & The Regenerate button is disabled.
+    \texttt{POST \ldots/summary/regenerate} returns \textbf{409}. & pytest \\
+  S-08 & 6 & Simulate a model failure, upload a file. & After the retries (about 30\,s) the tab shows ``The summary
+    could not be generated'' with the error and \ui{Try again}. Nothing spins forever. & pytest \\
+  S-09 & 6 & Fix the model URL, click \ui{Try again}. & The summary is generated. The transcript is \textbf{not}
+    re-transcribed (meeting stays Ready). & pytest \\
+  S-10 & -- & Re-transcribe a meeting that has a summary. & The summary is rebuilt after the new transcript.
+    & pytest \\
+  S-11 & -- & Phone width ($\leq$ 400\,px). & Sections stack in one column, buttons reachable, no horizontal
+    scroll. & manual \\
+\end{longtable}
+\endgroup
+
+\section{\#100 -- Translation (story \#60)}
+
+\begingroup\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}P{1.1cm}Q{0.7cm}P{4.5cm}P{5.8cm}P{2.5cm}@{}}
+  \caption{Test cases \#100 -- Translation}\label{tab:tc-translation}\\
+  \toprule
+  \thead{ID} & \thead{AC} & \thead{Steps} & \thead{Expected} & \thead{Auto} \\
+  \midrule
+  \endfirsthead
+  \multicolumn{5}{@{}l}{\footnotesize\itshape Bảng~\thetable{} (tiếp theo)}\\
+  \toprule
+  \thead{ID} & \thead{AC} & \thead{Steps} & \thead{Expected} & \thead{Auto} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  T-01 & 1 & Open the \ui{Translation} tab of a Ready meeting. Open ``Translate to''. & The list offers at least
+    \ui{Vietnamese} and \ui{English}; choosing one starts the translation. & e2e \\
+  T-02 & 2 & Translate \path{speech_en.mp3} into Vietnamese; wait for the end. & A progress bar with \% while
+    running, lines filling in. When done, \textbf{every} line has a translation (\texttt{GET \ldots/translations/vi}: no
+    \texttt{translation: null}). & e2e, pytest \\
+  T-03 & 3 & Translate the English meeting into \ui{English}, and the Vietnamese meeting into \ui{Vietnamese}.
+    & Lines are kept unchanged with the label ``already English/Vietnamese'' (\texttt{skipped: true}), and no model
+    call is made for them. & pytest \\
+  T-04 & 3 & Real model: translate the mixed EN/VI meeting into Vietnamese and into English. & Natural translation;
+    English technical terms and names kept. Vietnamese lines are kept when the target is Vietnamese.
+    & manual / \path{eval_translation.py} \\
+  T-05 & 4 & Look at a finished translation on a desktop screen. & Two columns \ui{Original \textbar{}
+    Translation}, one row per segment, time on the left, rows aligned. Clicking a time plays the audio from there.
+    & e2e \\
+  T-06 & 4 & Same at phone width. & Each original line is directly above its translation. & manual \\
+  T-07 & 5 & Reload the page (F5), open the Translation tab. & The saved translation shows at once. No new job:
+    \texttt{GET \ldots/translations} still has one entry with the same \texttt{updated\_at}; choosing the same language
+    again returns \textbf{200} immediately. & e2e, pytest \\
+  T-08 & 6 & Export ▾ $\rightarrow$ \ui{Text (.txt)}; open in Windows Notepad. & File \texttt{<title>\_vi.txt};
+    Vietnamese accents display correctly; lines \texttt{[hh:mm:ss] translation}. & e2e (file), manual (Notepad) \\
+  T-09 & 6 & Export ▾ $\rightarrow$ \ui{Subtitles (.srt)}; open in VLC with the audio, or in a subtitle editor.
+    & File \texttt{<title>\_vi.srt}; numbered cues \texttt{HH:MM:SS,mmm -{}-> HH:MM:SS,mmm}; subtitles in sync.
+    & e2e, pytest \\
+  T-10 & 6 & Export the bilingual variants. & Original line above each translation, in TXT and SRT. & pytest \\
+  T-11 & -- & Simulate a model failure, pick a language. & ``The translation stopped'' with the error and
+    \ui{Try again}; Export disabled. After fixing the model, Try again translates only the missing lines. & pytest \\
+  T-12 & -- & Before the transcript is Ready. & The tab says translation is available once the transcript is
+    ready; the API returns 409. & pytest \\
+\end{longtable}
+\endgroup
+
+\section{Results}
+
+QC records each test run in Table~\ref{tab:tc-results}.
+
+\begin{table}[H]
+  \centering
+  \caption{Test run results}
+  \label{tab:tc-results}
+  \small
+  \renewcommand{\arraystretch}{1.8}
+  \begin{tabularx}{\linewidth}{@{}P{1.8cm}P{2.6cm}P{2.2cm}P{2.2cm}Q{1.5cm}L@{}}
+    \toprule
+    \thead{Date} & \thead{Build / commit} & \thead{Tester} & \thead{Model} & \thead{Passed} & \thead{Failed (bug IDs)} \\
+    \midrule
+    & & & & & \\
+    & & & & & \\
+    & & & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\end{document}
