@@ -70,17 +70,6 @@ const json = (method: string, body: unknown): RequestInit => ({
   body: JSON.stringify(body),
 })
 
-// Serialize first use across recording/upload requests and across tabs before creating any meetings.
-let session: Promise<void> | undefined
-function ensureOwner() {
-  const establish = () => request<void>('/api/owner-session', { method: 'POST' })
-  session ??= (navigator.locks ? navigator.locks.request('sumtalk-owner', establish) : establish()).catch((err) => {
-    session = undefined
-    throw err
-  })
-  return session
-}
-
 export const api = {
   health: () => request<Health>('/api/health'),
   config: () => request<ClientConfig>('/api/config'),
@@ -88,8 +77,9 @@ export const api = {
   listMeetings: () => request<Meeting[]>('/api/meetings'),
   getMeeting: (id: string) => request<Meeting>(`/api/meetings/${id}`),
   renameMeeting: (id: string, title: string) => request<Meeting>(`/api/meetings/${id}`, json('PATCH', { title })),
-  addTag: (id: string, name: string) => request<Meeting>(`/api/meetings/${id}/tags`, json('PUT', { name })),
-  removeTag: (id: string, name: string) => request<Meeting>(`/api/meetings/${id}/tags`, json('DELETE', { name })),
+  addTag: (id: string, name: string) => request<Meeting>(`/api/meetings/${id}/tags`, json('POST', { name })),
+  removeTag: (id: string, name: string) =>
+    request<Meeting>(`/api/meetings/${id}/tags/${encodeURIComponent(name)}`, { method: 'DELETE' }),
   getShare: (id: string) => request<ShareLink | null>(`/api/meetings/${id}/share`),
   setShare: (id: string, include_audio: boolean) =>
     request<ShareLink>(`/api/meetings/${id}/share`, json('PUT', { include_audio })),
@@ -97,13 +87,10 @@ export const api = {
   sharedMeeting: (token: string) => request<SharedMeeting>(`/api/shared/${encodeURIComponent(token)}`),
   deleteMeeting: (id: string) => request<void>(`/api/meetings/${id}`, { method: 'DELETE' }),
 
-  createRecording: async (
+  createRecording: (
     id: string,
     body: { title: string; language: string | null; capture_mode: string; started_at: string; meeting_at: string },
-  ) => {
-    await ensureOwner()
-    return request<Meeting>(`/api/meetings/${id}`, json('PUT', body))
-  },
+  ) => request<Meeting>(`/api/meetings/${id}`, json('PUT', body)),
   uploadChunk: (id: string, seq: number, pcm: ArrayBuffer) =>
     request<{ seq: number; received_chunks: number }>(`/api/meetings/${id}/chunks/${seq}`, {
       method: 'PUT',
@@ -118,10 +105,8 @@ export const api = {
   retranscribe: (id: string, language: string | null) =>
     request<Meeting>(`/api/meetings/${id}/retranscribe`, json('POST', { language })),
 
-  createUpload: async (body: { filename: string; meeting_at: string; size_bytes: number; mime_type: string | null; title: string; language: string | null }) => {
-    await ensureOwner()
-    return request<UploadSession>('/api/uploads', json('POST', body))
-  },
+  createUpload: (body: { filename: string; meeting_at: string; size_bytes: number; mime_type: string | null; title: string; language: string | null }) =>
+    request<UploadSession>('/api/uploads', json('POST', body)),
   completeUpload: (id: string) => request<Meeting>(`/api/uploads/${id}/complete`, { method: 'POST' }),
   cancelUpload: (id: string) => request<void>(`/api/uploads/${id}`, { method: 'DELETE' }),
   uploadPartUrl: (id: string, n: number) => `/api/uploads/${id}/parts/${n}`,

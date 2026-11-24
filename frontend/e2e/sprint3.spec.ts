@@ -24,8 +24,8 @@ test.describe('Sprint 3 - summary and translation (server started with AI_MOCK=t
     test.skip(!config.ai_mock, 'start the server with AI_MOCK=true')
   })
 
-  test.afterEach(async ({ page }) => {
-    if (meetingId) await page.request.delete(`/api/meetings/${meetingId}`)
+  test.afterEach(async ({ request }) => {
+    if (meetingId) await request.delete(`/api/meetings/${meetingId}`)
     meetingId = undefined
   })
 
@@ -47,7 +47,7 @@ test.describe('Sprint 3 - summary and translation (server started with AI_MOCK=t
     await expect(summary.getByText(/Bản tóm tắt thử nghiệm/)).toHaveCount(0)
   })
 
-  test('#100 translation side by side, kept after reload without a new job, exported as TXT / SRT', async ({ page }) => {
+  test('#100 translation side by side, kept after reload without a new job, exported as TXT / SRT', async ({ page, request }) => {
     meetingId = await uploadMeeting(page)
     await page.getByRole('tab', { name: 'Translation' }).click()
     await page.getByLabel('Target language').selectOption('vi')
@@ -57,7 +57,7 @@ test.describe('Sprint 3 - summary and translation (server started with AI_MOCK=t
     await expect(table.getByRole('columnheader', { name: 'Original' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Export' })).toBeEnabled({ timeout: 30_000 })
 
-    const detail = await (await page.request.get(`/api/meetings/${meetingId}/translations/vi`)).json()
+    const detail = await (await request.get(`/api/meetings/${meetingId}/translations/vi`)).json()
     expect(detail.status).toBe('done')
     expect(detail.segments.length).toBeGreaterThan(0)
     expect(detail.segments.every((s: { translation: string | null }) => s.translation)).toBe(true)
@@ -66,7 +66,7 @@ test.describe('Sprint 3 - summary and translation (server started with AI_MOCK=t
     await page.reload()
     await page.getByRole('tab', { name: 'Translation' }).click()
     await expect(table.getByText(/^\[vi\] /).first()).toBeVisible()
-    const after = await (await page.request.get(`/api/meetings/${meetingId}/translations`)).json()
+    const after = await (await request.get(`/api/meetings/${meetingId}/translations`)).json()
     expect(after).toHaveLength(1)
     expect(after[0].updated_at).toBe(detail.updated_at)
 

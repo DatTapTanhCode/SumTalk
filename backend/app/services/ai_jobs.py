@@ -99,7 +99,7 @@ def run_summary_job(meeting_id: str, client: LLMClient | None = None) -> None:
                 return  # transcription is running again; it queues the summary when it finishes
             if generation is not None and summary.generation != generation:
                 return  # a newer request is queued
-            generation, language = summary.generation, summary.language
+            generation, language, title = summary.generation, summary.language, meeting.title
             summary.status, summary.model = AIStatus.RUNNING, _model_name(client, settings.summary_model)
             db.commit()
             lines = [Line(s.idx, s.start, s.text) for s in final_segments(db, meeting_id)]
@@ -109,7 +109,7 @@ def run_summary_job(meeting_id: str, client: LLMClient | None = None) -> None:
                 client,
                 lines,
                 language=language,
-                title="Meeting",  # Private library names must stay out of shareable minutes.
+                title=title,
                 deadline=time.monotonic() + settings.ai_job_time_limit_sec,
             )
         except Exception as exc:

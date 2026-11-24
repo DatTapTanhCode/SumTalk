@@ -1,5 +1,7 @@
 """STORAGE_BACKEND=s3: finished audio moves to S3 (moto fake), playback is a presigned redirect."""
 
+import time
+
 import pytest
 from conftest import wait_for_status
 from test_api import upload, wav_file
@@ -36,6 +38,10 @@ def test_finished_audio_moves_to_s3_and_plays_from_a_presigned_url(client, s3):
     done = wait_for_status(client, meeting["id"])
     assert done["status"] == "done" and done["has_audio"]
 
+    # The meeting is marked done just before its audio moves to S3, so wait for the move.
+    deadline = time.time() + 10
+    while storage.audio_path(meeting["id"]).exists() and time.time() < deadline:
+        time.sleep(0.05)
     prefix = f"sumtalk/meetings/{meeting['id']}/"
     assert keys(s3) == [prefix + "audio.wav", prefix + "original.wav"]
     assert not storage.audio_path(meeting["id"]).exists()  # local copy removed

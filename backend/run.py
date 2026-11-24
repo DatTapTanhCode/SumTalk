@@ -107,20 +107,7 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=None, help="default 8000 (http) / 8443 (https)")
     parser.add_argument("--reload", action="store_true", help="restart when backend code changes")
     parser.add_argument("--parent-watch", action="store_true", help="exit when stdin closes (desktop app)")
-    parser.add_argument("--assign-legacy", nargs=2, metavar=("OLD_ID_OR_ALL", "OWNED_MEETING_ID"),
-                        help="assign unowned legacy meetings to the owner of an existing meeting, then exit")
     args = parser.parse_args()
-
-    if args.assign_legacy:
-        from app.db import assign_legacy_meetings, init_db
-
-        init_db()
-        try:
-            count = assign_legacy_meetings(*args.assign_legacy)
-        except ValueError as exc:
-            parser.error(str(exc))
-        print(f"Assigned {count} legacy meeting(s).")
-        return
 
     if args.parent_watch:
         # Output goes to the desktop app's log file through a pipe: UTF-8, one line at a time.

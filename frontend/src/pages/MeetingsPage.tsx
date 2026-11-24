@@ -305,30 +305,34 @@ export function MeetingsPage() {
       return sort === 'oldest' ? delta : -delta
     })
 
+  // Search, tag and dates narrow the list first, so the status tab counts match what they would show.
+  const matching = useMemo(() => {
+    const q = query.trim().toLocaleLowerCase()
+    return (meetings ?? []).filter((m) => (m.title.toLocaleLowerCase().includes(q) || m.tags.some((t) => t.toLocaleLowerCase().includes(q)))
+      && (!tag || m.tags.includes(tag)) && inDateRange(meetingTime(m), from, to))
+  }, [meetings, query, tag, from, to])
+
   const counts = useMemo(() => {
-    const list = meetings ?? []
-    const busy = list.filter((m) => BUSY_STATUSES.includes(m.status))
+    const busy = matching.filter((m) => BUSY_STATUSES.includes(m.status))
     return {
-      all: list.length,
-      transcribed: list.filter((m) => m.status === 'done').length,
+      all: matching.length,
+      transcribed: matching.filter((m) => m.status === 'done').length,
       progress: busy.length,
-      failed: list.filter((m) => m.status === 'failed').length,
-      recorded: list.reduce((sum, m) => sum + (m.duration_sec || 0), 0),
+      failed: matching.filter((m) => m.status === 'failed').length,
+      recorded: (meetings ?? []).reduce((sum, m) => sum + (m.duration_sec || 0), 0), // whole library, next to its total
       remaining: busy.reduce((sum, m) => sum + (remainingSeconds(m) ?? 0), 0),
     }
-  }, [meetings])
+  }, [meetings, matching])
 
   const visible = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    const list = (meetings ?? []).filter((m) => matchesFilter(m, filter) && m.title.toLowerCase().includes(q)
-      && (!tag || m.tags.includes(tag)) && inDateRange(meetingTime(m), from, to))
+    const list = matching.filter((m) => matchesFilter(m, filter))
     const newestFirst = (a: Meeting, b: Meeting) => Date.parse(meetingTime(b)) - Date.parse(meetingTime(a))
     if (sort === 'newest') list.sort(newestFirst)
     else if (sort === 'oldest') list.sort((a, b) => newestFirst(b, a))
     else if (sort === 'longest') list.sort((a, b) => b.duration_sec - a.duration_sec)
     else list.sort((a, b) => a.title.localeCompare(b.title))
     return list
-  }, [meetings, filter, query, sort, tag, from, to])
+  }, [matching, filter, sort])
 
   const groups = useMemo(() => {
     if (sort !== 'newest' && sort !== 'oldest') return [{ label: null as string | null, items: visible }]

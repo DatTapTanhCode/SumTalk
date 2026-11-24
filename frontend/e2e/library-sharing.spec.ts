@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 
 test.use({ timezoneId: 'UTC', actionTimeout: 5000 })
 
-test('organizes a private library and revokes an accountless guest link', async ({ page, browser }) => {
+test('organizes meetings with names and tags, and revokes a guest link', async ({ page, browser }) => {
   const oldId = randomUUID()
   const newId = randomUUID()
   const oldMeeting = `/api/meetings/${oldId}`

@@ -28,10 +28,6 @@ class UTCDateTime(TypeDecorator):
         return value
 
 
-def default_title(when: datetime) -> str:
-    return when.strftime("Meeting %Y-%m-%d %H:%M") + (when.strftime(" %Z") or " UTC")
-
-
 class MeetingStatus:
     RECORDING = "recording"  # browser is still sending audio chunks
     UPLOADING = "uploading"  # a file upload is in progress
@@ -48,7 +44,6 @@ class Meeting(Base):
     __tablename__ = "meetings"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    owner_id: Mapped[str | None] = mapped_column(String(64), index=True)
     title: Mapped[str] = mapped_column(String(200))
     source: Mapped[str] = mapped_column(String(16))  # recording | upload
     status: Mapped[str] = mapped_column(String(16), index=True)

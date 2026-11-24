@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .api import ai, meetings, ownership, sharing, stt_server, system, uploads
+from .api import ai, meetings, sharing, stt_server, system, uploads
 from .config import get_settings
 from .db import init_db
 from .services import pipeline
@@ -48,7 +48,6 @@ async def private_response_headers(request, call_next):
     return response
 
 
-app.include_router(ownership.router)
 app.include_router(sharing.router)
 app.include_router(system.router)
 app.include_router(meetings.router)

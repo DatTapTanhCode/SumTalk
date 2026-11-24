@@ -13,17 +13,15 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.concurrency import run_in_threadpool
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..config import get_settings
-from ..db import get_db
-from ..models import Meeting, MeetingStatus, Upload, default_title, utcnow
+from ..db import SessionLocal, get_db
+from ..models import Meeting, MeetingStatus, Upload, utcnow
 from ..schemas import MeetingOut, UploadCreate, UploadOut
 from ..services import storage
 from ..services.pipeline import batch_worker
 from .meetings import to_out
-from .ownership import establish_owner, owner_id
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 settings = get_settings()
@@ -31,9 +29,9 @@ settings = get_settings()
 MB = 1024 * 1024
 
 
-def owned_upload(upload_id: str, owner: str = Depends(owner_id), db: Session = Depends(get_db)) -> Upload:
+def _get_upload(db: Session, upload_id: str) -> Upload:
     try:
-        upload = db.scalar(select(Upload).join(Meeting).where(Upload.id == storage.parse_id(upload_id), Meeting.owner_id == owner))
+        upload = db.get(Upload, storage.parse_id(upload_id))
     except ValueError:
         upload = None
     if upload is None:
@@ -60,7 +58,7 @@ def _out(upload: Upload) -> UploadOut:
 
 
 @router.post("", response_model=UploadOut, status_code=201)
-def create_upload(body: UploadCreate, owner: str = Depends(establish_owner), db: Session = Depends(get_db)):
+def create_upload(body: UploadCreate, db: Session = Depends(get_db)):
     extension = Path(body.filename).suffix.lower()
     if extension not in settings.allowed_extensions:
         allowed = ", ".join(e.lstrip(".") for e in settings.allowed_extensions)
@@ -69,15 +67,13 @@ def create_upload(body: UploadCreate, owner: str = Depends(establish_owner), db:
         raise HTTPException(413, f"File is too large (max {settings.max_upload_mb} MB)")
 
     part_size = settings.upload_part_mb * MB
-    when = body.meeting_at or utcnow()
     meeting = Meeting(
-        owner_id=owner,
-        meeting_at=when,
         id=str(uuid.uuid4()),
-        title=(body.title or "").strip() or default_title(when),
+        title=(body.title or Path(body.filename).stem or "Uploaded audio")[:200],
         source="upload",
         status=MeetingStatus.UPLOADING,
         language=body.language,
+        meeting_at=body.meeting_at or utcnow(),  # the browser sends the file's last-modified time
         original_filename=body.filename,
         mime_type=body.mime_type,
         size_bytes=body.size_bytes,
@@ -97,30 +93,33 @@ def create_upload(body: UploadCreate, owner: str = Depends(establish_owner), db:
 
 
 @router.get("/{upload_id}", response_model=UploadOut)
-def read_upload(upload: Upload = Depends(owned_upload)):
-    return _out(upload)
+def read_upload(upload_id: str, db: Session = Depends(get_db)):
+    return _out(_get_upload(db, upload_id))
 
 
 @router.put("/{upload_id}/parts/{n}")
-async def upload_part(n: int, request: Request, upload: Upload = Depends(owned_upload)):
+async def upload_part(upload_id: str, n: int, request: Request):
     data = await request.body()
-    return await run_in_threadpool(_store_part, upload, n, data)
+    return await run_in_threadpool(_store_part, upload_id, n, data)
 
 
-def _store_part(upload: Upload, n: int, data: bytes) -> dict:
-    if upload.status != "uploading":
-        raise HTTPException(409, "Upload already completed")
-    if not 0 <= n < upload.total_parts:
-        raise HTTPException(422, "Invalid part number")
-    expected = upload.part_size if n < upload.total_parts - 1 else upload.size_bytes - upload.part_size * n
-    if len(data) != expected:
-        raise HTTPException(422, f"Part {n} must be {expected} bytes, got {len(data)}")
-    storage.write_atomic(storage.part_path(upload.id, n), data)
-    return {"n": n}
+def _store_part(upload_id: str, n: int, data: bytes) -> dict:
+    with SessionLocal() as db:
+        upload = _get_upload(db, upload_id)
+        if upload.status != "uploading":
+            raise HTTPException(409, "Upload already completed")
+        if not 0 <= n < upload.total_parts:
+            raise HTTPException(422, "Invalid part number")
+        expected = upload.part_size if n < upload.total_parts - 1 else upload.size_bytes - upload.part_size * n
+        if len(data) != expected:
+            raise HTTPException(422, f"Part {n} must be {expected} bytes, got {len(data)}")
+        storage.write_atomic(storage.part_path(upload.id, n), data)
+        return {"n": n}
 
 
 @router.post("/{upload_id}/complete", response_model=MeetingOut)
-def complete_upload(upload: Upload = Depends(owned_upload), db: Session = Depends(get_db)):
+def complete_upload(upload_id: str, db: Session = Depends(get_db)):
+    upload = _get_upload(db, upload_id)
     meeting = db.get(Meeting, upload.meeting_id)
     if upload.status == "completed":
         return to_out(db, meeting)
@@ -151,7 +150,8 @@ def complete_upload(upload: Upload = Depends(owned_upload), db: Session = Depend
 
 
 @router.delete("/{upload_id}", status_code=204)
-def cancel_upload(upload: Upload = Depends(owned_upload), db: Session = Depends(get_db)):
+def cancel_upload(upload_id: str, db: Session = Depends(get_db)):
+    upload = _get_upload(db, upload_id)
     if upload.status == "completed":
         raise HTTPException(409, "Upload already completed - delete the meeting instead")
     meeting = db.get(Meeting, upload.meeting_id)

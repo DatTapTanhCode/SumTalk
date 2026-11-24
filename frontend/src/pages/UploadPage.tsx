@@ -6,7 +6,7 @@ import { LanguageSelect } from '../components/LanguageSelect'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Notice, ProgressBar, inputClass } from '../components/primitives'
-import { cn, defaultMeetingTitle, formatBytes, formatDuration } from '../lib/format'
+import { cn, formatBytes, formatDuration } from '../lib/format'
 import { configStore } from '../lib/server'
 import { useStore } from '../lib/store'
 import { uploadAudioFile, validateAudioFile, type UploadProgress } from '../upload/uploader'
@@ -49,7 +49,7 @@ export function UploadPage() {
   const choose = (picked: File | undefined) => {
     if (!picked || uploading) return
     setFile(picked)
-    setTitle(defaultMeetingTitle(new Date(picked.lastModified || Date.now())))
+    setTitle(picked.name.replace(/\.[^.]+$/, ''))
     setError(null)
   }
 
@@ -67,7 +67,7 @@ export function UploadPage() {
     setProgress({ phase: 'starting', loaded: 0, total: file.size, partsDone: 0, totalParts: 0, bytesPerSecond: 0, waitingForNetwork: false })
     try {
       const meeting = await uploadAudioFile(file, {
-        title: title.trim() || defaultMeetingTitle(new Date(file.lastModified || Date.now())),
+        title: title.trim() || file.name,
         language,
         signal: controller.signal,
         onProgress: setProgress,

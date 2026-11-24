@@ -12,19 +12,19 @@ from ..models import AIStatus, Meeting, MeetingShare, Translation
 from ..schemas import SharedMeetingOut, SharedTranslation, ShareOut, ShareSettings
 from ..services import ai_jobs, storage
 from .ai import _translation_out
-from .meetings import _active_segments, transcript_kind
-from .ownership import owned_meeting
+from .meetings import _active_segments, get_meeting, transcript_kind
 
 router = APIRouter(prefix="/api", tags=["sharing"])
 
 
 @router.get("/meetings/{meeting_id}/share", response_model=ShareOut | None)
-def read_share(meeting: Meeting = Depends(owned_meeting), db: Session = Depends(get_db)):
-    return db.get(MeetingShare, meeting.id)
+def read_share(meeting_id: str, db: Session = Depends(get_db)):
+    return db.get(MeetingShare, get_meeting(db, meeting_id).id)
 
 
 @router.put("/meetings/{meeting_id}/share", response_model=ShareOut)
-def set_share(body: ShareSettings, meeting: Meeting = Depends(owned_meeting), db: Session = Depends(get_db)):
+def set_share(meeting_id: str, body: ShareSettings, db: Session = Depends(get_db)):
+    meeting = get_meeting(db, meeting_id)
     # Concurrent creates and audio changes keep one stable link until explicitly revoked.
     stmt = insert(MeetingShare).values(meeting_id=meeting.id, token=secrets.token_urlsafe(32), include_audio=body.include_audio)
     db.execute(stmt.on_conflict_do_update(index_elements=["meeting_id"], set_={"include_audio": body.include_audio}))
@@ -34,7 +34,8 @@ def set_share(body: ShareSettings, meeting: Meeting = Depends(owned_meeting), db
 
 
 @router.delete("/meetings/{meeting_id}/share", status_code=204)
-def revoke_share(meeting: Meeting = Depends(owned_meeting), db: Session = Depends(get_db)):
+def revoke_share(meeting_id: str, db: Session = Depends(get_db)):
+    meeting = get_meeting(db, meeting_id)
     db.execute(delete(MeetingShare).where(MeetingShare.meeting_id == meeting.id))
     db.commit()
     return Response(status_code=204)

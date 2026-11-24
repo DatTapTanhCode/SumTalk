@@ -45,7 +45,7 @@ test('records microphone + meeting (tab/system) audio mixed together', async ({ 
 test('uploads an existing audio file and creates a meeting from it', async ({ page }) => {
   await page.goto('/upload')
   await page.locator('input[type=file]').setInputFiles('e2e/fixtures/speech_en.mp3')
-  await expect(page.getByLabel('Meeting title')).toHaveValue(/^Meeting .+\d{2}:\d{2}/)
+  await expect(page.getByLabel('Meeting title')).toHaveValue('speech_en')
   await page.getByRole('button', { name: /Upload & transcribe/ }).click()
   await expect(page).toHaveURL(/\/meetings\/[0-9a-f-]{36}$/)
   await expect(page.getByText('Ready', { exact: true })).toBeVisible({ timeout: 60_000 })
