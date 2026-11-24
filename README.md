@@ -123,6 +123,14 @@ start.bat --lan --https       :: or: python backend/run.py --lan --https  ->  ht
 Accept the certificate warning once. Anyone on that network can then use the app – there is no login
 in the POC.
 
+### Organizing and sharing meetings
+
+Open a meeting to rename it, add or remove tags (for a project or client), or choose **Share**. On the Meetings page, combine a title or tag search, a tag, and inclusive local calendar dates, then choose the sort order. The same filters are available from the API: `GET /api/meetings?q=&tag=&start=&end=&sort=newest|oldest|longest|title`.
+
+A share link opens a read-only page with the minutes, action items, transcript and completed translations; audio is optional. Turning the link off stops it working at once, and creating another link generates a new URL. On the hosted server, share pages (`/share/...`) are the only part of the app reachable without the test-phase login.
+
+For teammates on other devices, use a hosted SumTalk server or start the web server with `--https --lan` and use its LAN address. A loopback URL works only on the computer hosting SumTalk.
+
 ## Speech engine: on this PC or on a server
 
 Whisper can run on the machine (`STT_PROVIDER=local`, the default) or behind an **OpenAI-compatible API**

@@ -28,6 +28,8 @@ import { sessionStore } from '../audio/session'
 import { AudioPlayer } from '@/components/AudioPlayer'
 import { LanguageSelect } from '../components/LanguageSelect'
 import { StatusBadge } from '../components/StatusBadge'
+import { MeetingShare } from '@/components/MeetingShare'
+import { MeetingTags } from '@/components/MeetingTags'
 import { SummaryPanel } from '../components/SummaryPanel'
 import { TranscriptView } from '../components/TranscriptView'
 import { TranslationPanel } from '../components/TranslationPanel'
@@ -96,7 +98,11 @@ function Meta({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   )
 }
 
-function EditableTitle({ meeting, onSaved }: { meeting: Meeting; onSaved: (m: Meeting) => void }) {
+function EditableTitle({ meeting, onSaved, onError }: {
+  meeting: Meeting
+  onSaved: (m: Meeting) => void
+  onError: (message: string | null) => void
+}) {
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(meeting.title)
 
@@ -104,9 +110,11 @@ function EditableTitle({ meeting, onSaved }: { meeting: Meeting; onSaved: (m: Me
     setEditing(false)
     const title = value.trim()
     if (!title || title === meeting.title) return setValue(meeting.title)
+    onError(null)
     try {
       onSaved(await api.renameMeeting(meeting.id, title))
-    } catch {
+    } catch (e) {
+      onError(errorMessage(e))
       setValue(meeting.title)
     }
   }
@@ -115,6 +123,8 @@ function EditableTitle({ meeting, onSaved }: { meeting: Meeting; onSaved: (m: Me
     return (
       <input
         autoFocus
+        aria-label="Meeting title"
+        maxLength={200}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onBlur={save}
@@ -457,7 +467,7 @@ export function MeetingPage({ id }: { id: string }) {
         <Breadcrumb title={meeting.title} />
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1 space-y-2">
-            <EditableTitle key={meeting.title} meeting={meeting} onSaved={setMeeting} />
+            <EditableTitle key={meeting.title} meeting={meeting} onSaved={setMeeting} onError={setActionError} />
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
               <StatusBadge status={meeting.status} progress={meeting.progress} />
               <Meta icon={meeting.source === 'upload' ? <FileAudio className="size-4" /> : <Mic className="size-4" />}>{source}</Meta>
@@ -466,6 +476,7 @@ export function MeetingPage({ id }: { id: string }) {
               {languageLabel && <Meta icon={<Languages className="size-4" />}>{languageLabel}</Meta>}
             </div>
           </div>
+          <MeetingShare id={meeting.id} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon-sm" aria-label="More actions">
@@ -493,6 +504,8 @@ export function MeetingPage({ id }: { id: string }) {
           </DropdownMenu>
         </div>
       </div>
+
+      <MeetingTags meeting={meeting} onSaved={setMeeting} />
 
       <StatusPanel
         meeting={meeting}

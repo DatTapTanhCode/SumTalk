@@ -5,6 +5,7 @@ import { MeetingPage } from './pages/MeetingPage'
 import { MeetingsPage } from './pages/MeetingsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { RecordPage } from './pages/RecordPage'
+import { SharedMeetingPage } from './pages/SharedMeetingPage'
 import { UploadPage } from './pages/UploadPage'
 
 function MeetingRoute() {
@@ -17,6 +18,7 @@ export function App() {
     <BrowserRouter>
       <TooltipProvider delayDuration={300}>
         <Routes>
+          <Route path="share/:token" element={<SharedMeetingPage />} />
           <Route element={<Layout />}>
             <Route index element={<MeetingsPage />} />
             <Route path="record" element={<RecordPage />} />

@@ -5,6 +5,7 @@ export type TranscriptKind = 'live' | 'final'
 export interface Meeting {
   id: string
   title: string
+  tags: string[]
   source: 'recording' | 'upload'
   status: MeetingStatus
   capture_mode: CaptureMode | null
@@ -136,3 +137,15 @@ export interface Translation extends TranslationInfo {
 
 export type TranslationExportFormat = 'txt' | 'srt'
 export type TranslationExportMode = 'translated' | 'bilingual'
+
+export interface ShareLink {
+  token: string
+  include_audio: boolean
+}
+
+export interface SharedMeeting {
+  summary: Minutes | null
+  segments: Segment[]
+  translations: { target_lang: string; segments: TranslatedSegment[] }[]
+  has_audio: boolean
+}

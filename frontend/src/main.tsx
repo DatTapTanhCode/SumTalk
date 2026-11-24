@@ -9,11 +9,14 @@ import { isDesktop } from './lib/desktop'
 import { startServerWatch } from './lib/server'
 import { startSync } from './offline/sync'
 
-startServerWatch()
-startSync()
+const sharedPage = window.location.pathname.startsWith('/share/')
+if (!sharedPage) {
+  startServerWatch()
+  startSync()
+}
 
 // The desktop app ships its own server next to the window, so it needs no offline app shell.
-if (import.meta.env.PROD && !isDesktop && 'serviceWorker' in navigator) {
+if (import.meta.env.PROD && !sharedPage && !isDesktop && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => void navigator.serviceWorker.register('/sw.js').catch(() => undefined))
 }
 

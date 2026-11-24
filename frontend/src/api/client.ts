@@ -3,6 +3,8 @@ import type {
   ExportFormat,
   Health,
   Meeting,
+  ShareLink,
+  SharedMeeting,
   Summary,
   Transcript,
   TranscriptKind,
@@ -75,6 +77,14 @@ export const api = {
   listMeetings: () => request<Meeting[]>('/api/meetings'),
   getMeeting: (id: string) => request<Meeting>(`/api/meetings/${id}`),
   renameMeeting: (id: string, title: string) => request<Meeting>(`/api/meetings/${id}`, json('PATCH', { title })),
+  addTag: (id: string, name: string) => request<Meeting>(`/api/meetings/${id}/tags`, json('POST', { name })),
+  removeTag: (id: string, name: string) =>
+    request<Meeting>(`/api/meetings/${id}/tags/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+  getShare: (id: string) => request<ShareLink | null>(`/api/meetings/${id}/share`),
+  setShare: (id: string, include_audio: boolean) =>
+    request<ShareLink>(`/api/meetings/${id}/share`, json('PUT', { include_audio })),
+  revokeShare: (id: string) => request<void>(`/api/meetings/${id}/share`, { method: 'DELETE' }),
+  sharedMeeting: (token: string) => request<SharedMeeting>(`/api/shared/${encodeURIComponent(token)}`),
   deleteMeeting: (id: string) => request<void>(`/api/meetings/${id}`, { method: 'DELETE' }),
 
   createRecording: (
@@ -95,7 +105,7 @@ export const api = {
   retranscribe: (id: string, language: string | null) =>
     request<Meeting>(`/api/meetings/${id}/retranscribe`, json('POST', { language })),
 
-  createUpload: (body: { filename: string; size_bytes: number; mime_type: string | null; title: string; language: string | null }) =>
+  createUpload: (body: { filename: string; meeting_at: string; size_bytes: number; mime_type: string | null; title: string; language: string | null }) =>
     request<UploadSession>('/api/uploads', json('POST', body)),
   completeUpload: (id: string) => request<Meeting>(`/api/uploads/${id}/complete`, { method: 'POST' }),
   cancelUpload: (id: string) => request<void>(`/api/uploads/${id}`, { method: 'DELETE' }),

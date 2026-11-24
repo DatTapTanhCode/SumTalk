@@ -1,16 +1,18 @@
 import json
+from datetime import datetime
 from typing import Literal
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, RedirectResponse
-from sqlalchemy import exists, select
-from sqlalchemy.orm import Session
+from sqlalchemy import delete, exists, func, select, type_coerce
+from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.orm import Session, selectinload
 
 from ..config import SAMPLE_RATE, SAMPLE_WIDTH, get_settings
 from ..db import SessionLocal, get_db
-from ..models import Meeting, MeetingStatus, Segment, Upload, utcnow
+from ..models import Meeting, MeetingStatus, MeetingTag, Segment, Upload, UTCDateTime, utcnow
 from ..schemas import (
     ChunkAck,
     FinalizeIn,
@@ -18,6 +20,7 @@ from ..schemas import (
     MeetingOut,
     MeetingUpdate,
     RetranscribeIn,
+    TagIn,
     TranscriptOut,
 )
 from ..services import storage
@@ -52,8 +55,38 @@ def to_out(db: Session, meeting: Meeting) -> MeetingOut:
 
 
 @router.get("", response_model=list[MeetingOut])
-def list_meetings(db: Session = Depends(get_db)):
-    meetings = db.scalars(select(Meeting).order_by(Meeting.created_at.desc())).all()
+def list_meetings(
+    q: str | None = Query(default=None, max_length=200, description="Words in the title or a tag (any case)"),
+    tag: str | None = Query(default=None, max_length=64, description="Only meetings with this tag (any case)"),
+    start: datetime | None = Query(default=None, description="Meeting time on or after this instant"),
+    end: datetime | None = Query(default=None, description="Meeting time before this instant"),
+    sort: Literal["newest", "oldest", "longest", "title"] = "newest",
+    db: Session = Depends(get_db),
+):
+    """The library, filtered and sorted. Date bounds are instants, so the browser turns the
+    viewer's local calendar days into them."""
+    when = type_coerce(func.coalesce(Meeting.meeting_at, Meeting.created_at), UTCDateTime())
+    stmt = select(Meeting).options(selectinload(Meeting.tag_rows))
+    if tag and tag.strip():
+        key = tag.strip().casefold()
+        stmt = stmt.where(exists().where(MeetingTag.meeting_id == Meeting.id, MeetingTag.key == key))
+    if start is not None:
+        stmt = stmt.where(when >= start)
+    if end is not None:
+        stmt = stmt.where(when < end)
+    order = {
+        "newest": (when.desc(),),
+        "oldest": (when.asc(),),
+        "longest": (Meeting.duration_sec.desc(), when.desc()),
+        "title": (func.lower(Meeting.title), when.desc()),
+    }[sort]
+    meetings = db.scalars(stmt.order_by(*order)).all()
+    if q and q.strip():
+        # In Python: SQLite only folds ASCII case, and titles are often Vietnamese.
+        needle = q.strip().casefold()
+        meetings = [m for m in meetings if needle in m.title.casefold() or any(needle in t.key for t in m.tag_rows)]
+    if sort == "title":
+        meetings.sort(key=lambda m: m.title.casefold())
     return [to_out(db, m) for m in meetings]
 
 
@@ -96,6 +129,25 @@ def update_meeting(meeting_id: str, body: MeetingUpdate, db: Session = Depends(g
     if body.meeting_at is not None:
         meeting.meeting_at = body.meeting_at
     db.commit()
+    return to_out(db, meeting)
+
+
+@router.post("/{meeting_id}/tags", response_model=MeetingOut)
+def add_tag(meeting_id: str, body: TagIn, db: Session = Depends(get_db)):
+    """Tags are unique per meeting ignoring case; adding one that exists keeps the first spelling."""
+    meeting = get_meeting(db, meeting_id)
+    db.execute(insert(MeetingTag).values(meeting_id=meeting.id, key=body.name.casefold(), name=body.name).on_conflict_do_nothing())
+    db.commit()
+    db.refresh(meeting, ["tag_rows"])
+    return to_out(db, meeting)
+
+
+@router.delete("/{meeting_id}/tags/{name:path}", response_model=MeetingOut)
+def remove_tag(meeting_id: str, name: str, db: Session = Depends(get_db)):
+    meeting = get_meeting(db, meeting_id)
+    db.execute(delete(MeetingTag).where(MeetingTag.meeting_id == meeting.id, MeetingTag.key == name.strip().casefold()))
+    db.commit()
+    db.refresh(meeting, ["tag_rows"])
     return to_out(db, meeting)
 
 

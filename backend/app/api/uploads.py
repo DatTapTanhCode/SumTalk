@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from ..config import get_settings
 from ..db import SessionLocal, get_db
-from ..models import Meeting, MeetingStatus, Upload
+from ..models import Meeting, MeetingStatus, Upload, utcnow
 from ..schemas import MeetingOut, UploadCreate, UploadOut
 from ..services import storage
 from ..services.pipeline import batch_worker
@@ -73,6 +73,7 @@ def create_upload(body: UploadCreate, db: Session = Depends(get_db)):
         source="upload",
         status=MeetingStatus.UPLOADING,
         language=body.language,
+        meeting_at=body.meeting_at or utcnow(),  # the browser sends the file's last-modified time
         original_filename=body.filename,
         mime_type=body.mime_type,
         size_bytes=body.size_bytes,

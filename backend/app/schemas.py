@@ -24,6 +24,8 @@ class MeetingCreate(BaseModel):
 
 
 class MeetingUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     title: str | None = Field(default=None, min_length=1, max_length=200)
     meeting_at: datetime | None = None
 
@@ -43,6 +45,7 @@ class MeetingOut(BaseModel):
 
     id: str
     title: str
+    tags: list[str]
     source: str
     status: str
     capture_mode: str | None
@@ -87,6 +90,7 @@ class ChunkAck(BaseModel):
 
 
 class UploadCreate(BaseModel):
+    meeting_at: datetime | None = None
     filename: str = Field(min_length=1, max_length=255)
     size_bytes: int = Field(gt=0)
     mime_type: str | None = Field(default=None, max_length=100)
@@ -191,3 +195,29 @@ class TranslationOut(TranslationInfo):
     output_tokens: int = 0
     cost_usd: float = 0.0
     segments: list[TranslatedSegmentOut] = []
+
+
+class TagIn(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(min_length=1, max_length=64)
+
+
+class ShareSettings(BaseModel):
+    include_audio: bool = False
+
+
+class ShareOut(ShareSettings):
+    token: str
+
+
+class SharedTranslation(BaseModel):
+    target_lang: str
+    segments: list[TranslatedSegmentOut]
+
+
+class SharedMeetingOut(BaseModel):
+    summary: Minutes | None
+    segments: list[SegmentOut]
+    translations: list[SharedTranslation]
+    has_audio: bool

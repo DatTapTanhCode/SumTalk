@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .api import ai, meetings, stt_server, system, uploads
+from .api import ai, meetings, sharing, stt_server, system, uploads
 from .config import get_settings
 from .db import init_db
 from .services import pipeline
@@ -37,6 +37,18 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="SumTalk API", version="0.3.0", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def private_response_headers(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith(("/api/meetings", "/api/uploads", "/api/shared/", "/share/")):
+        response.headers["Cache-Control"] = "private, no-store"
+        response.headers["Referrer-Policy"] = "no-referrer"
+    return response
+
+
+app.include_router(sharing.router)
 app.include_router(system.router)
 app.include_router(meetings.router)
 app.include_router(uploads.router)

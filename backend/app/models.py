@@ -72,6 +72,30 @@ class Meeting(Base):
         back_populates="meeting", cascade="all, delete-orphan", passive_deletes=True
     )
 
+    tag_rows: Mapped[list["MeetingTag"]] = relationship(
+        cascade="all, delete-orphan", passive_deletes=True, order_by="MeetingTag.key"
+    )
+
+    @property
+    def tags(self) -> list[str]:
+        return [tag.name for tag in self.tag_rows]
+
+
+class MeetingTag(Base):
+    __tablename__ = "meeting_tags"
+
+    meeting_id: Mapped[str] = mapped_column(ForeignKey("meetings.id", ondelete="CASCADE"), primary_key=True)
+    key: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String(64))
+
+
+class MeetingShare(Base):
+    __tablename__ = "meeting_shares"
+
+    meeting_id: Mapped[str] = mapped_column(ForeignKey("meetings.id", ondelete="CASCADE"), primary_key=True)
+    token: Mapped[str] = mapped_column(String(64), unique=True)
+    include_audio: Mapped[bool] = mapped_column(Boolean, default=False)
+
 
 class Segment(Base):
     __tablename__ = "segments"
