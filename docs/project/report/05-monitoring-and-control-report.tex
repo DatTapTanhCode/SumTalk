@@ -1,0 +1,736 @@
+% =============================================================================
+%  Tài liệu 05 - Báo cáo theo dõi và kiểm soát (Monitoring & Control Report)
+%  Build: latexmk 05-monitoring-and-control-report.tex   (pdfLaTeX, output in build/)
+% =============================================================================
+\documentclass[12pt,a4paper]{report}
+\usepackage{sumtalk-report}
+\input{sumtalk-info}
+
+\newcommand{\DocTitle}{BÁO CÁO THEO DÕI VÀ KIỂM SOÁT}
+\newcommand{\DocTitleNormal}{Báo cáo theo dõi và kiểm soát}
+\newcommand{\DocTitleEn}{Monitoring \& Control Report}
+\newcommand{\DocRunningTitle}{Báo cáo theo dõi và kiểm soát}
+\newcommand{\DocCode}{SUMTALK-MCR}
+\newcommand{\DocVersion}{2.1 -- 24/11/2026}
+\newcommand{\DocStatus}{Chờ duyệt}
+\newcommand{\DocAuthor}{\canDien[Project Manager]}
+\newcommand{\DocReviewers}{Project Manager, Product Owner (Sponsor nhận bản báo cáo mỗi sprint)}
+\newcommand{\DocReaders}{Project Manager, Product Owner, Sponsor}
+\newcommand{\CoverDate}{TP. HỒ CHÍ MINH, THÁNG 11/2026}
+\hypersetup{pdftitle={SumTalk -- Báo cáo theo dõi và kiểm soát},pdfauthor={Nhóm SumTalk}}
+
+\begin{document}
+
+\makereportcover
+
+% ============================================================ Front matter
+\chapter*{Thông tin tài liệu}
+\addcontentsline{toc}{chapter}{Thông tin tài liệu}
+
+\docinfotable
+
+\section*{Lịch sử phiên bản}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}Q{1.6cm}Q{2.3cm}LP{3.2cm}@{}}
+    \toprule
+    \thead{Phiên bản} & \thead{Ngày} & \thead{Nội dung thay đổi} & \thead{Người thực hiện} \\
+    \midrule
+    1.0 & 12/11/2026 & Bản đầu, gồm bốn tài liệu riêng: báo cáo trạng thái sprint, Earned Value, biên bản họp và
+      Retrospective, Change Log & \canDien \\
+    2.0 & 13/11/2026 & Gộp thành một tài liệu, đánh lại số mục (CR-08) & \canDien \\
+    2.1 & 24/11/2026 & Chuyển sang định dạng báo cáo PDF (LaTeX), sắp xếp lại thành sáu chương; vẽ biểu đồ
+      burndown, đường S và quy trình kiểm soát thay đổi & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\needspace{8\baselineskip}
+\heading{Quy ước trong tài liệu}
+\begin{itemize}
+  \item \canDien[\ldots]: số liệu đã có ở Azure Boards, dashboard chi phí hoặc biên bản họp nhưng chưa chép
+        vào tài liệu; cần bổ sung trước khi trình duyệt.
+  \item \textbf{Số minh hoạ}: số dùng để giải thích phương pháp (ví dụ EVA, biểu đồ burndown và đường S), không
+        phải số của nhóm; chú thích của bảng và hình ghi rõ điều này.
+  \item \textbf{Mã thay đổi}: CR-xx là yêu cầu thay đổi đã ghi nhận, CR-Hx là thay đổi bị hoãn hoặc từ chối;
+        R-xx là mã rủi ro trong Risk Register~\cite{pmp}.
+  \item \textbf{Tài liệu sống}: báo cáo được cập nhật sau mỗi sprint; số liệu Sprint 4 lấy theo repo ngày
+        12/11/2026.
+\end{itemize}
+
+\tableofcontents
+
+\chapter*{Tóm tắt}
+\addcontentsline{toc}{chapter}{Tóm tắt}
+
+Tài liệu này là \textbf{báo cáo theo dõi và kiểm soát} của dự án SumTalk: nơi tập hợp số liệu và hồ sơ sinh ra
+trong lúc thực hiện, đối chiếu với đường cơ sở của kế hoạch quản lý dự án. Báo cáo gồm bốn phần, được cập nhật
+sau mỗi sprint: báo cáo trạng thái từng sprint, phân tích giá trị thu được (EVA), biên bản họp và Retrospective,
+và nhật ký thay đổi phạm vi (Change Log).
+
+Sprint 4 là sprint đã ghi đầy đủ theo repo: app desktop Windows, transcript live dạng streaming (từ mới hiện sau
+khoảng \textbf{1\,s}), engine STT remote và xử lý file dài đều xong; bản web đã sẵn sàng để deploy nhưng
+\textbf{chưa được deploy lên AWS thật}; 88 test pytest đạt. Sự cố đáng chú ý nhất là việc push lên GitHub bị từ
+chối (rủi ro R11). Change Log ghi \textbf{8 yêu cầu thay đổi} (CR-01 đến CR-08) và 3 đề xuất bị hoãn; các thay đổi
+lớn nhất là thêm app desktop, live streaming, engine STT remote và bản web trên AWS. Số liệu EVA, burndown và
+velocity của Sprint 1--3 đã có trên Azure Boards và dashboard nhưng chưa được chép vào; tài liệu ghi sẵn phương
+pháp, công thức, cách diễn giải và một ví dụ tính đầy đủ.
+
+\textbf{Từ khoá:} báo cáo trạng thái, sprint report, burndown, velocity, Earned Value, CPI, SPI, Retrospective,
+Change Log, kiểm soát thay đổi.
+
+\chapter*{Danh mục từ viết tắt}
+\addcontentsline{toc}{chapter}{Danh mục từ viết tắt}
+
+\begin{center}
+  \setstretch{1.1}
+  \begin{tabular}{@{}P{2.2cm}P{13.2cm}@{}}
+    \toprule
+    \thead{Viết tắt} & \thead{Ý nghĩa} \\
+    \midrule
+    AC     & Actual Cost -- chi phí thực tế \\
+    API    & Application Programming Interface -- giao diện lập trình ứng dụng \\
+    AWS    & Amazon Web Services (EC2: máy chủ ảo; S3: lưu trữ đối tượng) \\
+    BAC    & Budget at Completion -- ngân sách khi hoàn thành \\
+    CPI    & Cost Performance Index -- chỉ số hiệu quả chi phí \\
+    CR     & Change Request -- yêu cầu thay đổi \\
+    CV     & Cost Variance -- chênh lệch chi phí \\
+    DoD    & Definition of Done -- tiêu chí hoàn thành \\
+    EAC    & Estimate at Completion -- dự báo tổng chi phí khi hoàn thành \\
+    ETC    & Estimate to Complete -- dự báo chi phí phần còn lại \\
+    EV     & Earned Value -- giá trị thu được \\
+    EVA    & Earned Value Analysis -- phân tích giá trị thu được \\
+    GPU    & Graphics Processing Unit -- bộ xử lý đồ hoạ, dùng để chạy model \\
+    LLM    & Large Language Model -- mô hình ngôn ngữ lớn \\
+    PM     & Project Manager -- quản lý dự án \\
+    PO     & Product Owner -- chủ sản phẩm \\
+    POC    & Proof of Concept -- bản thử nghiệm khái niệm \\
+    PV     & Planned Value -- giá trị kế hoạch \\
+    QC     & Quality Control -- kiểm soát chất lượng \\
+    SM     & Scrum Master \\
+    SP     & Story Point -- điểm ước lượng độ lớn của story \\
+    SPI    & Schedule Performance Index -- chỉ số hiệu quả tiến độ \\
+    STT    & Speech-to-Text -- chuyển giọng nói thành văn bản \\
+    SV     & Schedule Variance -- chênh lệch tiến độ \\
+    TCPI   & To-Complete Performance Index -- chỉ số hiệu quả cần đạt cho phần còn lại \\
+    UAT    & User Acceptance Testing -- kiểm thử chấp nhận của người dùng \\
+    VAC    & Variance at Completion -- chênh lệch ngân sách khi hoàn thành \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listfigurename}
+\listoffigures
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listtablename}
+\listoftables
+
+% ============================================================ Chapter 1
+\chapter{Giới thiệu}
+\label{chap:intro}
+
+\section{Bối cảnh}
+
+Kế hoạch quản lý dự án~\cite{pmp} đặt đường cơ sở cho phạm vi (WBS), lịch trình (CPM, Gantt) và chi phí (PV theo
+sprint), cùng ngưỡng hành động CPI hoặc SPI $<$ 0,9. Điều lệ dự án~\cite{pid} quy định ai được duyệt thay đổi: PO
+duyệt thay đổi trong sprint, Sponsor duyệt thay đổi mốc, ngân sách vượt 10\% hoặc phạm vi dự án. Tài liệu này ghi
+lại những gì \emph{thực sự} diễn ra so với đường cơ sở đó, và các quyết định kiểm soát đã đưa ra.
+
+\section{Mục đích và người đọc của tài liệu}
+
+Tài liệu tập hợp số liệu và hồ sơ sinh ra trong lúc thực hiện dự án: báo cáo từng sprint, phân tích giá trị thu
+được, biên bản họp, Retrospective và nhật ký thay đổi phạm vi. Tài liệu được cập nhật sau mỗi sprint. Người đọc
+chính là Project Manager (lập và dùng báo cáo để điều hành), Product Owner (duyệt thay đổi trong sprint, ưu tiên
+lại backlog) và Sponsor (nhận bản báo cáo mỗi sprint, duyệt các thay đổi lớn).
+
+\section{Cấu trúc tài liệu}
+
+Phần còn lại của tài liệu gồm năm chương:
+\begin{itemize}
+  \item \textbf{Chương~\ref{chap:status} -- Báo cáo trạng thái theo sprint:} mẫu báo cáo, bảng tổng hợp các sprint,
+        burndown và báo cáo Sprint 4.
+  \item \textbf{Chương~\ref{chap:eva} -- Phân tích giá trị thu được:} định nghĩa, công thức, cách diễn giải, bảng
+        theo dõi và ví dụ tính kèm đường S.
+  \item \textbf{Chương~\ref{chap:minutes} -- Biên bản họp và Retrospective:} kiểm tra độ đầy đủ, mẫu biên bản bốn
+        loại họp, gợi ý Retrospective Sprint 4.
+  \item \textbf{Chương~\ref{chap:changelog} -- Change Log:} quy trình kiểm soát thay đổi, nhật ký thay đổi và các
+        thay đổi bị hoãn.
+  \item \textbf{Chương~\ref{chap:conclusion} -- Kết luận và phê duyệt.}
+\end{itemize}
+
+% ============================================================ Chapter 2
+\chapter{Báo cáo trạng thái theo sprint}
+\label{chap:status}
+
+\textbf{Mỗi sprint có một báo cáo theo cùng mẫu, để Sponsor so sánh được các sprint với nhau.} Báo cáo gồm mục
+tiêu, kế hoạch so với thực tế, burndown, velocity, chi phí (CPI, SPI), vấn đề, rủi ro và quyết định. Số liệu
+Sprint 1--3 nhóm đã có: \canDien[chép từ báo cáo S1--S3 hiện có]. Sprint 4 được ghi theo các commit trong repo.
+
+\section{Mẫu báo cáo sprint}
+
+Mỗi báo cáo mở đầu bằng tiêu đề ``Sprint N -- mục tiêu sprint (ngày bắt đầu -- ngày kết thúc)'', tiếp theo là bảng
+chỉ số kế hoạch so với thực tế (Bảng~\ref{tab:report-template}). Chi phí tính theo đơn giá 100.000~VND/giờ; các chỉ
+số EV, CPI, SPI được định nghĩa ở Chương~\ref{chap:eva}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Bảng chỉ số trong mẫu báo cáo sprint}
+  \label{tab:report-template}
+  \begin{tabularx}{\linewidth}{@{}LP{3.4cm}P{3.4cm}@{}}
+    \toprule
+    \thead{Chỉ số} & \thead{Kế hoạch} & \thead{Thực tế} \\
+    \midrule
+    Story point & & \\
+    Số story Done / cam kết & & \\
+    Giờ công & & \\
+    Chi phí (giờ $\times$ 100.000 VND) & PV = & AC = \\
+    EV (giá trị thu được) & & \\
+    CPI = EV/AC; SPI = EV/PV & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Sau bảng chỉ số, báo cáo có các mục ngắn sau:
+\begin{itemize}
+  \item \textbf{Burndown:} ảnh chụp từ Azure Boards, hoặc bảng điểm còn lại theo ngày (Mục~\ref{sec:burndown}).
+  \item \textbf{Kết quả:} việc đã xong; việc chưa xong, kèm lý do và sprint được dời sang.
+  \item \textbf{Vấn đề và rủi ro:} vấn đề phát sinh; rủi ro mới hoặc rủi ro thay đổi mức độ.
+  \item \textbf{Quyết định:} các quyết định và thay đổi phạm vi (đồng thời ghi vào Change Log).
+  \item \textbf{Cải tiến:} hành động cải tiến rút ra từ Retrospective.
+\end{itemize}
+
+\section{Tổng hợp các sprint}
+
+Bảng~\ref{tab:sprints} tổng hợp bốn sprint trên một trang. Story point của Sprint 4 là số đề xuất, cộng từ năm hạng
+mục: D-1 (8), S-1 (13), O-1 (8), US6.2 (5) và tài liệu (3).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Tổng hợp các sprint}
+  \label{tab:sprints}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}Q{1.2cm}LQ{1.6cm}Q{1.2cm}Q{1.7cm}Q{0.9cm}Q{0.9cm}P{2.5cm}@{}}
+    \toprule
+    \thead{Sprint} & \thead{Mục tiêu} & \thead{SP cam kết} & \thead{SP xong} & \thead{Velocity} & \thead{CPI}
+      & \thead{SPI} & \thead{Ghi chú} \\
+    \midrule
+    1 & Ghi âm, upload, transcript gốc (E1) & \canDien & & & & & \\
+    2 & Transcript live, benchmark LLM & \canDien & & & & & \\
+    3 & Tóm tắt \#67 và dịch \#60, test E2E & \canDien & & & & & \#60 dời vào sprint này \\
+    4 & Desktop, streaming, STT remote, deploy AWS & 37 (đề xuất) & & & & & Mục~\ref{sec:sprint4} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Burndown}
+\label{sec:burndown}
+
+Biểu đồ burndown của mỗi sprint vẽ số story point còn lại theo ngày, cạnh đường lý tưởng giảm đều về 0.
+Hình~\ref{fig:burndown} là mẫu với \textbf{số minh hoạ} cho một sprint 10 ngày, 37 SP;
+\canDien[thay bằng điểm còn lại theo ngày trên Azure Boards].
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.85\linewidth, height=6.4cm,
+        xmin=0.6, xmax=10.4, ymin=0, ymax=40,
+        xtick={1,...,10}, xticklabels={N1,N2,N3,N4,N5,N6,N7,N8,N9,N10},
+        ylabel={Story point còn lại},
+        grid=major, grid style={gray!25},
+        legend pos=north east, legend cell align=left,
+        legend style={font=\small,draw=gray!40},
+        tick label style={font=\small},
+        /pgf/number format/.cd, use comma, 1000 sep={.}]
+      \addplot[thick, chartgray, dashed, mark=none]
+        coordinates {(1,37) (2,33) (3,29) (4,26) (5,22) (6,18) (7,15) (8,11) (9,7) (10,0)};
+      \addlegendentry{Lý tưởng}
+      \addplot[very thick, primaryblue, mark=*]
+        coordinates {(1,37) (2,37) (3,34) (4,30) (5,30) (6,24) (7,20) (8,14) (9,8) (10,0)};
+      \addlegendentry{Thực tế}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Mẫu biểu đồ burndown của một sprint (số minh hoạ)}
+  \label{fig:burndown}
+\end{figure}
+
+Cách đọc: đường thực tế nằm \emph{trên} đường lý tưởng nghĩa là sprint đang chậm. Theo Risk Register~\cite{pmp},
+burndown nằm trên đường lý tưởng 2 ngày liền là dấu hiệu cảnh báo của rủi ro R3 (trễ tiến độ); trong ví dụ, điều
+này xảy ra từ ngày N2 và cần được nêu trong Daily.
+
+\section{Báo cáo Sprint 4 -- desktop, streaming, cloud}
+\label{sec:sprint4}
+
+Sprint 4 được ghi theo repo ngày 12/11/2026 (Bảng~\ref{tab:sprint4}). Sáu trên bảy hạng mục đã xong; riêng deploy
+AWS mới xong phần chuẩn bị.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Kết quả Sprint 4 theo repo (12/11/2026)}
+  \label{tab:sprint4}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{3.2cm}LP{4.2cm}@{}}
+    \toprule
+    \thead{Hạng mục} & \thead{Kết quả} & \thead{Bằng chứng} \\
+    \midrule
+    App desktop Windows & Xong: bộ cài 204\,MB, smoke test 8/8 & Nhánh \path{feature/desktop-app} (7 commit) \\
+    Live streaming & Xong: từ mới khoảng 1\,s, câu chốt trung bình 1,9\,s & Nhánh \path{feature/streaming-stt} \\
+    STT remote, API \path{/v1} & Xong: máy khách không tải model, độ trễ như GPU local & Như trên \\
+    File dài & Xong: file 11,6 phút xử lý trong 18--57\,s, dòng đầu sau 3--5\,s & Như trên \\
+    Deploy AWS & Xong phần chuẩn bị: image, Compose, Caddy, S3, hướng dẫn; \textbf{chưa deploy lên AWS thật}
+      & Nhánh \path{feature/aws-deploy} \\
+    Tài liệu quản lý & 22 tài liệu \texttt{.md}, sau đó gộp thành 6 tài liệu (CR-08)
+      & Nhánh \path{docs/project-management} \\
+    Test & 88 test pytest đạt, ruff sạch & -- \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{Vấn đề phát sinh:} push lên GitHub bị từ chối (403) vì tài khoản đang lưu trên máy không có quyền ghi
+        repo (rủi ro R11). Các nhánh lúc đó chỉ có ở máy dev.
+  \item \textbf{Quyết định:} thêm app desktop, streaming và bản web trên cloud vào phạm vi, ghi ở Change Log
+        (Chương~\ref{chap:changelog}).
+  \item \textbf{Việc tiếp theo:} cấp quyền repo và push; deploy thật lên AWS theo hướng dẫn; UAT với người dùng thử;
+        điền số liệu giờ công Sprint 4.
+\end{itemize}
+
+% ============================================================ Chapter 3
+\chapter{Phân tích giá trị thu được}
+\label{chap:eva}
+
+\textbf{EVA so sánh giá trị công việc đã làm được (EV) với chi phí thực tế (AC) và kế hoạch (PV) theo từng sprint,
+rồi dự báo tổng chi phí khi hoàn thành (EAC).} Nhóm đã có CPI và SPI trên dashboard:
+\canDien[chép số vào Bảng~\ref{tab:eva-track}]. Chương này ghi phương pháp, cách diễn giải và một ví dụ tính đầy đủ
+với số minh hoạ.
+
+\section{Định nghĩa và công thức}
+
+Các đại lượng và công thức dùng ở đây theo hướng dẫn PMBOK~\cite{pmbok}. Bốn đại lượng cơ bản và cách lấy chúng
+trong dự án được nêu trong Bảng~\ref{tab:eva-def}. Điểm quan trọng nhất là
+EV chỉ tính các story đã đạt Definition of Done~\cite{qtd}, không tính công việc dở dang.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Các đại lượng cơ bản của EVA}
+  \label{tab:eva-def}
+  \begin{tabularx}{\linewidth}{@{}Q{1.2cm}P{4.4cm}L@{}}
+    \toprule
+    \thead{Ký hiệu} & \thead{Ý nghĩa} & \thead{Cách lấy trong dự án} \\
+    \midrule
+    BAC & Ngân sách khi hoàn thành & Tổng giờ kế hoạch $\times$ 100.000 VND (kế hoạch chi phí trong~\cite{pmp}) \\
+    PV & Giá trị kế hoạch đến thời điểm đo & Giờ kế hoạch luỹ kế đến hết sprint $\times$ 100.000 VND \\
+    EV & Giá trị thu được & BAC $\times$ (SP Done luỹ kế / tổng SP kế hoạch); chỉ tính story đạt DoD \\
+    AC & Chi phí thực tế & Giờ thực tế luỹ kế $\times$ 100.000 VND \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Từ bốn đại lượng trên, chênh lệch và chỉ số hiệu quả được tính theo~\eqref{eq:eva-index}, còn các dự báo khi hoàn
+thành theo~\eqref{eq:eva-forecast}:
+\begin{gather}
+  \label{eq:eva-index}
+  \mathrm{CV} = \mathrm{EV} - \mathrm{AC}, \qquad \mathrm{SV} = \mathrm{EV} - \mathrm{PV}, \qquad
+  \mathrm{CPI} = \frac{\mathrm{EV}}{\mathrm{AC}}, \qquad \mathrm{SPI} = \frac{\mathrm{EV}}{\mathrm{PV}} \\
+  \label{eq:eva-forecast}
+  \mathrm{EAC} = \frac{\mathrm{BAC}}{\mathrm{CPI}}, \quad \mathrm{ETC} = \mathrm{EAC} - \mathrm{AC}, \quad
+  \mathrm{VAC} = \mathrm{BAC} - \mathrm{EAC}, \quad
+  \mathrm{TCPI} = \frac{\mathrm{BAC} - \mathrm{EV}}{\mathrm{BAC} - \mathrm{AC}}
+\end{gather}
+
+\section{Diễn giải}
+
+Bảng~\ref{tab:eva-meaning} cho biết ý nghĩa của từng chỉ số khi lớn hơn, bằng hoặc nhỏ hơn 1, và hành động tương
+ứng. Lưu ý TCPI đọc ngược chiều với CPI và SPI: TCPI lớn hơn 1 là tín hiệu xấu.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Diễn giải các chỉ số hiệu quả}
+  \label{tab:eva-meaning}
+  \small
+  \begin{tabularx}{\linewidth}{@{}Q{1.2cm}P{4.3cm}P{2.6cm}L@{}}
+    \toprule
+    \thead{Chỉ số} & \thead{$>$ 1} & \thead{= 1} & \thead{$<$ 1} \\
+    \midrule
+    CPI & Tốn ít hơn kế hoạch & Đúng ngân sách & Vượt chi phí: xem lại ước lượng, cắt việc Could \\
+    SPI & Nhanh hơn kế hoạch & Đúng tiến độ & Chậm: dồn người vào việc găng (lịch trình trong~\cite{pmp}) \\
+    TCPI & Phải làm hiệu quả hơn trước mới kịp ngân sách & -- & Còn dư địa \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Ngưỡng hành động của dự án giữ như trong kế hoạch chi phí~\cite{pmp}: khi CPI hoặc SPI nhỏ hơn 0,9, PM báo PO và
+Sponsor.
+
+\section{Bảng theo dõi theo sprint}
+
+Các giá trị luỹ kế đến hết mỗi sprint được ghi vào Bảng~\ref{tab:eva-track}; các cột CV, SV, CPI, SPI, EAC tính từ
+ba cột đầu theo~\eqref{eq:eva-index} và~\eqref{eq:eva-forecast}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Theo dõi EVA theo sprint (luỹ kế, VND)}
+  \label{tab:eva-track}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}Q{1.2cm}CCCCCQ{0.9cm}Q{0.9cm}C@{}}
+    \toprule
+    \thead{Hết sprint} & \thead{PV} & \thead{EV} & \thead{AC} & \thead{CV} & \thead{SV} & \thead{CPI} & \thead{SPI}
+      & \thead{EAC} \\
+    \midrule
+    1 & \canDien & & & & & & & \\
+    2 & \canDien & & & & & & & \\
+    3 & \canDien & & & & & & & \\
+    4 & \canDien & & & & & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Ví dụ cách tính}
+
+Để minh hoạ cách dùng công thức, giả sử \textbf{(số minh hoạ, không phải số của nhóm)} BAC = 60 triệu VND (600
+giờ) và tổng 125 SP. Hết Sprint 3, kế hoạch là 450 giờ, thực tế 480 giờ, đã Done 90 SP. Các bước tính được trình bày
+trong Bảng~\ref{tab:eva-example}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Ví dụ tính EVA hết Sprint 3 (số minh hoạ)}
+  \label{tab:eva-example}
+  \begin{tabularx}{\linewidth}{@{}Q{1.4cm}P{4.6cm}L@{}}
+    \toprule
+    \thead{Bước} & \thead{Tính} & \thead{Kết quả} \\
+    \midrule
+    PV & 450 $\times$ 100.000 & 45,0 triệu \\
+    EV & 60 triệu $\times$ 90/125 & 43,2 triệu \\
+    AC & 480 $\times$ 100.000 & 48,0 triệu \\
+    CPI & 43,2 / 48,0 & 0,90 (vượt chi phí 10\%) \\
+    SPI & 43,2 / 45,0 & 0,96 (chậm 4\%) \\
+    EAC & 60 / 0,90 & 66,7 triệu \\
+    VAC & 60 $-$ 66,7 & $-6{,}7$ triệu (dùng gần hết 10\% dự phòng) \\
+    TCPI & (60 $-$ 43,2) / (60 $-$ 48,0) & 1,40 (phần còn lại phải hiệu quả hơn 40\% mới giữ được BAC) \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Kết luận của ví dụ: CPI chạm ngưỡng 0,9, nên PM báo PO để dời một story Should sang phiên bản sau.
+
+Hình~\ref{fig:scurve} vẽ ba đường luỹ kế PV, EV, AC qua bốn sprint với cùng bộ số minh hoạ (giá trị hết Sprint 3
+khớp với Bảng~\ref{tab:eva-example}). Khoảng cách giữa AC và EV là chênh lệch chi phí CV; khoảng cách giữa PV và EV
+là chênh lệch tiến độ SV. \canDien[thay bằng số thật từ Bảng~\ref{tab:eva-track}].
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.85\linewidth, height=6.6cm,
+        xmin=0.7, xmax=4.3, ymin=0, ymax=70,
+        xtick={1,2,3,4}, xticklabels={Sprint 1,Sprint 2,Sprint 3,Sprint 4},
+        ylabel={Triệu VND (luỹ kế)},
+        grid=major, grid style={gray!25},
+        legend pos=north west, legend cell align=left,
+        legend style={font=\small,draw=gray!40},
+        tick label style={font=\small},
+        /pgf/number format/.cd, use comma, 1000 sep={.}]
+      \addplot[thick, chartgray, dashed, mark=square*] coordinates {(1,15) (2,30) (3,45) (4,60)};
+      \addlegendentry{PV -- kế hoạch}
+      \addplot[very thick, primaryblue, mark=*] coordinates {(1,13) (2,27) (3,43.2) (4,58)};
+      \addlegendentry{EV -- giá trị thu được}
+      \addplot[thick, todored, mark=triangle*] coordinates {(1,14) (2,31) (3,48) (4,62)};
+      \addlegendentry{AC -- chi phí thực tế}
+      \draw[{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]},todored] (axis cs:3.12,43.2) -- (axis cs:3.12,48)
+        node[midway,right,font=\scriptsize,text=todored] {CV};
+      \draw[{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]},chartgray] (axis cs:2.88,43.2) -- (axis cs:2.88,45)
+        node[midway,left,font=\scriptsize,text=chartgray] {SV};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Đường S của PV, EV và AC luỹ kế (số minh hoạ)}
+  \label{fig:scurve}
+\end{figure}
+
+% ============================================================ Chapter 4
+\chapter{Biên bản họp và Retrospective}
+\label{chap:minutes}
+
+\textbf{Mỗi sprint cần đủ biên bản Sprint Planning, Sprint Review và Retrospective; Daily chỉ cần ghi khi có vướng
+mắc.} Nhóm đã có biên bản các buổi họp: \canDien[dán liên kết hoặc chép vào Mục~\ref{sec:archive}]. Chương này đưa
+ra bảng kiểm tra độ đầy đủ, mẫu biên bản cho bốn loại họp và gợi ý nội dung Retrospective Sprint 4.
+
+\section{Kiểm tra độ đầy đủ}
+
+Bảng~\ref{tab:minutes-check} dùng để đánh dấu biên bản đã có của từng sprint. Cột ghi chú nêu nội dung quan trọng
+nhất cần có trong biên bản của sprint đó.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Kiểm tra độ đầy đủ của biên bản}
+  \label{tab:minutes-check}
+  \begin{tabularx}{\linewidth}{@{}Q{1.4cm}Q{2.2cm}Q{2.2cm}Q{2.8cm}L@{}}
+    \toprule
+    \thead{Sprint} & \thead{Planning} & \thead{Review} & \thead{Retrospective} & \thead{Ghi chú} \\
+    \midrule
+    1 & $\square$ & $\square$ & $\square$ & \\
+    2 & $\square$ & $\square$ & $\square$ & Benchmark LLM; ghi rủi ro R1--R6 \\
+    3 & $\square$ & $\square$ & $\square$ & Quyết định dời \#60 vào Sprint 3 \\
+    4 & $\square$ & $\square$ & $\square$ & Quyết định thêm desktop, streaming, cloud \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Mẫu biên bản}
+
+Bốn mẫu biên bản trong Bảng~\ref{tab:minutes-template} liệt kê các mục bắt buộc của từng loại họp. Sprint Planning
+và Sprint Review ghi số liệu để đối chiếu với báo cáo sprint; Retrospective dùng khung Start -- Stop -- Continue và
+luôn kiểm tra lại hành động của lần trước.
+
+\begingroup\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}P{4.2cm}P{10.8cm}@{}}
+  \caption{Mẫu biên bản cho bốn loại họp Scrum}\label{tab:minutes-template}\\
+  \toprule
+  \thead{Mục} & \thead{Nội dung cần ghi} \\
+  \midrule
+  \endfirsthead
+  \multicolumn{2}{@{}l}{\footnotesize\itshape Bảng~\thetable{} (tiếp theo)}\\
+  \toprule
+  \thead{Mục} & \thead{Nội dung cần ghi} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  \multicolumn{2}{@{}l}{\textbf{Sprint Planning}}\\
+  Thông tin chung & Sprint N Planning -- ngày -- thành phần -- chủ trì: SM \\
+  Mục tiêu sprint & Một câu mô tả kết quả sprint \\
+  Năng lực & Số giờ của từng người; velocity tham chiếu (SP) \\
+  Story nhận vào & ID, SP, người nhận \\
+  Ước lượng & Planning Poker; các story phải vote lại \\
+  Rủi ro, phụ thuộc & Rủi ro mới, phụ thuộc giữa các story \\
+  Quyết định & Các quyết định của buổi họp \\
+  \midrule
+  \multicolumn{2}{@{}l}{\textbf{Sprint Review}}\\
+  Thông tin chung & Sprint N Review -- ngày -- thành phần: nhóm và Sponsor \\
+  Demo & Story -- người demo -- kết quả: chấp nhận hoặc chưa \\
+  Phản hồi & Phản hồi của Sponsor và PO \\
+  Thay đổi backlog & Thay đổi sau review; ghi vào Change Log nếu là thay đổi phạm vi \\
+  Số liệu & SP Done trên cam kết, giờ thực tế, CPI, SPI \\
+  \midrule
+  \multicolumn{2}{@{}l}{\textbf{Retrospective (Start -- Stop -- Continue)}}\\
+  Thông tin chung & Sprint N Retrospective -- ngày \\
+  Continue & Điều tốt, cần giữ \\
+  Stop & Điều chưa tốt, cần bỏ \\
+  Start & Điều sẽ thử mới \\
+  Hành động cải tiến & Tối đa 3 hành động, mỗi hành động có người phụ trách và hạn \\
+  Kiểm tra retro trước & Hành động của lần trước: đã làm hay chưa \\
+  \midrule
+  \multicolumn{2}{@{}l}{\textbf{Daily Scrum (chỉ ghi khi có vướng mắc)}}\\
+  Vướng mắc & Ngày -- vướng mắc -- người hỗ trợ -- hạn gỡ \\
+\end{longtable}
+\endgroup
+
+\section{Gợi ý nội dung Retrospective Sprint 4}
+
+Bảng~\ref{tab:retro4} là gợi ý để nhóm thảo luận trong buổi Retrospective Sprint 4, rút ra từ diễn biến của sprint.
+Hai hành động Start nhắm thẳng vào hai vấn đề của sprint: sự cố quyền push (R11) và việc bản web chưa được deploy.
+
+% [H]: placed right after a longtable; a floating table would end up alone on its own page.
+\begin{table}[H]
+  \centering
+  \caption{Gợi ý nội dung Retrospective Sprint 4}
+  \label{tab:retro4}
+  \begin{tabularx}{\linewidth}{@{}P{2.4cm}L@{}}
+    \toprule
+    \thead{Loại} & \thead{Nội dung} \\
+    \midrule
+    Continue & Chia commit theo task, mỗi nhóm việc một nhánh; đo hiệu năng bằng script thay vì ước đoán \\
+    Continue & Có test tự động cho phần mới (live, STT remote, S3), chạy dưới 10 giây \\
+    Stop & Để nhiều thay đổi chưa commit trong máy quá lâu (Sprint 3 chưa commit khi bắt đầu Sprint 4) \\
+    Start & Kiểm tra quyền push repo ngay đầu sprint (sự cố 403 -- R11) \\
+    Start & Deploy bản web sớm để QC test trên môi trường giống thật \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Lưu trữ biên bản}
+\label{sec:archive}
+
+\canDien[liên kết tới biên bản các sprint (Azure Boards Wiki, Google Drive\ldots), hoặc chép nội dung vào đây].
+
+% ============================================================ Chapter 5
+\chapter{Change Log}
+\label{chap:changelog}
+
+\textbf{Mọi thay đổi phạm vi, mốc hoặc ngân sách phải được ghi vào Change Log trước khi làm, kèm lý do, tác động và
+người duyệt.} Theo phân quyền trong điều lệ dự án~\cite{pid}, thay đổi trong sprint do PO duyệt; thay đổi mốc, ngân
+sách vượt 10\% hoặc phạm vi dự án do Sponsor duyệt.
+
+\section{Quy trình kiểm soát thay đổi}
+
+Một yêu cầu thay đổi đi qua bốn bước (Hình~\ref{fig:cr-flow}):
+\begin{enumerate}
+  \item Người đề xuất ghi một dòng vào nhật ký, trạng thái ``Đề xuất''.
+  \item PM đánh giá tác động: story point và giờ công, chi phí, lịch (ảnh hưởng tới đường găng trong~\cite{pmp}),
+        rủi ro.
+  \item PO, hoặc Sponsor với thay đổi lớn, duyệt hoặc từ chối.
+  \item Nếu được duyệt: cập nhật backlog, kế hoạch, ngân sách, và thông báo theo kế hoạch truyền thông~\cite{pmp}.
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      st/.style={draw=primaryblue,fill=accentblue,rounded corners=2pt,align=center,font=\footnotesize,
+                 text width=2.9cm,minimum height=1.35cm,inner sep=3pt,execute at begin node=\setstretch{1.05}},
+      dc/.style={draw=primaryblue,fill=white,diamond,aspect=1.6,align=center,font=\footnotesize,inner sep=1pt,
+                 execute at begin node=\setstretch{1.05}},
+      ar/.style={-{Stealth[length=2.2mm]},thick,primaryblue}]
+    \node[st] (p) at (0,0) {\textbf{1. Đề xuất}\\ ghi một dòng vào Change Log};
+    \node[st] (a) at (3.7,0) {\textbf{2. PM đánh giá}\\ SP, giờ, chi phí, lịch, rủi ro};
+    \node[dc] (d) at (7.4,0) {\textbf{3. Duyệt?}\\ PO / Sponsor};
+    \node[st] (u) at (12.2,0) {\textbf{4. Cập nhật}\\ backlog, kế hoạch, ngân sách; thông báo};
+    \node[st,draw=chartgray,fill=gray!10] (r) at (7.4,-2.3) {Từ chối hoặc hoãn\\ (bảng CR-H)};
+    \draw[ar] (p) -- (a);
+    \draw[ar] (a) -- (d);
+    \draw[ar] (d) -- node[above,font=\scriptsize] {duyệt} (u);
+    \draw[ar,chartgray] (d) -- node[right,font=\scriptsize] {không} (r);
+  \end{tikzpicture}
+  \caption{Quy trình kiểm soát thay đổi}
+  \label{fig:cr-flow}
+\end{figure}
+
+Quyền duyệt ở bước 3 phụ thuộc vào quy mô thay đổi: thay đổi trong một sprint do PO quyết định; thay đổi làm dời
+mốc, tăng ngân sách quá 10\% hoặc mở rộng phạm vi dự án phải lên Sponsor.
+
+\section{Nhật ký thay đổi}
+
+Bảng~\ref{tab:changelog} ghi tám yêu cầu thay đổi theo thứ tự mới nhất trước. Người đề xuất và người duyệt của
+mọi yêu cầu chưa được chép vào: \canDien[điền theo biên bản và Azure Boards].
+
+\begingroup\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}P{1.2cm}P{1.9cm}P{3.6cm}P{3.3cm}P{2.8cm}P{1.7cm}@{}}
+  \caption{Change Log}\label{tab:changelog}\\
+  \toprule
+  \thead{Mã} & \thead{Ngày} & \thead{Thay đổi} & \thead{Lý do} & \thead{Tác động} & \thead{Trạng thái} \\
+  \midrule
+  \endfirsthead
+  \multicolumn{6}{@{}l}{\footnotesize\itshape Bảng~\thetable{} (tiếp theo)}\\
+  \toprule
+  \thead{Mã} & \thead{Ngày} & \thead{Thay đổi} & \thead{Lý do} & \thead{Tác động} & \thead{Trạng thái} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  CR-08 & 13/11/2026 & Gộp 22 tài liệu quản lý thành 6 tài liệu theo nhóm quy trình (khởi động, yêu cầu, kế hoạch,
+    chất lượng, theo dõi, kết thúc) & Mỗi bên liên quan đọc một tài liệu thay vì nhiều file rời; dễ duyệt và xuất bản
+    & Không đổi lịch, không đổi nội dung & Đã làm \\
+  CR-07 & 12/11/2026 & Tài liệu quản lý dự án làm thành 21 file \texttt{.md} trong repo thay vì một tài liệu
+    & Dễ chia việc, quản lý phiên bản cùng code & Không đổi lịch & Đã làm \\
+  CR-06 & 12/11/2026 & Thêm bản web deploy trên AWS EC2 và S3 (Docker, Caddy, hướng dẫn) & Test và demo cho khách
+    mà không cần cài app & +8 SP; chi phí AWS khoảng 2,5--3 triệu VND/tháng nếu chạy 24/7
+    & Đã làm (chưa deploy thật) \\
+  CR-05 & 12/11/2026 & Engine STT remote và API \path{/v1}: máy khách không cần model & Máy văn phòng không có GPU;
+    giữ độ chính xác của \texttt{large-v3-turbo} & +13 SP (gộp với CR-04); thêm phụ thuộc vào server hoặc API
+    & Đã làm \\
+  CR-04 & 12/11/2026 & Live ``nói tới đâu hiện tới đó'' (trễ $\leq$ 3--5\,s) và xử lý file dài $\geq$ 1 giờ
+    & Yêu cầu của PO sau khi dùng thử & Chunk 1\,s, LocalAgreement, chia đoạn file dài & Đã làm \\
+  CR-03 & \canDien & Chuyển từ web app sang có thêm app desktop Windows & Khách muốn cài như phần mềm; thu được âm
+    thanh từ Zoom/Teams bản desktop & +8 SP; thêm bộ cài, rủi ro R12 (chưa ký số) & Đã làm \\
+  CR-02 & \canDien & Dời story dịch \#60 vào Sprint 3 & \canDien[lý do theo biên bản]
+    & Sprint 3 nhận thêm 19 SP (\#61--\#66) & Đã làm \\
+  CR-01 & \canDien & \canDien[các thay đổi trước đó trong biên bản S1--S2, ví dụ chọn model sau benchmark] & & & \\
+\end{longtable}
+\endgroup
+
+Ba thay đổi mở rộng phạm vi có ghi tác động bằng story point là CR-03 (app desktop, +8 SP), CR-05 gộp CR-04
+(live streaming và STT remote, +13 SP) và CR-06 (bản web trên AWS, +8 SP), tổng cộng 29 SP; CR-02 chỉ dời 19 SP đã
+có trong backlog vào Sprint 3. Đây là biểu hiện cụ thể của rủi ro R5 (phình phạm vi) trong Risk Register~\cite{pmp};
+các thay đổi đều được ghi lại, đúng với chiến lược ``chấp nhận có kiểm soát'' đã chọn.
+
+\section{Thay đổi đã từ chối hoặc hoãn}
+
+Ba đề xuất bị hoãn được giữ lại để xem xét ở thời điểm phù hợp (Bảng~\ref{tab:deferred}); chúng tương ứng với
+backlog tương lai trong đặc tả yêu cầu~\cite{srs}.
+
+% Last table of the chapter: [H] so it is not pushed onto a page of its own.
+\begin{table}[H]
+  \centering
+  \caption{Thay đổi đã từ chối hoặc hoãn}
+  \label{tab:deferred}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{1.4cm}P{4.6cm}LP{2.6cm}@{}}
+    \toprule
+    \thead{Mã} & \thead{Đề xuất} & \thead{Lý do hoãn} & \thead{Xem lại khi} \\
+    \midrule
+    CR-H1 & Nhận diện người nói (diarization) & Tốn thời gian, cần model riêng; không ảnh hưởng mục tiêu chính
+      & Sau v1.0 \\
+    CR-H2 & Tài khoản, phân quyền & Ngoài phạm vi POC; bản test dùng đăng nhập chung & Trước khi thương mại \\
+    CR-H3 & Dịch trực tiếp khi đang họp (\#84), trang action items (\#79) & Ưu tiên Should/Could & Sprint sau \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ Chapter 6
+\chapter{Kết luận và phê duyệt}
+\label{chap:conclusion}
+
+\section{Tóm tắt}
+
+Báo cáo đã tập hợp các hồ sơ theo dõi và kiểm soát của dự án:
+\begin{itemize}
+  \item \textbf{Trạng thái sprint:} mẫu báo cáo chung cho mọi sprint; Sprint 4 hoàn thành sáu trên bảy hạng mục
+        (desktop, live streaming, STT remote, file dài, tài liệu, test), còn bản web chưa được deploy lên AWS thật.
+  \item \textbf{EVA:} phương pháp, công thức và cách diễn giải đã sẵn sàng; ví dụ minh hoạ cho thấy cách ngưỡng CPI
+        0,9 dẫn tới quyết định dời một story Should.
+  \item \textbf{Biên bản:} bảng kiểm tra độ đầy đủ, mẫu biên bản bốn loại họp và gợi ý Retrospective Sprint 4.
+  \item \textbf{Change Log:} 8 yêu cầu thay đổi và 3 đề xuất hoãn; ba thay đổi mở rộng phạm vi (desktop, live
+        streaming và STT remote, bản web trên AWS) thêm 29 SP.
+\end{itemize}
+
+\section{Việc cần làm trước khi trình duyệt}
+
+\begin{enumerate}
+  \item Chép số liệu Sprint 1--3 từ các báo cáo hiện có vào Bảng~\ref{tab:sprints}; điền giờ công Sprint 4.
+  \item Chép CPI, SPI từ dashboard vào Bảng~\ref{tab:eva-track}; thay số minh hoạ ở Hình~\ref{fig:burndown} và
+        Hình~\ref{fig:scurve} bằng số thật.
+  \item Đánh dấu Bảng~\ref{tab:minutes-check} và dán liên kết biên bản vào Mục~\ref{sec:archive}.
+  \item Điền ngày, lý do, người đề xuất và người duyệt còn thiếu trong Change Log, nhất là CR-01 đến CR-03.
+  \item Hoàn tất việc tiếp theo của Sprint 4: cấp quyền repo và push, deploy thật lên AWS, UAT với người dùng thử.
+\end{enumerate}
+
+\needspace{14\baselineskip}
+\section{Phê duyệt}
+
+Nhóm dự án đề nghị Project Manager và Product Owner xác nhận báo cáo theo dõi và kiểm soát này; bản báo cáo được gửi
+Sponsor theo kế hoạch truyền thông.
+
+\begin{table}[H]
+  \centering
+  \renewcommand{\arraystretch}{2.4}
+  \begin{tabularx}{\linewidth}{@{}P{3.6cm}LP{3.2cm}P{2.6cm}@{}}
+    \toprule
+    \thead{Vai trò} & \thead{Họ tên} & \thead{Chữ ký} & \thead{Ngày} \\
+    \midrule
+    Project Manager & & & \\
+    Product Owner & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ References
+\begin{thebibliography}{9}
+\addcontentsline{toc}{chapter}{\bibname}
+  \bibitem{pid} Nhóm SumTalk, \emph{Hồ sơ khởi động dự án (Project Initiation Document)}, Tài liệu 01,
+    mã SUMTALK-PID, phiên bản 2.1, 24/11/2026.
+  \bibitem{srs} Nhóm SumTalk, \emph{Đặc tả yêu cầu phần mềm (Software Requirements Specification)},
+    Tài liệu 02, mã SUMTALK-SRS, phiên bản 2.1, 24/11/2026.
+  \bibitem{pmp} Nhóm SumTalk, \emph{Kế hoạch quản lý dự án (Project Management Plan)}, Tài liệu 03,
+    mã SUMTALK-PMP, phiên bản 2.1, 24/11/2026.
+  \bibitem{qtd} Nhóm SumTalk, \emph{Chất lượng và kiểm thử (Quality \& Test Document)}, Tài liệu 04,
+    mã SUMTALK-QTD, phiên bản 2.1, 24/11/2026.
+  \bibitem{pmbok} Project Management Institute, \emph{A Guide to the Project Management Body of Knowledge
+    (PMBOK Guide)}, 6th ed., Newtown Square, PA: PMI, 2017.
+\end{thebibliography}
+
+\end{document}
