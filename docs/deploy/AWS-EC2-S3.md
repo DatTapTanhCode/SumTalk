@@ -22,14 +22,14 @@ flowchart LR
   A -- "tóm tắt, dịch" --> L["LLM API"]
 ```
 
-| | **A. CPU + Whisper API** (khuyên dùng cho test) | **B. GPU tự chạy Whisper** |
-|---|---|---|
-| EC2 | `t3.large` (2 vCPU, 8 GB) | `g4dn.xlarge` (T4 16 GB) hoặc `g6.xlarge` (L4 24 GB) |
-| AMI | Ubuntu Server 24.04 LTS | Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 22.04/24.04) |
-| Speech-to-text | Groq `whisper-large-v3-turbo` (hoặc OpenAI `whisper-1`) | Whisper `large-v3-turbo` chạy trên GPU của máy |
-| Làm engine cho app desktop | Không | Có (`STT_SERVER_API_KEYS`), máy khách không phải tải model |
-| Chi phí máy (ước tính, Singapore, chạy 24/7) | khoảng 75–80 USD/tháng | khoảng 530 USD/tháng (g4dn); bật/tắt theo giờ test thì rẻ hơn nhiều |
-| Chi phí STT | Groq khoảng 0.04 USD/giờ audio, OpenAI khoảng 0.36 USD/giờ | Không tốn thêm |
+|                                                    | **A. CPU + Whisper API** (khuyên dùng cho test)        | **B. GPU tự chạy Whisper**                                           |
+| -------------------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| EC2                                                | `t3.large` (2 vCPU, 8 GB)                                    | `g4dn.xlarge` (T4 16 GB) hoặc `g6.xlarge` (L4 24 GB)                    |
+| AMI                                                | Ubuntu Server 24.04 LTS                                        | Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 22.04/24.04)            |
+| Speech-to-text                                     | Groq`whisper-large-v3-turbo` (hoặc OpenAI `whisper-1`)    | Whisper`large-v3-turbo` chạy trên GPU của máy                          |
+| Làm engine cho app desktop                        | Không                                                         | Có (`STT_SERVER_API_KEYS`), máy khách không phải tải model           |
+| Chi phí máy (ước tính, Singapore, chạy 24/7) | khoảng 75–80 USD/tháng                                      | khoảng 530 USD/tháng (g4dn); bật/tắt theo giờ test thì rẻ hơn nhiều |
+| Chi phí STT                                       | Groq khoảng 0.04 USD/giờ audio, OpenAI khoảng 0.36 USD/giờ | Không tốn thêm                                                            |
 
 > Giá trên chỉ là ước tính để tham khảo. Trước khi tạo tài nguyên, hãy kiểm tra lại trên
 > [AWS Pricing Calculator](https://calculator.aws/) và trang giá của Groq/OpenAI. Ngoài ra còn các khoản nhỏ:
@@ -47,6 +47,7 @@ Region nên chọn **ap-southeast-1 (Singapore)** vì gần Việt Nam. S3 bucke
    ```bash
    git push -u origin feature/sprint3-summary-translation feature/desktop-app feature/streaming-stt feature/aws-deploy
    ```
+
    Nếu repo private, trên EC2 cần thêm deploy key hoặc personal access token. Cách khác là chép code lên bằng
    `scp`.
 3. Chuẩn bị key API:
@@ -60,18 +61,19 @@ Region nên chọn **ap-southeast-1 (Singapore)** vì gần Việt Nam. S3 bucke
 
 Vào **S3 → Create bucket**:
 
-| Mục | Giá trị |
-|---|---|
-| Bucket name | duy nhất toàn cầu, ví dụ `sumtalk-audio-<tên-nhóm>` |
-| Region | ap-southeast-1 |
-| Object Ownership | ACLs disabled |
+| Mục                    | Giá trị                                                                  |
+| ----------------------- | -------------------------------------------------------------------------- |
+| Bucket name             | duy nhất toàn cầu, ví dụ`sumtalk-audio-<tên-nhóm>`                |
+| Region                  | ap-southeast-1                                                             |
+| Object Ownership        | ACLs disabled                                                              |
 | Block all public access | **Bật** (audio chỉ được phát qua presigned URL có hạn dùng) |
-| Bucket Versioning | Tuỳ chọn (nên bật nếu muốn khôi phục khi xoá nhầm) |
-| Default encryption | SSE-S3 (mặc định) |
+| Bucket Versioning       | Tuỳ chọn (nên bật nếu muốn khôi phục khi xoá nhầm)               |
+| Default encryption      | SSE-S3 (mặc định)                                                       |
 
 Tuỳ chọn: mục **Management → Lifecycle rule** cho prefix `sumtalk/backups/`, xoá bản cũ hơn 30 ngày.
 
 App chỉ dùng prefix `sumtalk/` trong bucket:
+
 - `sumtalk/meetings/<id>/audio.wav` và `original.<đuôi>`: audio đã phiên âm xong.
 - `sumtalk/backups/app-YYYYMMDD-HHMMSS.db`: bản sao database, mặc định 6 giờ một lần.
 
@@ -90,25 +92,25 @@ App lấy quyền từ role này qua instance metadata, nên **không cần** đ
 
 **EC2 → Security Groups → Create**, đặt tên `sumtalk-web`, chọn VPC mặc định:
 
-| Type | Port | Source | Lý do |
-|---|---|---|---|
-| SSH | 22 | **My IP** | quản trị (không mở 0.0.0.0/0) |
-| HTTP | 80 | 0.0.0.0/0, ::/0 | lấy chứng chỉ, tự chuyển sang HTTPS |
-| HTTPS | 443 | 0.0.0.0/0, ::/0 | web app, API |
-| Custom UDP | 443 | 0.0.0.0/0, ::/0 | HTTP/3 (tuỳ chọn) |
+| Type       | Port | Source          | Lý do                                   |
+| ---------- | ---- | --------------- | ---------------------------------------- |
+| SSH        | 22   | **My IP** | quản trị (không mở 0.0.0.0/0)        |
+| HTTP       | 80   | 0.0.0.0/0, ::/0 | lấy chứng chỉ, tự chuyển sang HTTPS |
+| HTTPS      | 443  | 0.0.0.0/0, ::/0 | web app, API                             |
+| Custom UDP | 443  | 0.0.0.0/0, ::/0 | HTTP/3 (tuỳ chọn)                      |
 
 ## 5. Tạo máy EC2
 
 **EC2 → Launch instance**:
 
-| Mục | Cấu hình A (CPU) | Cấu hình B (GPU) |
-|---|---|---|
-| AMI | Ubuntu Server 24.04 LTS (x86_64) | Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu) |
-| Instance type | `t3.large` | `g4dn.xlarge` (nếu chưa được cấp quota GPU thì xin tăng quota "Running On-Demand G and VT instances" ≥ 4 vCPU) |
-| Key pair | tạo mới (`.pem`) và cất kỹ | như A |
-| Network | security group `sumtalk-web`, Auto-assign public IP: Enable | như A |
-| Storage | 30 GB gp3 | 80 GB gp3 (driver, image CUDA, model) |
-| Advanced → IAM instance profile | `SumTalkEC2Role` | như A |
+| Mục                             | Cấu hình A (CPU)                                           | Cấu hình B (GPU)                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| AMI                              | Ubuntu Server 24.04 LTS (x86_64)                             | Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu)                                                                     |
+| Instance type                    | `t3.large`                                                 | `g4dn.xlarge` (nếu chưa được cấp quota GPU thì xin tăng quota "Running On-Demand G and VT instances" ≥ 4 vCPU) |
+| Key pair                         | tạo mới (`.pem`) và cất kỹ                            | như A                                                                                                                    |
+| Network                          | security group`sumtalk-web`, Auto-assign public IP: Enable | như A                                                                                                                    |
+| Storage                          | 30 GB gp3                                                    | 80 GB gp3 (driver, image CUDA, model)                                                                                     |
+| Advanced → IAM instance profile | `SumTalkEC2Role`                                           | như A                                                                                                                    |
 
 Rồi bấm **Launch**.
 
@@ -152,18 +154,18 @@ docker run --rm caddy:2.10 caddy hash-password --plaintext 'MatKhauTest@2026'   
 nano .env
 ```
 
-| Biến | Giá trị | Ghi chú |
-|---|---|---|
-| `SITE_ADDRESS` | `sumtalk.ten-mien.vn` hoặc `13-229-10-20.sslip.io` | không có `https://` |
-| `BASIC_AUTH_USER` / `BASIC_AUTH_HASH` | user / hash vừa tạo | **giữ dấu nháy đơn** quanh hash |
-| `GPU` | `0` (A) hoặc `1` (B) | |
-| `STT_PROVIDER` | A: `remote`; B: `local` | |
-| `STT_BASE_URL`, `STT_API_KEY`, `STT_MODEL` | A: `https://api.groq.com/openai/v1`, key Groq, `whisper-large-v3-turbo` | OpenAI: `https://api.openai.com/v1`, `whisper-1` |
-| `LIVE_INTERVAL_SEC` | A: `1.5` | giảm số request khi ghi live, đỡ tốn tiền và đỡ bị rate limit |
-| `STT_SERVER_API_KEYS` | B: một hoặc vài chuỗi ngẫu nhiên, cách nhau dấu phẩy | để app desktop dùng GPU của server |
-| `STORAGE_BACKEND`, `S3_BUCKET`, `S3_REGION` | `s3`, tên bucket, `ap-southeast-1` | |
-| `S3_DB_BACKUP_HOURS` | `6` | `0` = tắt sao lưu |
-| `AI_MOCK` / `LLM_BASE_URL` / `LLM_API_KEY` / `SUMMARY_MODEL` / `TRANSLATION_MODEL` | | `AI_MOCK=true` để demo không cần LLM |
+| Biến                                                                                        | Giá trị                                                                  | Ghi chú                                                                |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `SITE_ADDRESS`                                                                             | `sumtalk.ten-mien.vn` hoặc `13-229-10-20.sslip.io`                    | không có`https://`                                                  |
+| `BASIC_AUTH_USER` / `BASIC_AUTH_HASH`                                                    | user / hash vừa tạo                                                      | **giữ dấu nháy đơn** quanh hash                              |
+| `GPU`                                                                                      | `0` (A) hoặc `1` (B)                                                  |                                                                         |
+| `STT_PROVIDER`                                                                             | A:`remote`; B: `local`                                                 |                                                                         |
+| `STT_BASE_URL`, `STT_API_KEY`, `STT_MODEL`                                             | A:`https://api.groq.com/openai/v1`, key Groq, `whisper-large-v3-turbo` | OpenAI:`https://api.openai.com/v1`, `whisper-1`                     |
+| `LIVE_INTERVAL_SEC`                                                                        | A:`1.5`                                                                  | giảm số request khi ghi live, đỡ tốn tiền và đỡ bị rate limit |
+| `STT_SERVER_API_KEYS`                                                                      | B: một hoặc vài chuỗi ngẫu nhiên, cách nhau dấu phẩy              | để app desktop dùng GPU của server                                  |
+| `STORAGE_BACKEND`, `S3_BUCKET`, `S3_REGION`                                            | `s3`, tên bucket, `ap-southeast-1`                                    |                                                                         |
+| `S3_DB_BACKUP_HOURS`                                                                       | `6`                                                                      | `0` = tắt sao lưu                                                   |
+| `AI_MOCK` / `LLM_BASE_URL` / `LLM_API_KEY` / `SUMMARY_MODEL` / `TRANSLATION_MODEL` |                                                                            | `AI_MOCK=true` để demo không cần LLM                              |
 
 Tạo chuỗi key ngẫu nhiên bằng: `openssl rand -hex 24`.
 
@@ -182,6 +184,7 @@ curl -s -u sumtalk:'MatKhauTest@2026' https://$SITE_ADDRESS/api/health
 Lần build đầu mất khoảng 5–10 phút. Với cấu hình B, lần chạy đầu còn tải model Whisper 1.6 GB vào volume.
 
 Kiểm tra trên trình duyệt, mở `https://<SITE_ADDRESS>` rồi đăng nhập:
+
 1. Góc trái phía dưới hiện `whisper-large-v3-turbo · Server` (A) hoặc `Whisper large-v3-turbo · GPU` (B).
 2. **Record**: cho phép micro, nói khoảng 30 giây. Chữ phải hiện theo lời nói, trễ khoảng 1–3 giây.
 3. **Upload**: tải một file MP3 dài vài phút lên, phải thấy các dòng đầu sau vài giây.
@@ -243,15 +246,15 @@ nguyên.
 
 ## 15. Xử lý sự cố
 
-| Triệu chứng | Nguyên nhân thường gặp | Cách xử lý |
-|---|---|---|
-| Caddy báo lỗi lấy chứng chỉ | DNS chưa trỏ đúng IP, hoặc cổng 80/443 chưa mở | `dig +short <SITE_ADDRESS>` phải ra Elastic IP; kiểm tra security group; `docker compose restart caddy` |
-| Trình duyệt hỏi đăng nhập liên tục | Hash sai, hoặc mất dấu nháy đơn trong `.env` | Tạo lại hash, đặt trong `'...'`, rồi `docker compose up -d` |
-| Header báo "Speech model error … refused the key" | Sai `STT_API_KEY` | Sửa `.env`, `docker compose up -d` |
-| Lỗi HTTP 429 trong log app | Vượt rate limit của Groq/OpenAI | Tăng `LIVE_INTERVAL_SEC` lên 2–3, giảm `STT_CONCURRENCY`, hoặc nâng gói của nhà cung cấp |
-| Upload xong nhưng không phát được audio | Role thiếu quyền S3, hoặc sai bucket/region | `docker compose logs app \| grep -i s3`; kiểm tra policy và `S3_BUCKET`/`S3_REGION` |
-| Cấu hình B chạy CPU thay vì GPU | Thiếu NVIDIA Container Toolkit, hoặc quên file gpu.yml | `docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi`; chạy lại với `-f docker-compose.gpu.yml` |
-| Build hết RAM | Máy nhỏ | Script đã tạo swap 2 GB; hoặc build image trên máy khác rồi push lên ECR |
+| Triệu chứng                                       | Nguyên nhân thường gặp                               | Cách xử lý                                                                                                                |
+| --------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Caddy báo lỗi lấy chứng chỉ                    | DNS chưa trỏ đúng IP, hoặc cổng 80/443 chưa mở    | `dig +short <SITE_ADDRESS>` phải ra Elastic IP; kiểm tra security group; `docker compose restart caddy`                |
+| Trình duyệt hỏi đăng nhập liên tục          | Hash sai, hoặc mất dấu nháy đơn trong`.env`       | Tạo lại hash, đặt trong`'...'`, rồi `docker compose up -d`                                                          |
+| Header báo "Speech model error … refused the key" | Sai`STT_API_KEY`                                        | Sửa`.env`, `docker compose up -d`                                                                                       |
+| Lỗi HTTP 429 trong log app                         | Vượt rate limit của Groq/OpenAI                        | Tăng`LIVE_INTERVAL_SEC` lên 2–3, giảm `STT_CONCURRENCY`, hoặc nâng gói của nhà cung cấp                        |
+| Upload xong nhưng không phát được audio       | Role thiếu quyền S3, hoặc sai bucket/region            | `docker compose logs app \| grep -i s3`; kiểm tra policy và `S3_BUCKET`/`S3_REGION`                                   |
+| Cấu hình B chạy CPU thay vì GPU                 | Thiếu NVIDIA Container Toolkit, hoặc quên file gpu.yml | `docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi`; chạy lại với `-f docker-compose.gpu.yml` |
+| Build hết RAM                                      | Máy nhỏ                                                 | Script đã tạo swap 2 GB; hoặc build image trên máy khác rồi push lên ECR                                            |
 
 ## Checklist
 

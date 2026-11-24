@@ -1,0 +1,1519 @@
+% =============================================================================
+%  Tài liệu 03 - Kế hoạch quản lý dự án (Project Management Plan)
+%  Build: latexmk 03-project-management-plan.tex   (pdfLaTeX, output in build/)
+% =============================================================================
+\documentclass[12pt,a4paper]{report}
+\usepackage{sumtalk-report}
+\usepackage{pgfgantt}
+\input{sumtalk-info}
+
+\newcommand{\DocTitle}{KẾ HOẠCH QUẢN LÝ DỰ ÁN}
+\newcommand{\DocTitleNormal}{Kế hoạch quản lý dự án}
+\newcommand{\DocTitleEn}{Project Management Plan}
+\newcommand{\DocRunningTitle}{Kế hoạch quản lý dự án}
+\newcommand{\DocCode}{SUMTALK-PMP}
+\newcommand{\DocVersion}{2.1 -- 24/11/2026}
+\newcommand{\DocStatus}{Chờ duyệt}
+\newcommand{\DocAuthor}{\canDien[Project Manager]}
+\newcommand{\DocReviewers}{Sponsor, Product Owner, Project Manager}
+\newcommand{\DocReaders}{Sponsor, Project Manager, cả nhóm dự án}
+\newcommand{\CoverDate}{TP. HỒ CHÍ MINH, THÁNG 11/2026}
+\hypersetup{pdftitle={SumTalk -- Kế hoạch quản lý dự án},pdfauthor={Nhóm SumTalk}}
+
+% Role placeholder in the risk register (a role that still has to be replaced by a name).
+\newcommand{\role}[1]{\textit{#1}}
+
+\begin{document}
+
+\makereportcover
+
+% ============================================================ Front matter
+\chapter*{Thông tin tài liệu}
+\addcontentsline{toc}{chapter}{Thông tin tài liệu}
+
+\docinfotable
+
+\section*{Lịch sử phiên bản}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}Q{1.6cm}Q{2.3cm}LP{3.2cm}@{}}
+    \toprule
+    \thead{Phiên bản} & \thead{Ngày} & \thead{Nội dung thay đổi} & \thead{Người thực hiện} \\
+    \midrule
+    1.0 & 12/11/2026 & Bản đầu, gồm bảy tài liệu riêng: WBS, ước lượng effort, lịch trình CPM/Gantt, Risk Register,
+      kế hoạch nguồn lực, kế hoạch chi phí, RACI và truyền thông & \canDien \\
+    2.0 & 13/11/2026 & Gộp thành một tài liệu, đánh lại số mục (CR-08) & \canDien \\
+    2.1 & 24/11/2026 & Chuyển sang định dạng báo cáo PDF (LaTeX), sắp xếp lại thành chín chương; vẽ cây WBS, sơ đồ
+      mạng, Gantt, ma trận rủi ro; sửa tổng story point của bảng ước lượng (118 SP) & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\needspace{8\baselineskip}
+\heading{Quy ước trong tài liệu}
+\begin{itemize}
+  \item \canDien[\ldots]: số liệu đã có ở Azure Boards, dashboard chi phí hoặc biên bản họp nhưng chưa chép
+        vào tài liệu; cần bổ sung trước khi trình duyệt.
+  \item \textbf{Giả định}: con số đặt ra để tính toán; bảng ghi rõ công thức để tính lại khi có số thật, hoặc
+        tính lại bằng công cụ \texttt{pm\_calc.py}~\cite{pmcalc}.
+  \item \textbf{Thời lượng} trong lịch trình tính bằng \emph{ngày làm việc} và là số ước lượng từ story point.
+  \item \textbf{Story point (SP)} là điểm đề xuất để đối chiếu với điểm đã vote trên Azure Boards.
+  \item \textbf{Mã công việc}: \#61--\#72, \#99, \#100 là ID trên Azure Boards; T1.x là task của epic E1; A--W là
+        mã công việc trong lịch trình (Chương~\ref{chap:schedule}).
+  \item Tên \role{in nghiêng} ở cột phụ trách là \emph{vai trò}, cần thay bằng tên thành viên.
+\end{itemize}
+
+\tableofcontents
+
+\chapter*{Tóm tắt}
+\addcontentsline{toc}{chapter}{Tóm tắt}
+
+Tài liệu này là \textbf{kế hoạch quản lý dự án} (Project Management Plan -- PMP) của SumTalk: kế hoạch tổng thể
+để thực hiện và kiểm soát dự án sau khi Sponsor đã duyệt khởi động. Phạm vi công việc được phân rã thành
+\textbf{9 nhánh cấp 1 và 33 gói công việc}, mỗi gói tương ứng một task trên Azure Boards hoặc một nhóm commit
+trên GitHub. Effort được ước lượng bằng story point với Planning Poker (\textbf{118 SP} đề xuất cho 18 hạng mục) và
+được đối chiếu bằng hai phương pháp độc lập: Function Point cho khoảng \textbf{1.560 giờ} phần chức năng,
+COCOMO~81 cho \textbf{3.500--5.100 giờ} nếu làm theo kiểu công ty với nhóm toàn thời gian.
+
+Lịch trình gồm 23 công việc; đường găng A $\rightarrow$ B $\rightarrow$ C/F $\rightarrow$ G $\rightarrow$ U
+$\rightarrow$ V $\rightarrow$ W dài \textbf{33 ngày làm việc}, còn nhánh tóm tắt và dịch có 3--12 ngày dự trữ.
+Risk Register theo dõi \textbf{14 rủi ro}, trong đó 5 rủi ro ở vùng Cao; rủi ro lớn nhất hiện nay là chi phí và
+giới hạn của API bên ngoài khi deploy, cùng độ chính xác STT với tiếng Việt và họp trộn ngôn ngữ. Chi phí chủ
+yếu là nhân công với đơn giá \textbf{100.000~VND/giờ}; hạ tầng và API cho bản test chỉ khoảng
+\textbf{2,5--3 triệu VND/tháng} khi chạy 24/7, ngân sách giữ thêm 10\% dự phòng. Cuối cùng, ma trận RACI giao
+mỗi sản phẩm cho đúng một người chịu trách nhiệm cuối, kèm lịch họp Scrum, kế hoạch truyền thông và quy trình
+leo thang.
+
+\textbf{Từ khoá:} kế hoạch quản lý dự án, WBS, story point, COCOMO, Function Point, CPM, Gantt, Risk Register,
+ngân sách, RACI.
+
+\chapter*{Danh mục từ viết tắt}
+\addcontentsline{toc}{chapter}{Danh mục từ viết tắt}
+
+% 39 entries: longtable so the list can continue on the next page.
+\begingroup
+  \setstretch{1.1}
+  \begin{longtable}{@{}P{2.2cm}P{13.2cm}@{}}
+    \toprule
+    \thead{Viết tắt} & \thead{Ý nghĩa} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \thead{Viết tắt} & \thead{Ý nghĩa} \\
+    \midrule
+    \endhead
+    \bottomrule
+    \endlastfoot
+    AC     & Actual Cost -- chi phí thực tế \\
+    AFP    & Adjusted Function Point -- điểm chức năng đã điều chỉnh \\
+    AON    & Activity on Node -- sơ đồ mạng đặt công việc trên nút \\
+    API    & Application Programming Interface -- giao diện lập trình ứng dụng \\
+    AWS    & Amazon Web Services (EC2: máy chủ ảo; EBS: ổ đĩa; S3: lưu trữ đối tượng) \\
+    BA     & Business Analyst -- chuyên viên phân tích nghiệp vụ \\
+    BAC    & Budget at Completion -- tổng ngân sách khi hoàn thành \\
+    COCOMO & Constructive Cost Model -- mô hình ước lượng chi phí phần mềm \\
+    CPI    & Cost Performance Index -- chỉ số hiệu quả chi phí \\
+    CPM    & Critical Path Method -- phương pháp đường găng \\
+    CPU    & Central Processing Unit -- bộ xử lý trung tâm \\
+    E2E    & End-to-End -- kiểm thử đầu cuối \\
+    EVA    & Earned Value Analysis -- phân tích giá trị thu được \\
+    FP     & Function Point -- điểm chức năng \\
+    GPU    & Graphics Processing Unit -- bộ xử lý đồ hoạ, dùng để chạy model \\
+    HTTPS  & Hypertext Transfer Protocol Secure -- giao thức web có mã hoá \\
+    IAM    & Identity and Access Management -- quản lý danh tính và quyền trên AWS \\
+    IFPUG  & International Function Point Users Group -- tổ chức chuẩn hoá cách đếm FP \\
+    KLOC   & Kilo Lines of Code -- nghìn dòng mã \\
+    LLM    & Large Language Model -- mô hình ngôn ngữ lớn \\
+    PM     & Project Manager -- quản lý dự án \\
+    PMP    & Project Management Plan -- kế hoạch quản lý dự án \\
+    PO     & Product Owner -- chủ sản phẩm \\
+    POC    & Proof of Concept -- bản thử nghiệm khái niệm \\
+    PV     & Planned Value -- giá trị (chi phí) kế hoạch \\
+    PWA    & Progressive Web App -- ứng dụng web cài được như app \\
+    QC     & Quality Control -- kiểm soát chất lượng \\
+    RACI   & Responsible, Accountable, Consulted, Informed -- ma trận phân vai \\
+    SM     & Scrum Master \\
+    SP     & Story Point -- điểm ước lượng độ lớn của story \\
+    SPI    & Schedule Performance Index -- chỉ số hiệu quả tiến độ \\
+    STT    & Speech-to-Text -- chuyển giọng nói thành văn bản \\
+    UAT    & User Acceptance Testing -- kiểm thử chấp nhận của người dùng \\
+    UFP    & Unadjusted Function Point -- điểm chức năng chưa điều chỉnh \\
+    UI/UX  & User Interface / User Experience -- giao diện / trải nghiệm người dùng \\
+    VAD    & Voice Activity Detection -- phát hiện đoạn có tiếng nói \\
+    VAF    & Value Adjustment Factor -- hệ số điều chỉnh của FP \\
+    WBS    & Work Breakdown Structure -- cấu trúc phân rã công việc \\
+  \end{longtable}
+\endgroup
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listfigurename}
+\listoffigures
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listtablename}
+\listoftables
+
+% ============================================================ Chapter 1
+\chapter{Giới thiệu}
+\label{chap:intro}
+
+\section{Bối cảnh}
+
+Hồ sơ khởi động dự án~\cite{pid} đã xác lập SumTalk, đặt sáu mục tiêu SMART và chọn \textbf{Scrum} làm phương
+pháp quản lý, kèm một bộ tài liệu quản lý tối thiểu để báo cáo với Sponsor. Đặc tả yêu cầu phần
+mềm~\cite{srs} mô tả sản phẩm cần làm: 7 epic, 17 user story và 37 yêu cầu phi chức năng. Tài liệu này trả lời
+câu hỏi tiếp theo: dự án sẽ được \emph{thực hiện} và \emph{kiểm soát} như thế nào để giao đúng sản phẩm đó,
+trong thời gian và ngân sách đã duyệt.
+
+\section{Mục đích và người đọc của tài liệu}
+
+Kế hoạch bao gồm bảy lĩnh vực: phạm vi công việc (WBS), ước lượng effort, lịch trình và đường găng, rủi ro,
+nguồn lực, chi phí, tổ chức nhóm và truyền thông. Các khái niệm và kỹ thuật dùng ở đây (WBS, CPM, ma trận rủi ro,
+RACI) theo hướng dẫn PMBOK~\cite{pmbok}. Kế hoạch chất lượng và kiểm thử không nằm trong tài liệu này mà ở
+\docref{04}{Chất lượng và kiểm thử}~\cite{qtd}; số liệu thực tế của từng sprint (burndown, EVA, Change Log) được
+báo cáo trong \docref{05}{Báo cáo theo dõi và kiểm soát}~\cite{mcr}.
+
+Người đọc chính là Sponsor (duyệt lịch, ngân sách và mức rủi ro chấp nhận được), Project Manager (dùng kế hoạch
+làm đường cơ sở để theo dõi) và cả nhóm dự án (biết việc của mình, phụ thuộc và người cần phối hợp). Theo cách áp
+dụng Scrum đã chọn, kế hoạch \emph{được cập nhật mỗi sprint}, không lập một lần rồi khoá.
+
+\section{Cấu trúc tài liệu}
+
+Phần còn lại của tài liệu gồm tám chương:
+\begin{itemize}
+  \item \textbf{Chương~\ref{chap:wbs} -- Phạm vi công việc (WBS):} cây WBS, từ điển WBS đến gói công việc và quy
+        tắc phân rã.
+  \item \textbf{Chương~\ref{chap:effort} -- Ước lượng effort:} story point và Planning Poker, velocity, đối chiếu
+        bằng COCOMO~81 và Function Point.
+  \item \textbf{Chương~\ref{chap:schedule} -- Lịch trình:} danh sách công việc, CPM, sơ đồ mạng, Gantt và release
+        plan theo sprint.
+  \item \textbf{Chương~\ref{chap:risk} -- Quản lý rủi ro:} thang đánh giá, Risk Register, ma trận rủi ro, quy trình
+        và dự phòng.
+  \item \textbf{Chương~\ref{chap:resource} -- Nguồn lực:} con người, phân công theo sprint, san tải, máy móc và
+        dịch vụ.
+  \item \textbf{Chương~\ref{chap:cost} -- Chi phí và ngân sách:} đơn giá, chi phí nhân công và ngoài nhân công,
+        tổng ngân sách và cách kiểm soát.
+  \item \textbf{Chương~\ref{chap:team} -- Tổ chức nhóm và truyền thông:} vai trò, ma trận RACI, lịch họp Scrum,
+        kế hoạch truyền thông và leo thang vấn đề.
+  \item \textbf{Chương~\ref{chap:conclusion} -- Kết luận và phê duyệt.}
+\end{itemize}
+
+% ============================================================ Chapter 2
+\chapter{Phạm vi công việc (WBS)}
+\label{chap:wbs}
+
+\textbf{Dự án được phân rã thành 9 nhánh cấp 1 và 33 gói công việc.} Nhánh đầu là quản lý dự án, bảy nhánh tiếp
+theo ứng với bảy epic của Product Backlog~\cite{srs}, nhánh cuối là kiểm thử và phát hành. Gói công việc ở cấp
+thấp nhất tương ứng với task trên Azure Boards (T1.x, \#61--\#72, \#99, \#100) hoặc các commit theo task trên
+GitHub.
+
+Hình~\ref{fig:wbs} trình bày WBS đến cấp 2. Hai nhánh tóm tắt (E3) và dịch (E4) có nhiều gói nhất, mỗi nhánh 5
+gói, vì ngoài model, lưu trữ, job và giao diện còn có một gói đánh giá chất lượng (\#72, \#66).
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      root/.style={draw=primaryblue,fill=primaryblue,text=white,font=\small\bfseries,
+                   rounded corners=2pt,inner sep=4pt,anchor=west},
+      l1/.style={draw=primaryblue,fill=accentblue,font=\footnotesize,align=left,text width=3.4cm,
+                 minimum height=0.85cm,inner sep=3pt,rounded corners=1.5pt,anchor=west,
+                 execute at begin node={\setstretch{1}\hyphenpenalty=10000\relax}},
+      l2/.style={draw=primaryblue!60,fill=white,font=\scriptsize,align=left,text width=1.9cm,
+                 minimum height=0.85cm,inner sep=3pt,anchor=west,
+                 execute at begin node={\setstretch{1}\hyphenpenalty=10000\relax}},
+      ln/.style={primaryblue!70,thin}]
+    \node[root] (root) at (0,0) {SumTalk};
+    \draw[ln] (0.35,-0.3) -- (0.35,-9.9);
+    \foreach \lab/\kids [count=\i] in {
+        {\textbf{1} -- Quản lý dự án}/{1.1 Khởi động,{1.2 Lập kế hoạch},{1.3 Theo dõi, kiểm soát},1.4 Kết thúc},
+        {\textbf{2 -- E1} Ghi lại cuộc họp}/{{2.1 Ghi âm trên trình duyệt},{2.2 Offline, điện thoại},2.3 Upload},
+        {\textbf{3 -- E2} Transcript}/{{3.1 STT ngôn ngữ gốc},{3.2 Transcript live},{3.3 Trang cuộc họp},3.4 File dài},
+        {\textbf{4 -- E3} Tóm tắt (\#67)}/{{4.1 Model, prompt},4.2 Map-reduce,{4.3 Job, lưu trữ, API},{4.4 Giao diện},{4.5 Đánh giá}},
+        {\textbf{5 -- E4} Dịch (\#60)}/{5.1 Model dịch,{5.2 Lưu bản dịch, API},{5.3 Job có tiến độ},{5.4 Giao diện, xuất file},5.5 Đánh giá},
+        {\textbf{6 -- E5} App desktop}/{6.1 Vỏ Electron,6.2 Đóng gói,{6.3 Thích nghi web app}},
+        {\textbf{7 -- E6} Engine STT dùng chung}/{{7.1 Client STT remote},{7.2 API STT chuẩn OpenAI},{7.3 Cấu hình bộ cài}},
+        {\textbf{8 -- E7} Triển khai web AWS}/{8.1 Lưu trữ S3,{8.2 Container, proxy},{8.3 Hướng dẫn deploy}},
+        {\textbf{9} -- Kiểm thử và phát hành}/{9.1 Test tự động,{9.2 Test E2E Sprint 3},{9.3 UAT, phát hành}}} {
+      \pgfmathsetmacro{\y}{-1.1*\i}
+      \draw[ln] (0.35,\y) -- (0.6,\y);
+      \node[l1] (L\i) at (0.6,\y) {\lab};
+      \foreach \k [count=\n] in \kids {
+        \pgfmathsetmacro{\xk}{4.5+(\n-1)*2.25}
+        \ifnum\n=1 \pgfmathsetmacro{\xs}{4.21}\else\pgfmathsetmacro{\xs}{\xk-0.14}\fi
+        \draw[ln] (\xs,\y) -- (\xk,\y);
+        \node[l2] at (\xk,\y) {\k};
+      }
+    }
+  \end{tikzpicture}
+  \caption{Cấu trúc phân rã công việc (WBS) của dự án SumTalk, cấp 1--2}
+  \label{fig:wbs}
+\end{figure}
+
+\section{Từ điển WBS}
+
+Từ điển WBS (Bảng~\ref{tab:wbs-dict}) mô tả sản phẩm bàn giao của từng gói công việc và nơi theo dõi gói đó:
+tài liệu trong bộ quản lý dự án, task trên Azure Boards, hoặc file và nhánh trong kho mã nguồn.
+
+\begingroup\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}P{1.0cm}P{3.2cm}P{6.3cm}P{4.4cm}@{}}
+  \caption{Từ điển WBS đến gói công việc}\label{tab:wbs-dict}\\
+  \toprule
+  \thead{Mã} & \thead{Gói công việc} & \thead{Sản phẩm bàn giao} & \thead{Liên kết board / repo} \\
+  \midrule
+  \endfirsthead
+  \multicolumn{4}{@{}l}{\footnotesize\itshape Bảng~\thetable{} (tiếp theo)}\\
+  \toprule
+  \thead{Mã} & \thead{Gói công việc} & \thead{Sản phẩm bàn giao} & \thead{Liên kết board / repo} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  \multicolumn{4}{@{}l}{\textbf{1 -- Quản lý dự án}}\\
+  1.1 & Khởi động & Charter, Business Case, chọn phương pháp & Hồ sơ khởi động~\cite{pid} \\
+  1.2 & Lập kế hoạch & Backlog, yêu cầu, ước lượng, lịch, rủi ro, nguồn lực, chi phí, chất lượng, RACI
+      & Đặc tả yêu cầu~\cite{srs}, tài liệu này, Chất lượng và kiểm thử~\cite{qtd} \\
+  1.3 & Theo dõi và kiểm soát & Sprint report, EVA, biên bản, Change Log & Báo cáo theo dõi và kiểm soát~\cite{mcr} \\
+  1.4 & Kết thúc & SOW và nghiệm thu, test summary, release notes, lessons learned
+      & Báo cáo kết thúc~\cite{pcr}, Test Summary~\cite{qtd} \\
+  \midrule
+  \multicolumn{4}{@{}l}{\textbf{2 -- E1 Ghi lại cuộc họp}}\\
+  2.1 & Ghi âm trên trình duyệt & Màn hình ghi âm, recorder (micro + âm thanh họp), gửi chunk, tạo meeting
+      & T1.1.1--T1.1.5 \\
+  2.2 & Offline và điện thoại & IndexedDB, đồng bộ, Wake Lock, PWA & T1.2.1--T1.2.5 \\
+  2.3 & Upload & Màn hình upload, kiểm tra file, upload theo phần, chuẩn hoá audio & T1.3.1--T1.3.5 \\
+  \midrule
+  \multicolumn{4}{@{}l}{\textbf{3 -- E2 Transcript}}\\
+  3.1 & STT ngôn ngữ gốc & Whisper GPU/CPU, nhận ngôn ngữ từng câu, lọc chữ ``ảo'' & \path{services/transcriber.py} \\
+  3.2 & Transcript live & Live theo LocalAgreement, chunk 1\,s, chữ chắc chắn và chữ tạm
+      & Nhánh \path{feature/streaming-stt} \\
+  3.3 & Trang cuộc họp & Player đồng bộ, tìm kiếm, xuất TXT/SRT/VTT/JSON/WAV, phiên âm lại
+      & \path{pages/MeetingPage.tsx} \\
+  3.4 & File dài & Chia đoạn tại chỗ im lặng, lưu dần & Nhánh \path{feature/streaming-stt} \\
+  \midrule
+  \multicolumn{4}{@{}l}{\textbf{4 -- E3 Tóm tắt (\#67)}}\\
+  4.1 & Model và prompt tóm tắt & Schema, prompt, client LLM & \#68 \\
+  4.2 & Transcript dài & Map-reduce & \#69 \\
+  4.3 & Job tóm tắt, lưu trữ, API & Worker, retry, model dữ liệu, endpoint & \#70 \\
+  4.4 & Giao diện tóm tắt & Tab Summary và Regenerate & \#71 \\
+  4.5 & Đánh giá tóm tắt & \path{eval_summary.py} & \#72 \\
+  \midrule
+  \multicolumn{4}{@{}l}{\textbf{5 -- E4 Dịch (\#60)}}\\
+  5.1 & Model dịch & Prompt, batch, nhận ngôn ngữ & \#61 \\
+  5.2 & Lưu bản dịch, API & Model dữ liệu, endpoint & \#62 \\
+  5.3 & Job dịch có tiến độ & Worker & \#63 \\
+  5.4 & Giao diện và xuất & Chọn ngôn ngữ, song ngữ, xuất TXT/SRT & \#64, \#65 \\
+  5.5 & Đánh giá dịch & \path{eval_translation.py} & \#66 \\
+  \midrule
+  \multicolumn{4}{@{}l}{\textbf{6 -- E5 App desktop}}\\
+  6.1 & Vỏ Electron & Cửa sổ, menu, quyền, vòng đời backend & \path{desktop/main.js}, \path{lib/backend.js} \\
+  6.2 & Đóng gói & PyInstaller, bộ cài NSIS, bản GPU
+      & \path{desktop/sumtalk-server.spec}, \path{build-desktop.bat} \\
+  6.3 & Thích nghi web app & Nhận biết desktop, âm thanh hệ thống & \path{lib/desktop.ts} \\
+  \midrule
+  \multicolumn{4}{@{}l}{\textbf{7 -- E6 Engine STT dùng chung}}\\
+  7.1 & Client STT remote & VAD, chia block, song song, retry & \path{services/stt_remote.py} \\
+  7.2 & API STT chuẩn OpenAI & \path{/v1/audio/transcriptions}, API key & \path{api/stt_server.py} \\
+  7.3 & Cấu hình bộ cài & \texttt{SUMTALK\_DEFAULT\_*} & \path{desktop/scripts/build-backend.js} \\
+  \midrule
+  \multicolumn{4}{@{}l}{\textbf{8 -- E7 Triển khai web AWS}}\\
+  8.1 & Lưu trữ S3 & Lưu audio, presigned URL, sao lưu database & \path{services/storage.py} \\
+  8.2 & Container và proxy & Dockerfile, Compose, Caddy & \path{Dockerfile}, \path{deploy/} \\
+  8.3 & Hướng dẫn deploy & Tài liệu từng bước & \path{docs/deploy/AWS-EC2-S3.md} \\
+  \midrule
+  \multicolumn{4}{@{}l}{\textbf{9 -- Kiểm thử và phát hành}}\\
+  9.1 & Test tự động & pytest, Playwright (trình duyệt, desktop)
+      & \path{backend/tests}, \path{frontend/e2e}, \path{desktop/scripts/smoke-test.js} \\
+  9.2 & Test E2E Sprint 3 & Test case, kịch bản & \#99, \#100 \\
+  9.3 & UAT và phát hành & Biên bản UAT, release notes, bộ cài, bản web
+      & Test Summary Report~\cite{qtd}, Release Notes~\cite{pcr} \\
+\end{longtable}
+\endgroup
+
+\section{Quy tắc phân rã}
+
+Ba quy tắc sau giữ cho WBS vừa đủ chi tiết để giao việc và đo tiến độ:
+\begin{itemize}
+  \item \textbf{Kích thước:} gói công việc ở cấp thấp nhất làm được trong $\leq$ 3 ngày và có sản phẩm kiểm tra
+        được. Quy tắc 8/80 giờ thường dùng được nhóm siết lại thành $\leq$ 24 giờ cho mỗi gói.
+  \item \textbf{Trách nhiệm:} mỗi gói có đúng một người chịu trách nhiệm, theo ma trận RACI ở
+        Mục~\ref{sec:raci}.
+  \item \textbf{Truy vết:} gói công việc ánh xạ 1--1 với task trên Azure Boards; commit trên GitHub ghi mã task,
+        ví dụ \texttt{(\#70)}.
+\end{itemize}
+
+% ============================================================ Chapter 3
+\chapter{Ước lượng effort}
+\label{chap:effort}
+
+\textbf{Phương pháp chính là story point với Planning Poker, quy ra giờ bằng velocity thực tế.} Hai phương pháp
+đối chiếu, COCOMO~81 cơ bản (tính từ số dòng code thật của repo) và Function Point (tính từ số API và bảng dữ liệu
+thật), cho kết quả 3.500--5.100 giờ cho cả sản phẩm nếu làm theo kiểu công ty với một nhóm toàn thời gian. Con số
+này dùng để kiểm tra độ hợp lý về quy mô, không thay cho số giờ thực tế của nhóm.
+
+\section{Story point và Planning Poker}
+
+Mỗi buổi Sprint Planning ước lượng theo năm bước:
+\begin{enumerate}
+  \item PO đọc user story và acceptance criteria trong Product Backlog~\cite{srs}.
+  \item Mỗi thành viên chọn một lá bài theo dãy Fibonacci: 1, 2, 3, 5, 8, 13, 21, ?.
+  \item Cả nhóm lật bài cùng lúc. Người chọn cao nhất và thấp nhất giải thích lý do; vote lại tối đa 2 vòng.
+  \item Story trên 13 điểm phải tách nhỏ. Story mốc tham chiếu là \textbf{\#65 Xuất TXT/SRT = 2 điểm}.
+  \item Khi lập kế hoạch, điểm được quy ra giờ theo công thức~\eqref{eq:sp-hours}.
+\end{enumerate}
+\begin{equation}
+  \label{eq:sp-hours}
+  \text{Giờ} \approx \text{SP} \times \frac{H_2}{\mathit{SP}_2}
+\end{equation}
+trong đó $H_2$ và $\mathit{SP}_2$ là tổng giờ thực tế và tổng story point hoàn thành của 2 sprint gần nhất.
+
+\section{Bảng ước lượng theo backlog}
+
+Bảng~\ref{tab:estimate} liệt kê 18 hạng mục theo backlog. Cột ``SP'' là điểm đề xuất để nhóm đối chiếu với điểm
+đã vote trên Azure Boards; cột ``Giờ thực tế'' lấy từ board. Giờ ước lượng của từng hạng mục được tính bằng
+công thức~\eqref{eq:sp-hours} khi đã có velocity (Mục~\ref{sec:velocity}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Ước lượng theo backlog}
+  \label{tab:estimate}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{2.6cm}LQ{1.6cm}Q{2.6cm}@{}}
+    \toprule
+    \thead{Task / story} & \thead{Nội dung} & \thead{SP đề xuất} & \thead{Giờ thực tế} \\
+    \midrule
+    T1.1.1--T1.1.5 & Ghi âm trên trình duyệt, gửi chunk, tạo meeting, test trình duyệt & 13 & \canDien \\
+    T1.2.1--T1.2.5 & Ghi trên điện thoại, offline, tự đồng bộ & 13 & \canDien \\
+    T1.3.1--T1.3.5 & Upload file lớn, kiểm tra định dạng, chuẩn hoá audio & 8 & \canDien \\
+    STT & Whisper, transcript ngôn ngữ gốc, live & 13 & \canDien \\
+    \midrule
+    \#68 & Model và prompt tóm tắt & 5 & \canDien \\
+    \#69 & Transcript dài (map-reduce) & 5 & \canDien \\
+    \#70 & Bước tóm tắt, lưu trữ, API & 5 & \canDien \\
+    \#71 & Tab Summary và Regenerate & 3 & \canDien \\
+    \#61 & Model dịch & 3 & \canDien \\
+    \#62 & Lưu bản dịch và API & 3 & \canDien \\
+    \#63 & Bước dịch có tiến độ & 3 & \canDien \\
+    \#64 & Chọn ngôn ngữ và hiển thị song ngữ & 3 & \canDien \\
+    \#65 & Xuất TXT/SRT (mốc tham chiếu) & 2 & \canDien \\
+    \#66, \#72 & Đánh giá chất lượng dịch, tóm tắt & 5 & \canDien \\
+    \#99, \#100 & Test E2E Sprint 3 & 5 & \canDien \\
+    \midrule
+    D-1 & App desktop (Electron, đóng gói, bộ cài) & 8 & \canDien \\
+    S-1 & Live streaming, STT remote, file dài & 13 & \canDien \\
+    O-1 & Deploy AWS (Docker, S3, hướng dẫn) & 8 & \canDien \\
+    \midrule
+    \textbf{Tổng} & & \textbf{118} & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Tổng điểm đề xuất là 118 SP, được cộng lại từ các dòng của bảng; phiên bản 2.0 ghi tổng là 125 SP do cộng sai.
+Nhóm tóm tắt và dịch (\#61--\#72) chiếm 37 SP, đúng bằng tổng điểm của hai story \#67 (18 SP) và \#60 (19 SP)
+trong Product Backlog~\cite{srs}.
+
+\section{Velocity}
+\label{sec:velocity}
+
+Velocity là số story point nhóm hoàn thành trong một sprint. Velocity dùng để lập kế hoạch là trung bình của 3
+sprint gần nhất, và từ đó suy ra số sprint còn lại:
+\begin{equation}
+  \label{eq:velocity}
+  v = \frac{1}{3}\sum_{\text{3 sprint gần nhất}} \text{SP hoàn thành},
+  \qquad
+  \text{Số sprint còn lại} = \frac{\text{SP còn lại trong backlog}}{v}
+\end{equation}
+Số liệu của ba sprint đầu (Bảng~\ref{tab:velocity}) được lấy từ Azure Boards.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Velocity theo sprint}
+  \label{tab:velocity}
+  \begin{tabularx}{\linewidth}{@{}LQ{2.5cm}Q{2.5cm}Q{2.5cm}Q{1.8cm}@{}}
+    \toprule
+    \thead{Sprint} & \thead{SP cam kết} & \thead{SP hoàn thành} & \thead{Giờ thực tế} & \thead{Giờ/SP} \\
+    \midrule
+    Sprint 1 & \canDien & \canDien & \canDien & \\
+    Sprint 2 & \canDien & \canDien & \canDien & \\
+    Sprint 3 & \canDien & \canDien & \canDien & \\
+    \midrule
+    \textbf{Trung bình} & & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Đối chiếu bằng COCOMO 81 cơ bản}
+
+Kích thước sản phẩm được đo trong repo ngày 12/11/2026, chỉ tính code viết tay, không tính dòng trống, comment,
+test và các component UI sinh tự động (Bảng~\ref{tab:loc}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Kích thước mã nguồn ngày 12/11/2026}
+  \label{tab:loc}
+  \begin{tabular}{@{}P{10cm}r@{}}
+    \toprule
+    \thead{Thành phần} & \thead{Dòng code} \\
+    \midrule
+    Backend Python (\path{backend/app}, \path{run.py}) & 3.386 \\
+    Frontend TypeScript/React (trừ \path{components/ui}) & 4.518 \\
+    Desktop (Electron, build) & 749 \\
+    \midrule
+    \textbf{Tổng} & \textbf{8.653 (8,65 KLOC)} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+COCOMO~81 cơ bản~\cite{boehm} ước lượng effort $E$ (người-tháng), thời gian $T$ (tháng) và số người $N$ từ kích
+thước theo KLOC, với các hệ số $a, b, c, d$ phụ thuộc chế độ dự án:
+\begin{equation}
+  \label{eq:cocomo}
+  E = a \cdot \mathrm{KLOC}^{\,b}, \qquad T = c \cdot E^{\,d}, \qquad N = \frac{E}{T}
+\end{equation}
+Kết quả cho hai chế độ phù hợp với SumTalk được nêu trong Bảng~\ref{tab:cocomo}, với $E$ tính bằng người-tháng,
+$T$ bằng tháng; giờ công quy đổi theo 152 giờ/tháng và chi phí theo 100.000~VND/giờ.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Ước lượng bằng COCOMO 81 cơ bản (8,65 KLOC)}
+  \label{tab:cocomo}
+  \small
+  \setlength{\tabcolsep}{5pt}
+  \begin{tabularx}{\linewidth}{@{}LQ{3.3cm}rrrrr@{}}
+    \toprule
+    \thead{Chế độ} & \thead{$a$; $b$; $c$; $d$} & \thead{$E$} & \thead{$T$} & \thead{$N$}
+      & \thead{Giờ} & \thead{Chi phí (VND)} \\
+    \midrule
+    Organic & 2,4; 1,05; 2,5; 0,38 & 23,1 & 8,2 & 2,8 & 3.516 & 351,6 triệu \\
+    Semi-detached (có AI/ML, nhiều công nghệ) & 3,0; 1,12; 2,5; 0,35 & 33,6 & 8,6 & 3,9 & 5.112 & 511,2 triệu \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Đối chiếu bằng Function Point}
+
+Function Point được đếm theo IFPUG với trọng số trung bình~\cite{ifpug}, từ hệ thống thật: 27 endpoint API và
+6 bảng dữ liệu (Bảng~\ref{tab:fp}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Đếm Function Point (IFPUG, trọng số trung bình)}
+  \label{tab:fp}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}P{2.9cm}LQ{1.3cm}Q{1.4cm}Q{1cm}@{}}
+    \toprule
+    \thead{Loại} & \thead{Đếm từ hệ thống} & \thead{Số lượng} & \thead{Trọng số} & \thead{Điểm} \\
+    \midrule
+    EI -- nhập liệu & Tạo meeting, gửi chunk, finalize, đổi tên, xoá, upload (tạo, part, complete, huỷ),
+      retranscribe, regenerate/dịch & 11 & 4 & 44 \\
+    EO -- xuất có xử lý & Export transcript (5 định dạng), export bản dịch, transcript live, tóm tắt, phát audio,
+      API \path{/v1} transcription & 7 & 5 & 35 \\
+    EQ -- truy vấn & Danh sách meeting, chi tiết, transcript, health, config, trạng thái upload, danh sách bản dịch,
+      bản dịch, models & 9 & 4 & 36 \\
+    ILF -- dữ liệu nội bộ & Meeting, Segment, Upload, Summary, Translation, SegmentTranslation & 6 & 10 & 60 \\
+    EIF -- dữ liệu ngoài & API LLM, API Whisper/S3 & 2 & 7 & 14 \\
+    \midrule
+    \textbf{UFP} & & & & \textbf{189} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Hệ số điều chỉnh được tính từ tổng điểm của 14 đặc tính hệ thống, giả định là 38 điểm:
+\begin{equation*}
+  \mathrm{VAF} = 0{,}65 + 0{,}01 \times 38 = 1{,}03, \qquad
+  \mathrm{AFP} = 189 \times 1{,}03 \approx 195~\text{FP}
+\end{equation*}
+Với năng suất 8 giờ/FP, effort khoảng $195 \times 8 \approx$ \textbf{1.560 giờ}.
+
+\section{So sánh và kết luận}
+
+Bảng~\ref{tab:effort-compare} và Hình~\ref{fig:effort-compare} đặt các kết quả cạnh nhau. Ước lượng theo story
+point là số dùng để lập kế hoạch, nhưng còn chờ giờ thực tế để quy đổi.
+
+\begin{table}[htbp]
+  \centering
+  \caption{So sánh các phương pháp ước lượng}
+  \label{tab:effort-compare}
+  \begin{tabularx}{\linewidth}{@{}P{5.6cm}P{3.4cm}L@{}}
+    \toprule
+    \thead{Phương pháp} & \thead{Effort} & \thead{Ghi chú} \\
+    \midrule
+    Story point (118 SP $\times$ giờ/SP thực tế) & \canDien & Số dùng để lập kế hoạch \\
+    Function Point (195 FP $\times$ 8 giờ) & Khoảng 1.560 giờ & Chỉ phần chức năng, chưa gồm desktop và deploy \\
+    COCOMO organic & Khoảng 3.500 giờ & Mô hình công ty, gồm cả quản lý và tài liệu \\
+    COCOMO semi-detached & Khoảng 5.100 giờ & Như trên, hệ số cho dự án nhiều công nghệ \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.72\linewidth, height=4.6cm,
+        xbar, bar width=0.5cm,
+        xmin=0, xmax=6400,
+        symbolic y coords={FP,CO,CS}, ytick=data, y dir=reverse,
+        yticklabels={{Function Point},{COCOMO organic},{COCOMO semi-detached}},
+        xlabel={Giờ công ước lượng},
+        nodes near coords, every node near coord/.append style={font=\footnotesize},
+        grid=major, ymajorgrids=false, grid style={gray!25},
+        tick label style={font=\small}, enlarge y limits=0.3,
+        /pgf/number format/.cd, use comma, 1000 sep={.}]
+      \addplot[fill=primaryblue, draw=primaryblue] coordinates {(1560,FP) (3516,CO) (5112,CS)};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Effort theo hai phương pháp đối chiếu}
+  \label{fig:effort-compare}
+\end{figure}
+
+Giờ thực tế của nhóm thấp hơn nhiều so với COCOMO, vì bốn lý do: nhóm dùng framework và thư viện có sẵn (FastAPI,
+React, faster-whisper, Electron); có công cụ AI hỗ trợ viết code; phạm vi POC chưa có tài khoản và phân quyền; và
+COCOMO~81 được hiệu chỉnh trên các dự án của những năm 1970--80. Vì vậy, khi báo cáo, story point là số kế hoạch;
+Function Point và COCOMO chỉ dùng để chứng minh quy mô sản phẩm.
+
+% ============================================================ Chapter 4
+\chapter{Lịch trình}
+\label{chap:schedule}
+
+\textbf{Đường găng là A $\rightarrow$ B $\rightarrow$ C/F $\rightarrow$ G $\rightarrow$ U $\rightarrow$ V
+$\rightarrow$ W, dài 33 ngày làm việc} (khoảng 7 tuần nếu đủ người làm song song). Phần tóm tắt và dịch (H--S) có
+3--12 ngày dự trữ, nên một thành viên chuyển sang hỗ trợ phần live và STT khi cần sẽ không làm trễ dự án.
+
+Thời lượng của từng công việc là \textbf{ước lượng} từ story point (Chương~\ref{chap:effort}). Phụ thuộc lấy từ
+board (ví dụ \#61 $\rightarrow$ \#63, \#68 $\rightarrow$ \#70) và từ kiến trúc. Ngày bắt đầu của Gantt giả định là
+07/09/2026: \canDien[thay bằng ngày bắt đầu Sprint 1 thật]. Toàn bộ bảng CPM được tính lại bằng
+\texttt{pm\_calc.py}~\cite{pmcalc}.
+
+\section{Danh sách công việc và phương pháp đường găng}
+
+Với mỗi công việc có thời lượng $d$, phương pháp đường găng tính thời điểm bắt đầu và kết thúc sớm nhất (ES, EF)
+bằng một lượt đi xuôi, thời điểm muộn nhất (LS, LF) bằng một lượt đi ngược, rồi lấy hiệu làm dự trữ:
+\begin{equation}
+  \label{eq:cpm}
+  \begin{aligned}
+    \mathrm{ES} &= \max_{\text{trước}} \mathrm{EF}, & \mathrm{EF} &= \mathrm{ES} + d, \\
+    \mathrm{LF} &= \min_{\text{sau}} \mathrm{LS}, & \mathrm{LS} &= \mathrm{LF} - d, \qquad
+    \text{Dự trữ} = \mathrm{LS} - \mathrm{ES}.
+  \end{aligned}
+\end{equation}
+Công việc có dự trữ bằng 0 là công việc găng: trễ bao nhiêu ngày thì cả dự án trễ bấy nhiêu ngày. Kết quả cho 23
+công việc được trình bày trong Bảng~\ref{tab:cpm}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Danh sách công việc, phụ thuộc và kết quả CPM (ngày làm việc)}
+  \label{tab:cpm}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}Q{0.6cm}LQ{1.0cm}P{2.1cm}rrrrQ{1.2cm}@{}}
+    \toprule
+    \thead{ID} & \thead{Công việc} & \thead{Ngày} & \thead{Phụ thuộc} & \thead{ES} & \thead{EF} & \thead{LS}
+      & \thead{LF} & \thead{Dự trữ} \\
+    \midrule
+    \textbf{A} & Khởi động: charter, backlog, yêu cầu và UI/UX & 5 & -- & 0 & 5 & 0 & 5 & \textbf{0} \\
+    \textbf{B} & Kiến trúc và môi trường dev & 3 & A & 5 & 8 & 5 & 8 & \textbf{0} \\
+    \textbf{C} & T1.1 Ghi âm trên trình duyệt, gửi chunk & 8 & B & 8 & 16 & 8 & 16 & \textbf{0} \\
+    D & T1.2 Offline/mobile (IndexedDB, đồng bộ) & 6 & C & 16 & 22 & 24 & 30 & 8 \\
+    E & T1.3 Upload file lớn, chuẩn hoá audio & 6 & B & 8 & 14 & 24 & 30 & 16 \\
+    \textbf{F} & STT Whisper, transcript ngôn ngữ gốc & 8 & B & 8 & 16 & 8 & 16 & \textbf{0} \\
+    \textbf{G} & Phiên âm live & 5 & C, F & 16 & 21 & 16 & 21 & \textbf{0} \\
+    H & Benchmark model LLM (Sprint 2) & 4 & A & 5 & 9 & 10 & 14 & 5 \\
+    I & \#68 Model và prompt tóm tắt & 3 & H & 9 & 12 & 16 & 19 & 7 \\
+    J & \#69 Transcript dài (map-reduce) & 3 & I & 12 & 15 & 24 & 27 & 12 \\
+    K & \#70 Bước tóm tắt, lưu trữ, API & 4 & I, F & 16 & 20 & 19 & 23 & 3 \\
+    L & \#71 Tab Summary và Regenerate & 3 & K & 20 & 23 & 23 & 26 & 3 \\
+    M & \#61 Model dịch & 3 & H & 9 & 12 & 14 & 17 & 5 \\
+    N & \#62 Lưu bản dịch và API & 3 & M & 12 & 15 & 17 & 20 & 5 \\
+    O & \#63 Bước dịch có tiến độ & 3 & M, N & 15 & 18 & 20 & 23 & 5 \\
+    P & \#64 Chọn ngôn ngữ và song ngữ & 3 & O & 18 & 21 & 23 & 26 & 5 \\
+    Q & \#65 Xuất TXT/SRT & 2 & N & 15 & 17 & 24 & 26 & 9 \\
+    R & \#66/\#72 Đánh giá chất lượng & 3 & J, O & 18 & 21 & 27 & 30 & 9 \\
+    S & \#99/\#100 Test E2E Sprint 3 & 4 & L, P, Q & 23 & 27 & 26 & 30 & 3 \\
+    T & App desktop (Electron, PyInstaller) & 5 & G & 21 & 26 & 25 & 30 & 4 \\
+    \textbf{U} & Streaming, STT remote, file dài & 5 & G & 21 & 26 & 21 & 26 & \textbf{0} \\
+    \textbf{V} & Deploy AWS (Docker, S3, hướng dẫn) & 4 & U & 26 & 30 & 26 & 30 & \textbf{0} \\
+    \textbf{W} & UAT, phát hành, đóng dự án & 3 & S, T, V, R, D, E & 30 & 33 & 30 & 33 & \textbf{0} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Tám công việc găng được in đậm. Đường găng có hai nhánh song song cùng dài 8 ngày ở giữa (C ghi âm và F STT), nên
+trễ ở bất kỳ nhánh nào cũng làm trễ G. Ngược lại, E (upload) có tới 16 ngày dự trữ và J (map-reduce) có 12 ngày:
+đây là nơi có thể tạm lấy người sang hỗ trợ công việc găng.
+
+\section{Sơ đồ mạng}
+
+Hình~\ref{fig:network} vẽ 23 công việc dưới dạng sơ đồ mạng AON: mỗi nút là một công việc, mũi tên là quan hệ
+phụ thuộc kết thúc -- bắt đầu. Đường găng được tô đỏ. Sơ đồ cho thấy dự án có hai luồng gần như độc lập sau bước
+khởi động: luồng ghi âm, STT, live và triển khai ở nửa trên (chứa toàn bộ đường găng), và luồng LLM cho tóm tắt,
+dịch ở nửa dưới, chỉ gặp luồng trên tại K (\#70 cần STT) và tại W.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      nd/.style={draw=primaryblue,fill=accentblue,rounded corners=1.5pt,align=center,font=\scriptsize,
+                 text width=1.45cm,minimum height=0.9cm,inner sep=2pt,
+                 execute at begin node=\setstretch{1}},
+      cr/.style={nd,draw=todored,fill=todored!10,line width=0.9pt},
+      ar/.style={-{Stealth[length=1.8mm]},primaryblue},
+      ca/.style={-{Stealth[length=2mm]},todored,line width=1pt}]
+    % Nodes: upper half = recording/STT/deploy stream, lower half = LLM stream.
+    \node[cr] (A) at (0,0)     {\textbf{A} (5)\\ Khởi động};
+    \node[cr] (B) at (2,1.4)   {\textbf{B} (3)\\ Kiến trúc};
+    \node[nd] (E) at (4,4.2)   {\textbf{E} (6)\\ Upload};
+    \node[cr] (C) at (4,2.8)   {\textbf{C} (8)\\ Ghi âm};
+    \node[nd] (D) at (6,2.8)   {\textbf{D} (6)\\ Offline};
+    \node[cr] (F) at (4,1.4)   {\textbf{F} (8)\\ STT gốc};
+    \node[cr] (G) at (6,1.4)   {\textbf{G} (5)\\ Live};
+    \node[cr] (U) at (8,1.4)   {\textbf{U} (5)\\ Streaming};
+    \node[cr] (V) at (10,1.4)  {\textbf{V} (4)\\ Deploy AWS};
+    \node[nd] (T) at (8,0)     {\textbf{T} (5)\\ Desktop};
+    \node[nd] (H) at (2,-1.4)  {\textbf{H} (4)\\ Benchmark};
+    \node[nd] (I) at (4,-1.4)  {\textbf{I} (3)\\ \#68};
+    \node[nd] (K) at (6,-1.4)  {\textbf{K} (4)\\ \#70};
+    \node[nd] (L) at (8,-1.4)  {\textbf{L} (3)\\ \#71};
+    \node[nd] (S) at (12,-1.4) {\textbf{S} (4)\\ \#99/\#100};
+    \node[nd] (J) at (6,-2.8)  {\textbf{J} (3)\\ \#69};
+    \node[nd] (R) at (10,-2.8) {\textbf{R} (3)\\ \#66/\#72};
+    \node[nd] (M) at (4,-4.2)  {\textbf{M} (3)\\ \#61};
+    \node[nd] (O) at (8,-4.2)  {\textbf{O} (3)\\ \#63};
+    \node[nd] (P) at (10,-4.2) {\textbf{P} (3)\\ \#64};
+    \node[nd] (N) at (6,-5.6)  {\textbf{N} (3)\\ \#62};
+    \node[nd] (Q) at (8,-5.6)  {\textbf{Q} (2)\\ \#65};
+    \node[cr,minimum height=7.9cm] (W) at (14,0.7) {\textbf{W} (3)\\ UAT, phát hành};
+    % Critical path
+    \draw[ca] (A) -- (B);
+    \draw[ca] (B) -- (C);
+    \draw[ca] (B) -- (F);
+    \draw[ca] (C) -- (G);
+    \draw[ca] (F) -- (G);
+    \draw[ca] (G) -- (U);
+    \draw[ca] (U) -- (V);
+    \draw[ca] (V) -- (V -| W.west);
+    % Other dependencies
+    \draw[ar] (A) -- (H);
+    \draw[ar] (B) |- (E);
+    \draw[ar] (C) -- (D);
+    \draw[ar] (F) -- (K);
+    \draw[ar] (G) -- (T);
+    \draw[ar] (E) -- (E -| W.west);
+    \draw[ar] (D) -- (D -| W.west);
+    \draw[ar] (T) -- (T -| W.west);
+    \draw[ar] (S) -- (S -| W.west);
+    \draw[ar] (H) -- (I);
+    \draw[ar] (H) |- (M);
+    \draw[ar] (I) -- (K);
+    \draw[ar] (I) -- (J);
+    \draw[ar] (K) -- (L);
+    \draw[ar] (L) -- (S);
+    \draw[ar] (J) -- (R);
+    \draw[ar] (M) -- (O);
+    \draw[ar] (M) -- (N);
+    \draw[ar] (N) -- (O);
+    \draw[ar] (N) -- (Q);
+    \draw[ar] (O) -- (P);
+    \draw[ar] (O) -- (R);
+    \draw[ar] (R) -- (R -| W.west);
+    % P and Q join S from below; the line bridges over R's arrow.
+    \draw[white,line width=3pt] (12,-2.62) -- (12,-2.98);
+    \draw[ar] (Q.east) -| (S.south);
+    \draw[primaryblue] (P.east) -- (P.east -| S.south);
+    \fill[primaryblue] (P.east -| S.south) circle (1.3pt);
+  \end{tikzpicture}
+  \caption{Sơ đồ mạng AON; số trong ngoặc là thời lượng (ngày làm việc), đường găng tô đỏ}
+  \label{fig:network}
+\end{figure}
+
+\section{Biểu đồ Gantt}
+
+Biểu đồ Gantt (Hình~\ref{fig:gantt}) đặt các công việc lên trục thời gian theo ES và EF của Bảng~\ref{tab:cpm},
+tính bằng ngày làm việc (bỏ cuối tuần) kể từ ngày bắt đầu giả định 07/09/2026. Phần nét đứt sau mỗi thanh không găng
+là dự trữ: công việc có thể kết thúc muộn tới đó mà không làm trễ W.
+
+\begin{figure}[htbp]
+  \centering
+  \newcommand{\gcrit}[3]{\ganttbar[bar/.append style={fill=todored!80,draw=todored}]{#1}{#2}{#3}}
+  \newcommand{\gtask}[3]{\ganttbar[bar/.append style={fill=primaryblue!70,draw=primaryblue}]{#1}{#2}{#3}}
+  \newcommand{\gslack}[2]{\ganttbar[bar/.append style={fill=gray!12,draw=chartgray,dashed},bar height=0.3]{}{#1}{#2}}
+  \begin{ganttchart}[
+      x unit=0.3cm, y unit chart=0.47cm, y unit title=0.5cm,
+      hgrid={draw=gray!15}, vgrid={*4{draw=none},*1{gray!35}},
+      title/.append style={fill=accentblue,draw=primaryblue!50},
+      title label font=\scriptsize, bar label font=\scriptsize,
+      bar height=0.55, bar top shift=0.225,
+      bar label node/.append style={align=right}]
+                {1}{35}
+    \gantttitle{Tuần 1}{5} \gantttitle{Tuần 2}{5} \gantttitle{Tuần 3}{5} \gantttitle{Tuần 4}{5}
+    \gantttitle{Tuần 5}{5} \gantttitle{Tuần 6}{5} \gantttitle{Tuần 7}{5} \\
+    \gantttitle{07/09}{5} \gantttitle{14/09}{5} \gantttitle{21/09}{5} \gantttitle{28/09}{5}
+    \gantttitle{05/10}{5} \gantttitle{12/10}{5} \gantttitle{19/10}{5} \\
+    \gcrit{A -- Charter, backlog, yêu cầu}{1}{5} \\
+    \gcrit{B -- Kiến trúc, môi trường}{6}{8} \\
+    \gcrit{C -- Ghi âm trình duyệt}{9}{16} \\
+    \gtask{E -- Upload file lớn}{9}{14} \gslack{15}{30} \\
+    \gcrit{F -- STT ngôn ngữ gốc}{9}{16} \\
+    \gtask{D -- Offline/mobile}{17}{22} \gslack{23}{30} \\
+    \gcrit{G -- Phiên âm live}{17}{21} \\
+    \gtask{H -- Benchmark LLM}{6}{9} \gslack{10}{14} \\
+    \gtask{I -- \#68 Model, prompt}{10}{12} \gslack{13}{19} \\
+    \gtask{J -- \#69 Map-reduce}{13}{15} \gslack{16}{27} \\
+    \gtask{K -- \#70 Bước tóm tắt, API}{17}{20} \gslack{21}{23} \\
+    \gtask{L -- \#71 Tab Summary}{21}{23} \gslack{24}{26} \\
+    \gtask{M -- \#61 Model dịch}{10}{12} \gslack{13}{17} \\
+    \gtask{N -- \#62 Lưu bản dịch, API}{13}{15} \gslack{16}{20} \\
+    \gtask{O -- \#63 Bước dịch}{16}{18} \gslack{19}{23} \\
+    \gtask{P -- \#64 Song ngữ}{19}{21} \gslack{22}{26} \\
+    \gtask{Q -- \#65 Xuất TXT/SRT}{16}{17} \gslack{18}{26} \\
+    \gtask{R -- \#66/\#72 Đánh giá}{19}{21} \gslack{22}{30} \\
+    \gtask{S -- \#99/\#100 Test E2E}{24}{27} \gslack{28}{30} \\
+    \gtask{T -- App desktop}{22}{26} \gslack{27}{30} \\
+    \gcrit{U -- Streaming, STT remote}{22}{26} \\
+    \gcrit{V -- Deploy AWS}{27}{30} \\
+    \gcrit{W -- UAT, phát hành}{31}{33}
+  \end{ganttchart}
+  \caption{Biểu đồ Gantt theo CPM (ngày bắt đầu 07/09/2026 là giả định); đỏ: công việc găng, nét đứt: dự trữ}
+  \label{fig:gantt}
+\end{figure}
+
+\section{Release plan theo sprint}
+
+Các công việc được gom thành bốn sprint và một giai đoạn kết thúc, mỗi giai đoạn ra một bản phát hành
+(Bảng~\ref{tab:release}). Story \#60 được dời vào Sprint 3 theo Change Log~\cite{mcr}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Release plan theo sprint}
+  \label{tab:release}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{1.9cm}LP{3.6cm}Q{1.6cm}@{}}
+    \toprule
+    \thead{Sprint} & \thead{Mục tiêu sprint} & \thead{Công việc} & \thead{Phát hành} \\
+    \midrule
+    Sprint 1 & Ghi âm và transcript gốc chạy được (POC E1) & A, B, C, D, E, F & v0.1 \\
+    Sprint 2 & Transcript live; chọn model LLM & G, H & v0.2 \\
+    Sprint 3 & Tóm tắt và dịch hoàn chỉnh, có test E2E & I--S (gồm \#60 được dời vào) & v0.3 \\
+    Sprint 4 & App desktop, live dạng streaming, STT qua server, bản web trên AWS & T, U, V & v0.4 \\
+    Kết thúc & UAT, nghiệm thu & W & v1.0 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Cột ``Công việc'' là kế hoạch; \canDien[đối chiếu với việc đã thực sự làm trong từng sprint trên Azure Boards].
+
+\section{Cách dùng lịch trình khi theo dõi}
+
+\begin{itemize}
+  \item \textbf{Công việc găng trễ:} trễ 1 ngày thì cả dự án trễ 1 ngày. Người phụ trách báo ngay trong Daily; nếu
+        phải dời mốc thì ghi vào Change Log~\cite{mcr}.
+  \item \textbf{Dùng dự trữ:} công việc có dự trữ lớn (E: 16 ngày, J: 12 ngày) là nơi có thể tạm lấy người sang
+        hỗ trợ công việc găng.
+  \item \textbf{Cập nhật:} mỗi sprint ghi ngày thực tế vào bảng, rồi tính lại bằng lệnh
+        \texttt{python docs/project/tools/pm\_calc.py}.
+\end{itemize}
+
+% ============================================================ Chapter 5
+\chapter{Quản lý rủi ro}
+\label{chap:risk}
+
+\textbf{Rủi ro lớn nhất hiện tại là chi phí và giới hạn của API bên ngoài khi deploy (R6, R8), và độ chính xác STT
+với tiếng Việt hoặc họp trộn ngôn ngữ (R1).} Cả hai đã có biện pháp kỹ thuật nhưng cần được đo lại trong đợt UAT.
+Risk Register hiện có 14 rủi ro, 5 rủi ro ở vùng Cao.
+
+\section{Thang đánh giá}
+
+Mỗi rủi ro được chấm xác suất (P) và tác động (I) theo thang 1--5 (Bảng~\ref{tab:risk-scale}).
+
+% [H]: a longtable follows right after this section; a floating table would leave half of this page empty.
+\begin{table}[H]
+  \centering
+  \caption{Thang điểm xác suất và tác động}
+  \label{tab:risk-scale}
+  \begin{tabularx}{\linewidth}{@{}Q{1.2cm}P{4.4cm}L@{}}
+    \toprule
+    \thead{Điểm} & \thead{Xác suất (P)} & \thead{Tác động (I)} \\
+    \midrule
+    1 & Hiếm ($<$ 10\%) & Không đáng kể, xử lý trong ngày \\
+    2 & Thấp (10--30\%) & Trễ $<$ 2 ngày, không ảnh hưởng mốc \\
+    3 & Trung bình (30--50\%) & Trễ 1 sprint một phần việc, hoặc tốn thêm $<$ 10\% ngân sách \\
+    4 & Cao (50--80\%) & Lỡ mốc, phải cắt phạm vi, hoặc tốn thêm 10--20\% ngân sách \\
+    5 & Gần như chắc chắn ($>$ 80\%) & Mục tiêu dự án thất bại \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Mức độ của rủi ro là tích hai điểm và quyết định cách xử lý:
+\begin{equation}
+  \label{eq:risk-level}
+  \text{Mức độ} = P \times I, \qquad
+  \begin{cases}
+    1\text{--}5: & \text{Thấp -- theo dõi,} \\
+    6\text{--}11: & \text{Trung bình -- có kế hoạch ứng phó,} \\
+    12\text{--}25: & \text{Cao -- xử lý ngay, báo Sponsor.}
+  \end{cases}
+\end{equation}
+
+\section{Risk Register}
+
+Risk Register được chia thành hai bảng có cùng mã rủi ro. Bảng~\ref{tab:risk-assess} ghi mô tả, điểm đánh giá
+và trạng thái; Bảng~\ref{tab:risk-response} ghi chiến lược, biện pháp ứng phó, dấu hiệu cảnh báo và người phụ
+trách.
+
+R1--R6 là các rủi ro đã nêu trong buổi họp của nhóm. Repo chỉ ghi rõ R6 (ngân sách API/LLM); nội dung R1--R5 trong
+bảng là đề xuất: \canDien[đối chiếu với biên bản và sửa lại cho khớp tên, mô tả gốc]. R7 trở đi là các rủi ro mới
+phát hiện khi làm app desktop, streaming và deploy.
+
+\begingroup\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}P{0.9cm}P{6.3cm}P{1.9cm}Q{0.5cm}Q{0.5cm}Q{0.9cm}P{2.7cm}@{}}
+  \caption{Risk Register: đánh giá và trạng thái}\label{tab:risk-assess}\\
+  \toprule
+  \thead{ID} & \thead{Rủi ro} & \thead{Hạng mục} & \thead{P} & \thead{I} & \thead{Mức} & \thead{Trạng thái} \\
+  \midrule
+  \endfirsthead
+  \multicolumn{7}{@{}l}{\footnotesize\itshape Bảng~\thetable{} (tiếp theo)}\\
+  \toprule
+  \thead{ID} & \thead{Rủi ro} & \thead{Hạng mục} & \thead{P} & \thead{I} & \thead{Mức} & \thead{Trạng thái} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  R1 & STT sai với tiếng Việt, họp trộn Anh -- Việt, hoặc tự sinh chữ khi im lặng & Kỹ thuật & 3 & 4 & \textbf{12}
+     & Đang theo dõi \\
+  R2 & Máy người dùng không có GPU, CPU quá chậm cho live & Kỹ thuật & 4 & 3 & \textbf{12}
+     & \textbf{Đã xử lý} (Sprint 4) \\
+  R3 & Trễ tiến độ do làm bán thời gian, trùng lịch công việc khác & Lịch & 4 & 3 & \textbf{12} & Đang theo dõi \\
+  R4 & Mất dữ liệu ghi âm khi rớt mạng, đóng tab hoặc app & Kỹ thuật & 2 & 4 & 8 & Đã xử lý \\
+  R5 & Yêu cầu thay đổi, phình phạm vi (thêm desktop, streaming, cloud) & Phạm vi & 4 & 3 & \textbf{12}
+     & Đang theo dõi \\
+  R6 & Chi phí API LLM/STT vượt ngân sách & Chi phí & 3 & 3 & 9 & Đang theo dõi \\
+  R7 & Model LLM chạy local (Ollama) quá nặng cho máy nhóm & Kỹ thuật & 3 & 2 & 6 & Đã xử lý \\
+  R8 & Rate limit của Whisper API (lỗi 429) khi ghi live & Bên ngoài & 3 & 3 & 9 & Đang theo dõi \\
+  R9 & Lộ dữ liệu họp khi deploy công khai (POC chưa có tài khoản) & Bảo mật & 2 & 5 & 10
+     & Đã xử lý (bản test) \\
+  R10 & Chi phí AWS phát sinh do quên tắt máy GPU hoặc Elastic IP & Chi phí & 3 & 3 & 9 & Mới \\
+  R11 & Mất quyền truy cập repo/CI (push bị 403), mất code chưa push & Cấu hình & 3 & 4 & \textbf{12}
+      & \textbf{Đang xảy ra} (12/11/2026) \\
+  R12 & Bộ cài Windows chưa ký số, bị SmartScreen chặn & Triển khai & 4 & 2 & 8 & Chấp nhận \\
+  R13 & iOS dừng micro khi khoá màn hình & Kỹ thuật & 5 & 2 & 10 & Chấp nhận \\
+  R14 & Thành viên chủ chốt vắng hoặc rời nhóm & Nhân sự & 2 & 4 & 8 & Đang theo dõi \\
+\end{longtable}
+\endgroup
+
+\begingroup\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}P{0.9cm}P{1.9cm}P{6.4cm}P{3.0cm}P{2.1cm}@{}}
+  \caption{Risk Register: ứng phó và theo dõi}\label{tab:risk-response}\\
+  \toprule
+  \thead{ID} & \thead{Chiến lược} & \thead{Biện pháp ứng phó} & \thead{Dấu hiệu cảnh báo} & \thead{Phụ trách} \\
+  \midrule
+  \endfirsthead
+  \multicolumn{5}{@{}l}{\footnotesize\itshape Bảng~\thetable{} (tiếp theo)}\\
+  \toprule
+  \thead{ID} & \thead{Chiến lược} & \thead{Biện pháp ứng phó} & \thead{Dấu hiệu cảnh báo} & \thead{Phụ trách} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  R1 & Giảm & Nhận diện ngôn ngữ theo từng câu; lọc chữ ``ảo''; cho chọn cố định ngôn ngữ và phiên âm lại; dùng
+       \texttt{large-v3-turbo} qua server GPU & WER cao trong UAT, người dùng sửa nhiều & \role{Dev STT} \\
+  R2 & Giảm & Engine remote (\texttt{STT\_PROVIDER=remote}): server GPU hoặc Whisper API, client không tải model;
+       bộ cài ghi sẵn cấu hình & Live trễ $>$ 5\,s & \role{Dev} \\
+  R3 & Giảm & Sprint ngắn; ưu tiên việc găng (Chương~\ref{chap:schedule}); dùng dự trữ của nhánh tóm tắt và dịch
+     & Burndown nằm trên đường lý tưởng 2 ngày liền & PM \\
+  R4 & Tránh & Lưu chunk vào IndexedDB trước khi gửi, tự đồng bộ; khôi phục sau crash; hỏi trước khi đóng khi đang
+       ghi & Lỗi đồng bộ trong log & \role{Dev frontend} \\
+  R5 & Chấp nhận có kiểm soát & Mọi thay đổi qua PO và Change Log~\cite{mcr}; việc ngoài phạm vi để sau v1.0
+     & Story mới chen vào giữa sprint & PO \\
+  R6 & Giảm & Log token và chi phí từng lần chạy; \texttt{AI\_MOCK} khi demo; \texttt{LIVE\_INTERVAL\_SEC}; VAD bỏ
+       đoạn im lặng không gửi; AWS Budget cảnh báo & Chi phí tuần $>$ 25\% ngân sách tháng & PM \\
+  R7 & Chuyển giao & Client chuẩn OpenAI: đổi sang LLM cloud bằng cấu hình & Tóm tắt $>$ 2 phút hoặc hết RAM
+     & \role{Dev AI} \\
+  R8 & Giảm & Retry có back-off; \texttt{LIVE\_INTERVAL\_SEC}; giới hạn \texttt{STT\_CONCURRENCY}; chuyển sang server
+       GPU riêng & Lỗi 429 trong log & \role{Dev} \\
+  R9 & Giảm & HTTPS và đăng nhập (Caddy); bucket S3 private, presigned URL ngắn hạn; IAM role tối thiểu;
+       \path{/v1} có API key; không commit \texttt{.env} & Truy cập lạ trong log Caddy & \role{Dev ops} \\
+  R10 & Giảm & AWS Budget gửi email; tắt máy khi không test; checklist gỡ bỏ trong hướng dẫn deploy
+      & Hoá đơn tăng bất thường & PM \\
+  R11 & Giảm & Thêm collaborator đúng tài khoản; push sau mỗi task; nhánh feature theo sprint
+      & \texttt{git push} lỗi & PM \\
+  R12 & Chấp nhận & Hướng dẫn ``More info $\rightarrow$ Run anyway''; demo bằng bản web; ký số khi thương mại
+      & Người dùng báo không cài được & \role{Dev desktop} \\
+  R13 & Chấp nhận & Giữ màn hình sáng (Wake Lock); ghi chú hạn chế; app native ở phiên bản sau & -- & PO \\
+  R14 & Giảm & Code review chéo; tài liệu README/ARCHITECTURE; HANDOFF khi bàn giao & Task bị kẹt $>$ 2 ngày & PM \\
+\end{longtable}
+\endgroup
+
+Trong 14 rủi ro, chín rủi ro được xử lý bằng chiến lược \emph{giảm}, ba rủi ro được \emph{chấp nhận} (R5 có kiểm
+soát, R12 và R13 là hạn chế đã biết), một rủi ro được \emph{tránh} (R4) và một được \emph{chuyển giao} (R7). R11 là
+rủi ro duy nhất đang xảy ra tại thời điểm lập kế hoạch.
+
+\section{Ma trận rủi ro}
+
+Hình~\ref{fig:risk-matrix} đặt 14 rủi ro lên ma trận xác suất $\times$ tác động theo điểm \emph{trước} ứng phó.
+Năm rủi ro ở vùng Cao ($\geq$ 12) là R1, R2, R3, R5 và R11. Sau khi có engine remote, R2 đã giảm xuống mức
+$2 \times 2 = 4$ (mũi tên nét đứt).
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      cell/.style={draw=white,line width=1.2pt,minimum width=2.3cm,minimum height=1.15cm,
+                   align=center,font=\footnotesize,inner sep=1pt}]
+    \foreach \p in {1,...,5} {
+      \foreach \i in {1,...,5} {
+        \pgfmathtruncatemacro{\lv}{\p*\i}
+        \ifnum\lv>11 \def\cellcol{todored!25}\else\ifnum\lv>5 \def\cellcol{accentblue}\else\def\cellcol{gray!10}\fi\fi
+        \node[cell,fill=\cellcol] (c\p\i) at ({(\i-1)*2.3},{(\p-1)*1.15}) {};
+        \node[font=\tiny,text=chartgray,anchor=north east,inner sep=2pt] at (c\p\i.north east) {\lv};
+      }
+    }
+    \begin{scope}[every node/.style={font=\footnotesize}]
+      \node at (c52) {R13};
+      \node at (c42) {R12};
+      \node at (c43) {R2, R3, R5};
+      \node at (c32) {R7};
+      \node at (c33) {R6, R8, R10};
+      \node at (c34) {\textbf{R1, R11}};
+      \node at (c24) {R4, R14};
+      \node at (c25) {R9};
+      \node[text=chartgray,font=\footnotesize\itshape] at (c22) {R2 (sau)};
+    \end{scope}
+    \draw[-{Stealth[length=2mm]},chartgray,dashed,thick] ($(c43.south west)+(0.3,0.2)$) -- ($(c22.north east)+(-0.4,-0.3)$);
+    % Axes
+    \foreach \p/\lab in {1/Hiếm,2/Thấp,3/Trung bình,4/Cao,5/Gần chắc chắn}
+      \node[anchor=east,font=\footnotesize,align=right] at ($(c\p1.west)+(-0.1,0)$) {\p\ -- \lab};
+    \foreach \i in {1,...,5}
+      \node[anchor=north,font=\footnotesize] at ($(c1\i.south)+(0,-0.05)$) {\i};
+    \node[font=\small\bfseries,anchor=north] at ($(c13.south)+(0,-0.5)$) {Tác động (I)};
+    \node[font=\small\bfseries,rotate=90,anchor=south] at ($(c31.west)+(-3.1,0)$) {Xác suất (P)};
+    % Legend
+    \foreach \col/\lab [count=\k] in {gray!10/Thấp (1--5),accentblue/Trung bình (6--11),todored!25/Cao (12--25)}
+      \node[draw=gray!50,fill=\col,minimum width=0.45cm,minimum height=0.3cm,
+            label={[font=\footnotesize]right:\lab}] at ({0.6+(\k-1)*3.9},-1.95) {};
+  \end{tikzpicture}
+  \caption{Ma trận rủi ro theo xác suất và tác động, trước ứng phó}
+  \label{fig:risk-matrix}
+\end{figure}
+
+\section{Quy trình quản lý rủi ro}
+
+Rủi ro được quản lý liên tục theo năm bước, gắn với các sự kiện Scrum:
+\begin{enumerate}
+  \item \textbf{Nhận diện:} ở mỗi Sprint Planning và Retrospective, nhóm trả lời câu hỏi ``Điều gì có thể làm
+        sprint sau thất bại?''.
+  \item \textbf{Đánh giá:} chấm P và I theo Bảng~\ref{tab:risk-scale}, cập nhật Risk Register.
+  \item \textbf{Ứng phó:} chọn một trong bốn chiến lược Tránh, Giảm, Chuyển giao, Chấp nhận; ghi biện pháp và
+        người phụ trách.
+  \item \textbf{Theo dõi:} người phụ trách báo tình trạng trong Daily khi dấu hiệu cảnh báo xuất hiện; PM rà toàn
+        bộ bảng ở mỗi Sprint Review.
+  \item \textbf{Đóng:} rủi ro đã qua hoặc đã xử lý xong được chuyển sang ``Đã đóng'', bài học được ghi vào Lessons
+        Learned~\cite{pcr}.
+\end{enumerate}
+
+\section{Dự phòng ngân sách và thời gian}
+
+Dự án giữ hai loại dự phòng cho các rủi ro đã nhận diện. Về ngân sách, 10\% tổng ngân sách
+(Chương~\ref{chap:cost}) được dành cho các rủi ro chi phí R6, R8 và R10. Về thời gian, dự trữ 3--12 ngày của
+nhánh tóm tắt và dịch cùng 3 ngày UAT cuối dự án là vùng đệm cho trễ tiến độ.
+
+% ============================================================ Chapter 6
+\chapter{Nguồn lực}
+\label{chap:resource}
+
+\textbf{Ràng buộc chính là giờ rảnh của từng người, không phải số người.} Nguồn lực của dự án gồm con người (tính
+theo giờ mỗi sprint), máy móc (laptop GPU của nhóm, máy chủ AWS) và dịch vụ (API Whisper và LLM). Việc san tải dựa
+vào dự trữ của các công việc không găng ở Chương~\ref{chap:schedule}.
+
+\section{Nguồn lực con người theo sprint}
+
+Năng lực của mỗi người trong một sprint được tính theo công thức~\eqref{eq:capacity}, trong đó hệ số 0,8 trừ thời
+gian họp và gián đoạn:
+\begin{equation}
+  \label{eq:capacity}
+  \text{Năng lực (giờ)} = \text{số ngày của sprint} \times \text{giờ rảnh mỗi ngày} \times 0{,}8
+\end{equation}
+Bảng~\ref{tab:resource-hours} là khung ghi giờ theo người và sprint;
+\canDien[lấy từ số liệu tải theo người trên Azure Boards hoặc dashboard chi phí].
+
+\begin{table}[htbp]
+  \centering
+  \caption{Giờ làm việc theo thành viên và sprint}
+  \label{tab:resource-hours}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{2.7cm}LQ{1.4cm}Q{1.4cm}Q{1.4cm}Q{1.4cm}Q{1.2cm}@{}}
+    \toprule
+    \thead{Thành viên} & \thead{Vai trò} & \thead{Sprint 1} & \thead{Sprint 2} & \thead{Sprint 3} & \thead{Sprint 4}
+      & \thead{Tổng} \\
+    \midrule
+    \canDien & PO / BA & & & & & \\
+    \canDien & SM / PM & & & & & \\
+    \canDien & Dev Backend / STT & & & & & \\
+    \canDien & Dev Frontend / Desktop & & & & & \\
+    \canDien & Dev AI & & & & & \\
+    \canDien & QC & & & & & \\
+    \midrule
+    \textbf{Tổng} & & & & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Khi đã có số liệu, biểu đồ tải theo sprint (resource histogram) được vẽ từ bảng này: cột là tổng giờ thực tế, chia
+màu theo thành viên (biểu đồ cột chồng); đường ngang là năng lực của nhóm theo~\eqref{eq:capacity}. Sprint nào có
+cột vượt đường năng lực là quá tải và phải san tải theo Mục~\ref{sec:leveling}.
+
+\section{Phân công công việc theo sprint}
+
+Bảng~\ref{tab:assignment} giao các công việc của lịch trình cho từng sprint. Mã công việc A--W như ở
+Bảng~\ref{tab:cpm}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Phân công công việc theo sprint}
+  \label{tab:assignment}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{1.9cm}LP{3.4cm}@{}}
+    \toprule
+    \thead{Sprint} & \thead{Công việc} & \thead{Người phụ trách chính} \\
+    \midrule
+    1 & A Khởi động, B Kiến trúc, C Ghi âm, D Offline, E Upload, F STT & \canDien \\
+    2 & G Live, H Benchmark LLM & \canDien \\
+    3 & I--L Tóm tắt (\#68--\#71), M--Q Dịch (\#61--\#65), R Đánh giá (\#66, \#72), S Test E2E (\#99, \#100)
+      & \canDien \\
+    4 & T Desktop, U Streaming và STT remote, V Deploy AWS & \canDien \\
+    Kết thúc & W UAT, phát hành, tài liệu & Cả nhóm \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{San tải}
+\label{sec:leveling}
+
+Bốn tình huống quá tải đã được dự kiến, mỗi tình huống có cách xử lý dựa trên dự trữ của lịch trình hoặc biện pháp
+cho rủi ro R14 (Bảng~\ref{tab:leveling}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Các tình huống san tải}
+  \label{tab:leveling}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{4.2cm}LP{3cm}@{}}
+    \toprule
+    \thead{Tình huống} & \thead{Cách xử lý} & \thead{Dựa trên} \\
+    \midrule
+    Sprint 3 dồn nhiều việc AI (tóm tắt và dịch song song) & Dev frontend làm giao diện \#71/\#64 sau khi API
+      xong; QC viết test case song song & Dự trữ 3--5 ngày của K, L, O, P \\
+    Dev STT quá tải ở Sprint 4 (G $\rightarrow$ U $\rightarrow$ V đều găng) & Giao T (desktop, dự trữ 4 ngày) cho
+      Dev frontend; phần tài liệu của deploy (V) chia cho PM & Dự trữ của T \\
+    Thành viên bận việc khác trong một giai đoạn & Dời việc không găng (E: 16 ngày dự trữ, J: 12 ngày) sang sau giai
+      đoạn đó & CPM \\
+    Một người nghỉ đột xuất & Code review chéo; README, ARCHITECTURE và HANDOFF để người khác tiếp quản & R14 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Nguồn lực máy móc và dịch vụ}
+
+Ngoài con người, dự án cần bảy loại nguồn lực máy móc và dịch vụ (Bảng~\ref{tab:machines}). Phần lớn đã có sẵn
+hoặc miễn phí; các khoản phải trả tiền được tính ở Chương~\ref{chap:cost}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Nguồn lực máy móc và dịch vụ}
+  \label{tab:machines}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{3.4cm}LP{2.6cm}P{2.8cm}@{}}
+    \toprule
+    \thead{Nguồn lực} & \thead{Dùng cho} & \thead{Số lượng / cấu hình} & \thead{Chi phí} \\
+    \midrule
+    Laptop dev (i7-13620H, RTX 4050 6\,GB) & Phát triển, Whisper GPU local, build bộ cài & 1+ & Có sẵn \\
+    Laptop thành viên khác (CPU) & Frontend, test, dùng engine remote & \canDien & Có sẵn \\
+    AWS EC2 & Bản web test: \texttt{t3.large} (CPU) hoặc \texttt{g4dn.xlarge} (GPU, bật theo giờ) & 1
+      & Mục~\ref{sec:nonlabour} \\
+    AWS S3 & Audio, sao lưu database & 1 bucket & Vài nghìn VND/GB/tháng \\
+    Whisper API (Groq/OpenAI) & STT cho bản web CPU & Theo giờ audio & Mục~\ref{sec:nonlabour} \\
+    LLM API hoặc Ollama local & Tóm tắt, dịch & Theo token & Mục~\ref{sec:nonlabour} \\
+    Azure Boards, GitHub & Quản lý công việc, mã nguồn & Gói miễn phí & 0 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ Chapter 7
+\chapter{Chi phí và ngân sách}
+\label{chap:cost}
+
+\textbf{Chi phí chính là nhân công, tính theo đơn giá 100.000~VND/giờ trên dashboard chi phí của nhóm.} Chi phí
+ngoài nhân công nhỏ: bản test trên AWS khoảng 2,5--3 triệu VND/tháng nếu chạy 24/7 với cấu hình CPU, và gần như
+bằng 0 nếu chỉ bật khi demo. Ngân sách giữ thêm 10\% dự phòng.
+
+\section{Đơn giá}
+
+Hai đơn giá được dùng cho mọi phép tính chi phí trong tài liệu (Bảng~\ref{tab:rates}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Đơn giá dùng trong kế hoạch chi phí}
+  \label{tab:rates}
+  \begin{tabularx}{\linewidth}{@{}LP{4cm}P{5cm}@{}}
+    \toprule
+    \thead{Hạng mục} & \thead{Đơn giá} & \thead{Nguồn} \\
+    \midrule
+    Nhân công (mọi vai trò) & 100.000 VND/giờ & Dashboard chi phí của nhóm \\
+    Tỷ giá quy đổi & 26.000 VND/USD & Giả định \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Chi phí nhân công theo sprint}
+
+Chi phí kế hoạch (PV) và chi phí thực tế (AC) của mỗi sprint bằng số giờ tương ứng nhân với đơn giá nhân công:
+\begin{equation}
+  \label{eq:labour-cost}
+  \mathrm{PV}_{\text{sprint}} = \text{giờ kế hoạch} \times 100.000~\text{VND}, \qquad
+  \mathrm{AC}_{\text{sprint}} = \text{giờ thực tế} \times 100.000~\text{VND}
+\end{equation}
+Tổng PV của các sprint là ngân sách nhân công khi hoàn thành (BAC). Các giá trị theo sprint
+(Bảng~\ref{tab:labour}) là đầu vào cho phân tích EVA trong~\cite{mcr}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Chi phí nhân công theo sprint}
+  \label{tab:labour}
+  \begin{tabularx}{\linewidth}{@{}LQ{2.6cm}Q{2.8cm}Q{2.6cm}Q{2.8cm}@{}}
+    \toprule
+    \thead{Sprint} & \thead{Giờ kế hoạch} & \thead{PV (VND)} & \thead{Giờ thực tế} & \thead{AC (VND)} \\
+    \midrule
+    Sprint 1 & \canDien & & \canDien & \\
+    Sprint 2 & \canDien & & \canDien & \\
+    Sprint 3 & \canDien & & \canDien & \\
+    Sprint 4 & \canDien & & \canDien & \\
+    \midrule
+    \textbf{Tổng (BAC)} & & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Chi phí ngoài nhân công}
+\label{sec:nonlabour}
+
+Giá trong Bảng~\ref{tab:nonlabour} là ước tính từ bảng giá công khai, cần kiểm tra lại trên AWS Pricing Calculator
+và trang giá của nhà cung cấp trước khi dùng. Cấu hình A là bản web chạy 24/7 trên EC2 CPU, dùng Whisper API của
+Groq và LLM cloud model nhỏ.
+
+\begingroup\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}P{3.6cm}P{3.6cm}P{3.2cm}P{4.4cm}@{}}
+  \caption{Chi phí ngoài nhân công (ước tính mỗi tháng)}\label{tab:nonlabour}\\
+  \toprule
+  \thead{Khoản} & \thead{Cách tính} & \thead{Ước tính/tháng} & \thead{Ghi chú} \\
+  \midrule
+  \endfirsthead
+  \multicolumn{4}{@{}l}{\footnotesize\itshape Bảng~\thetable{} (tiếp theo)}\\
+  \toprule
+  \thead{Khoản} & \thead{Cách tính} & \thead{Ước tính/tháng} & \thead{Ghi chú} \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endlastfoot
+  EC2 \texttt{t3.large} (Singapore), 24/7 & Khoảng 0,1 USD/giờ $\times$ 730 giờ & Khoảng 2,0 triệu VND
+    & Bật/tắt theo giờ test thì rẻ hơn tương ứng \\
+  EBS gp3 30\,GB & Khoảng 0,1 USD/GB & Khoảng 80.000 VND & -- \\
+  Public IPv4 / Elastic IP & Khoảng 0,005 USD/giờ & Khoảng 95.000 VND & Nhớ release khi gỡ \\
+  S3 Standard & Khoảng 0,025 USD/GB; 1 giờ audio khoảng 115\,MB & $<$ 50.000 VND cho 100 giờ audio & -- \\
+  Whisper API -- Groq (\texttt{whisper-large-}\allowbreak\texttt{v3-turbo}) & Khoảng 0,04 USD/giờ audio
+    & 100 giờ audio khoảng 104.000 VND & Live gửi lặp lại cửa sổ ngắn, nên chi phí thực tế cao hơn số giờ audio \\
+  Whisper API -- OpenAI \texttt{whisper-1} & Khoảng 0,006 USD/phút & 100 giờ audio khoảng 940.000 VND
+    & Phương án dự phòng \\
+  LLM tóm tắt, dịch (cloud, model nhỏ) & Theo token; app log chi phí từng lần chạy & Khoảng 130.000 VND
+    & Cấu hình \texttt{LLM\_PRICE\_*\_PER\_1M} để log chi phí \\
+  EC2 GPU \texttt{g4dn.xlarge} (nếu cần) & Khoảng 0,7 USD/giờ & 20 giờ demo khoảng 370.000 VND
+    & Không chạy 24/7 \\
+  Chứng chỉ HTTPS, tên miền & Let's Encrypt và sslip.io miễn phí & 0 & Tên miền riêng tuỳ chọn \\
+  Ký số bộ cài (code signing) & -- & 0 & Ngoài phạm vi (R12) \\
+  \midrule
+  \textbf{Tổng cấu hình A, 24/7} & & \textbf{Khoảng 2,5--3 triệu VND} & \\
+\end{longtable}
+\endgroup
+
+Hình~\ref{fig:nonlabour} cho thấy cơ cấu của cấu hình A: máy chủ EC2 chiếm khoảng bốn phần năm chi phí, còn các API
+STT và LLM cộng lại chưa tới 10\%. Vì vậy, cách tiết kiệm hiệu quả nhất là tắt máy khi không test, không phải cắt
+giảm tính năng AI.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.8\linewidth, height=6cm,
+        xbar, bar width=0.42cm,
+        xmin=0, xmax=2450, xtick distance=500,
+        symbolic y coords={EC2,EBS,IP,S3,STT,LLM}, ytick=data, y dir=reverse,
+        yticklabels={{EC2 t3.large},{EBS gp3 30\,GB},{Public IPv4},{S3 (100 giờ audio)},
+                     {Whisper API (Groq)},{LLM API}},
+        xlabel={Nghìn VND/tháng (ước tính)},
+        nodes near coords, every node near coord/.append style={font=\footnotesize},
+        grid=major, ymajorgrids=false, grid style={gray!25},
+        tick label style={font=\small}, enlarge y limits=0.12,
+        /pgf/number format/.cd, use comma, 1000 sep={.}]
+      \addplot[fill=primaryblue, draw=primaryblue]
+        coordinates {(2000,EC2) (80,EBS) (95,IP) (50,S3) (104,STT) (130,LLM)};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Cơ cấu chi phí ngoài nhân công mỗi tháng của cấu hình A (S3 lấy mức tối đa 50 nghìn VND)}
+  \label{fig:nonlabour}
+\end{figure}
+
+\section{Tổng ngân sách}
+
+Tổng ngân sách gồm nhân công, hạ tầng và API trong thời gian test, cộng 10\% dự phòng
+(Bảng~\ref{tab:total-budget}). Phần hạ tầng giả định thời gian test là 2 tháng với cấu hình A.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Tổng ngân sách}
+  \label{tab:total-budget}
+  \begin{tabularx}{\linewidth}{@{}LP{7cm}@{}}
+    \toprule
+    \thead{Khoản} & \thead{Giá trị} \\
+    \midrule
+    Nhân công (BAC nhân công) & \canDien[tổng giờ $\times$ 100.000] \\
+    Hạ tầng và API trong thời gian test (giả định 2 tháng) & Khoảng 6 triệu VND \\
+    Dự phòng & 10\% $\times$ (nhân công + hạ tầng) \\
+    \midrule
+    \textbf{Tổng ngân sách được duyệt} & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Kiểm soát chi phí}
+
+\begin{itemize}
+  \item \textbf{Theo dõi:} dashboard chi phí của nhóm cập nhật giờ mỗi sprint; CPI và SPI được tính trong báo cáo
+        trạng thái và phân tích EVA~\cite{mcr}.
+  \item \textbf{Cảnh báo:} AWS Budget gửi email ở mức 80\%; log chi phí token của từng lần tóm tắt và dịch.
+  \item \textbf{Ngưỡng hành động:} khi CPI $<$ 0,9 hoặc chi phí ngoài nhân công vượt 25\% ngân sách tháng, PM báo PO
+        và Sponsor, cân nhắc cắt phạm vi (story Should, Could) hoặc chuyển sang cấu hình rẻ hơn (CPU kết hợp API,
+        tắt máy khi không dùng).
+  \item \textbf{Biện pháp kỹ thuật đã có:} \texttt{AI\_MOCK=true} khi demo; VAD không gửi đoạn im lặng;
+        \texttt{LIVE\_INTERVAL\_SEC} giảm số request khi ghi live; engine remote dùng chung một server GPU cho nhiều
+        máy khách.
+\end{itemize}
+
+% ============================================================ Chapter 8
+\chapter{Tổ chức nhóm và truyền thông}
+\label{chap:team}
+
+\textbf{Nhóm làm Scrum với một Product Owner, một Scrum Master kiêm Project Manager, BA, QC và các Developer; mỗi
+sản phẩm bàn giao có đúng một người chịu trách nhiệm cuối (A).} Kênh trao đổi chính là Azure Boards (công việc),
+GitHub (mã nguồn) và nhóm chat (trao đổi nhanh).
+
+\section{Thành viên và vai trò}
+
+Bảng~\ref{tab:roles} gán vai trò Scrum và vai trò chuyên môn cho từng thành viên. Một người có thể giữ nhiều vai;
+\canDien[chỉnh theo phân vai thật của nhóm].
+
+\begin{table}[htbp]
+  \centering
+  \caption{Thành viên và vai trò}
+  \label{tab:roles}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{2.6cm}P{3.2cm}P{3cm}L@{}}
+    \toprule
+    \thead{Thành viên} & \thead{Vai trò Scrum} & \thead{Chuyên môn} & \thead{Mảng phụ trách chính} \\
+    \midrule
+    \canDien & Product Owner & BA & Backlog, acceptance criteria, mẫu tham chiếu để đánh giá \\
+    \canDien & Scrum Master / PM & Dev & Kế hoạch, theo dõi chi phí (CPI/SPI), rủi ro, báo cáo \\
+    \canDien & Developer & Backend / STT & FastAPI, Whisper, pipeline, deploy \\
+    \canDien & Developer & Frontend / Desktop & React, recorder, offline, Electron \\
+    \canDien & Developer & AI (LLM) & Tóm tắt, dịch, đánh giá chất lượng \\
+    \canDien & Developer & QC & Test case, Playwright, báo lỗi \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Ma trận RACI}
+\label{sec:raci}
+
+Ma trận RACI (Bảng~\ref{tab:raci}) dùng bốn ký hiệu: \textbf{R} -- thực hiện, \textbf{A} -- chịu trách nhiệm cuối
+(mỗi dòng đúng một A), \textbf{C} -- được hỏi ý kiến, \textbf{I} -- được thông báo. Trong bảng, BE, FE là viết tắt
+của backend và frontend.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Ma trận RACI}
+  \label{tab:raci}
+  \small
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabularx}{\linewidth}{@{}LQ{0.95cm}Q{1.35cm}Q{1.3cm}Q{1.3cm}Q{1.3cm}Q{0.95cm}Q{1.55cm}@{}}
+    \toprule
+    \thead{Công việc / sản phẩm} & \thead{PO} & \thead{PM/\allowbreak SM} & \thead{Dev BE} & \thead{Dev FE} & \thead{Dev AI}
+      & \thead{QC} & \thead{Sponsor} \\
+    \midrule
+    Project Charter, Business Case & C & \textbf{A/R} & I & I & I & I & C (duyệt) \\
+    Product Backlog, user story, acceptance criteria & \textbf{A/R} & C & C & C & C & C & I \\
+    Ưu tiên backlog, chấp nhận story & \textbf{A} & C & I & I & I & C & I \\
+    Kế hoạch sprint, lịch, ước lượng & C & \textbf{A/R} & R & R & R & R & I \\
+    Kiến trúc, lựa chọn công nghệ & C & C & \textbf{A/R} & R & R & I & I \\
+    Ghi âm, offline, upload (E1) & C & I & R & \textbf{A/R} & I & C & I \\
+    STT, live streaming, engine remote & C & I & \textbf{A/R} & R & I & C & I \\
+    Tóm tắt, dịch (\#67, \#60) & C & I & R & R & \textbf{A/R} & C & I \\
+    App desktop & C & I & R & \textbf{A/R} & I & C & I \\
+    Deploy AWS, vận hành bản test & I & C & \textbf{A/R} & I & I & C & I \\
+    Test case, test E2E, báo cáo test & C & I & C & C & C & \textbf{A/R} & I \\
+    Definition of Done, nghiệm thu story & \textbf{A} & C & R & R & R & R & I \\
+    Quản lý rủi ro, Change Log & C & \textbf{A/R} & C & C & C & C & I \\
+    Theo dõi chi phí (EVA, CPI/SPI) & I & \textbf{A/R} & I & I & I & I & I \\
+    Báo cáo trạng thái, sprint report & C & \textbf{A/R} & C & C & C & C & I \\
+    Nghiệm thu cuối, SOW & R & R & I & I & I & C & \textbf{A} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+PM/SM giữ vai A ở năm trên mười sáu dòng, đều là các sản phẩm quản lý; PO giữ vai A ở các quyết định về sản phẩm
+(backlog, ưu tiên, Definition of Done). Sponsor chỉ giữ vai A ở bước nghiệm thu cuối, đúng với phân quyền trong
+điều lệ dự án~\cite{pid}.
+
+\section{Lịch họp Scrum}
+
+Năm sự kiện Scrum được tổ chức theo Bảng~\ref{tab:meetings}; mỗi sự kiện có đầu ra cụ thể để kiểm tra.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Lịch họp Scrum}
+  \label{tab:meetings}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{2.6cm}P{2.4cm}Q{1.6cm}P{3.2cm}L@{}}
+    \toprule
+    \thead{Sự kiện} & \thead{Khi nào} & \thead{Thời lượng} & \thead{Thành phần} & \thead{Đầu ra} \\
+    \midrule
+    Sprint Planning & Đầu sprint & 1--2 giờ & Cả nhóm & Sprint backlog, mục tiêu sprint, ước lượng (Planning
+      Poker) \\
+    Daily Scrum & \canDien[hằng ngày hoặc 3 buổi/tuần] & 15 phút & Dev, SM (PO tuỳ chọn) & Đã làm, sẽ làm,
+      vướng mắc \\
+    Backlog Refinement & Giữa sprint & 1 giờ & PO, BA, đại diện Dev/QC & Story sẵn sàng cho sprint sau (có
+      acceptance criteria, đã ước lượng) \\
+    Sprint Review & Cuối sprint & 1 giờ & Cả nhóm, Sponsor, người dùng thử (khi cần) & Demo, phản hồi, cập nhật
+      backlog \\
+    Retrospective & Sau Sprint Review & 45 phút & Cả nhóm & 1--3 hành động cải tiến~\cite{mcr} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Kế hoạch truyền thông}
+
+Kế hoạch truyền thông (Bảng~\ref{tab:comms}) xác định ai nhận thông tin gì, qua kênh nào và với tần suất nào.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Kế hoạch truyền thông}
+  \label{tab:comms}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}P{3.3cm}P{2.6cm}LP{2.1cm}P{2.1cm}@{}}
+    \toprule
+    \thead{Thông tin} & \thead{Gửi cho} & \thead{Hình thức} & \thead{Tần suất} & \thead{Người gửi} \\
+    \midrule
+    Tiến độ task, lỗi & Cả nhóm & Azure Boards (board, Bug) & Liên tục & Người làm task \\
+    Vướng mắc cần gỡ & SM, người liên quan & Nhóm chat, nêu trong Daily & Khi phát sinh & Bất kỳ \\
+    Code, review & Dev & GitHub Pull Request trên nhánh feature & Mỗi task & Dev \\
+    Báo cáo trạng thái (burndown, CPI/SPI, rủi ro) & Sponsor, cả nhóm & Sprint report~\cite{mcr}, dashboard chi phí
+      & Mỗi sprint & PM \\
+    Demo tính năng & Sponsor, người dùng thử & Sprint Review, bản web trên AWS & Mỗi sprint & PO \\
+    Thay đổi phạm vi & Sponsor, cả nhóm & Change Log~\cite{mcr}, email hoặc chat & Khi có thay đổi & PO/PM \\
+    Sự cố bản deploy & Dev ops, PM & Nhóm chat & Ngay & Người phát hiện \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Ba quy tắc trao đổi đi kèm: câu hỏi kỹ thuật được trả lời trong ngày làm việc; quyết định về phạm vi phải ghi lại
+trên board hoặc Change Log, không để lại chỉ trong chat; tài liệu dùng chung nằm trong repo (thư mục
+\path{docs/}).
+
+\section{Leo thang vấn đề}
+
+Một vấn đề được xử lý ở cấp thấp nhất có thể, và chỉ chuyển lên cấp trên khi vượt quyền hoặc vượt thời gian của
+cấp dưới:
+\begin{enumerate}
+  \item Người làm task tự xử lý (trong tối đa 1 ngày).
+  \item Báo Scrum Master trong Daily; SM điều phối người hỗ trợ.
+  \item Nếu ảnh hưởng mục tiêu sprint: PO quyết định cắt hoặc dời story.
+  \item Nếu ảnh hưởng mốc, ngân sách vượt 10\% hoặc phạm vi dự án: PM báo Sponsor để xin phê duyệt.
+\end{enumerate}
+
+% ============================================================ Chapter 9
+\chapter{Kết luận và phê duyệt}
+\label{chap:conclusion}
+
+\section{Tóm tắt}
+
+Kế hoạch đã xác định cách thực hiện và kiểm soát dự án SumTalk:
+\begin{itemize}
+  \item \textbf{Phạm vi:} WBS gồm 9 nhánh cấp 1 và 33 gói công việc, mỗi gói truy vết được tới task trên Azure
+        Boards hoặc file trong repo.
+  \item \textbf{Effort:} 118 SP đề xuất cho 18 hạng mục; Function Point (khoảng 1.560 giờ) và COCOMO~81
+        (3.500--5.100 giờ) xác nhận quy mô sản phẩm.
+  \item \textbf{Lịch trình:} 23 công việc, đường găng 33 ngày làm việc qua ghi âm, STT, live, streaming và deploy;
+        nhánh tóm tắt và dịch có 3--12 ngày dự trữ.
+  \item \textbf{Rủi ro:} 14 rủi ro, 5 ở vùng Cao; R2 đã giảm xuống mức Thấp nhờ engine remote, R11 đang xảy ra.
+  \item \textbf{Nguồn lực và chi phí:} ràng buộc là giờ rảnh của từng người; đơn giá nhân công là 100.000 VND mỗi
+        giờ, hạ tầng và API khoảng 2,5--3 triệu VND mỗi tháng, dự phòng 10\%.
+  \item \textbf{Tổ chức:} ma trận RACI với một người A cho mỗi sản phẩm, năm sự kiện Scrum, kế hoạch truyền thông và
+        bốn cấp leo thang.
+\end{itemize}
+
+\section{Việc cần làm trước khi trình duyệt}
+
+\begin{enumerate}
+  \item Điền các ô \canDien: người lập, tên thành viên theo vai trò, người phụ trách theo sprint, giờ kế hoạch và
+        giờ thực tế theo người và theo sprint, velocity của Sprint 1--3, lịch Daily và tổng ngân sách được duyệt.
+  \item Thay ngày bắt đầu giả định 07/09/2026 bằng ngày bắt đầu Sprint 1 thật, rồi tính lại lịch bằng
+        \texttt{pm\_calc.py}~\cite{pmcalc}.
+  \item Xác nhận tổng story point của Bảng~\ref{tab:estimate} (118 SP, phiên bản 2.0 ghi 125 SP) với điểm đã vote
+        trên Azure Boards.
+  \item Đối chiếu R1--R5 với biên bản họp, và đối chiếu release plan với việc đã thực sự làm trong từng sprint.
+  \item Thay vai trò in nghiêng ở cột phụ trách của Risk Register bằng tên thành viên.
+\end{enumerate}
+
+\needspace{14\baselineskip}
+\section{Phê duyệt}
+
+Nhóm dự án đề nghị Sponsor, Product Owner và Project Manager phê duyệt kế hoạch này làm đường cơ sở về phạm vi,
+lịch trình và chi phí để theo dõi và kiểm soát dự án SumTalk.
+
+\begin{table}[H]
+  \centering
+  \renewcommand{\arraystretch}{2.4}
+  \begin{tabularx}{\linewidth}{@{}P{3.6cm}LP{3.2cm}P{2.6cm}@{}}
+    \toprule
+    \thead{Vai trò} & \thead{Họ tên} & \thead{Chữ ký} & \thead{Ngày} \\
+    \midrule
+    Sponsor & & & \\
+    Product Owner & & & \\
+    Project Manager & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ References
+\begin{thebibliography}{9}
+\addcontentsline{toc}{chapter}{\bibname}
+  \bibitem{pid} Nhóm SumTalk, \emph{Hồ sơ khởi động dự án (Project Initiation Document)}, Tài liệu 01,
+    mã SUMTALK-PID, phiên bản 2.1, 24/11/2026.
+  \bibitem{srs} Nhóm SumTalk, \emph{Đặc tả yêu cầu phần mềm (Software Requirements Specification)},
+    Tài liệu 02, mã SUMTALK-SRS, phiên bản 2.1, 24/11/2026.
+  \bibitem{qtd} Nhóm SumTalk, \emph{Chất lượng và kiểm thử (Quality \& Test Document)}, Tài liệu 04,
+    mã SUMTALK-QTD, phiên bản 2.1, 24/11/2026.
+  \bibitem{mcr} Nhóm SumTalk, \emph{Báo cáo theo dõi và kiểm soát (Monitoring \& Control Report)}, Tài liệu 05,
+    mã SUMTALK-MCR, phiên bản 2.1, 24/11/2026.
+  \bibitem{pcr} Nhóm SumTalk, \emph{Báo cáo kết thúc dự án (Project Closure Report)}, Tài liệu 06,
+    mã SUMTALK-PCR, phiên bản 2.1, 24/11/2026.
+  \bibitem{pmcalc} Nhóm SumTalk, \emph{Công cụ tính COCOMO, NPV, ROI, thời gian hoàn vốn và CPM},
+    kho mã nguồn \texttt{DatTapTanhCode/SumTalk}, tệp \path{docs/project/tools/pm_calc.py}.
+  \bibitem{pmbok} Project Management Institute, \emph{A Guide to the Project Management Body of Knowledge
+    (PMBOK Guide)}, 6th ed., Newtown Square, PA: PMI, 2017.
+  \bibitem{boehm} B. W. Boehm, \emph{Software Engineering Economics}, Englewood Cliffs, NJ: Prentice-Hall, 1981.
+  \bibitem{ifpug} International Function Point Users Group, \emph{Function Point Counting Practices Manual},
+    Release 4.3.1, 2010.
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,849 @@
+% =============================================================================
+%  Tài liệu 01 - Hồ sơ khởi động dự án (Project Initiation Document)
+%  Build: latexmk 01-project-initiation.tex   (pdfLaTeX, output in build/)
+% =============================================================================
+\documentclass[12pt,a4paper]{report}
+\usepackage{sumtalk-report}
+\input{sumtalk-info}
+
+\newcommand{\DocTitle}{HỒ SƠ KHỞI ĐỘNG DỰ ÁN}
+\newcommand{\DocTitleNormal}{Hồ sơ khởi động dự án}
+\newcommand{\DocTitleEn}{Project Initiation Document}
+\newcommand{\DocRunningTitle}{Hồ sơ khởi động dự án}
+\newcommand{\DocCode}{SUMTALK-PID}
+\newcommand{\DocVersion}{2.1 -- 24/11/2026}
+\newcommand{\DocStatus}{Chờ duyệt}
+\newcommand{\DocAuthor}{\canDien[Project Manager]}
+\newcommand{\DocReviewers}{Sponsor, Product Owner, Project Manager}
+\newcommand{\DocReaders}{Sponsor, Product Owner, Project Manager}
+\newcommand{\CoverDate}{TP. HỒ CHÍ MINH, THÁNG 11/2026}
+\hypersetup{pdftitle={SumTalk -- Hồ sơ khởi động dự án},pdfauthor={Nhóm SumTalk}}
+
+\begin{document}
+
+\makereportcover
+
+% ============================================================ Front matter
+\chapter*{Thông tin tài liệu}
+\addcontentsline{toc}{chapter}{Thông tin tài liệu}
+
+\docinfotable
+
+\section*{Lịch sử phiên bản}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}Q{1.6cm}Q{2.3cm}LP{3.2cm}@{}}
+    \toprule
+    \thead{Phiên bản} & \thead{Ngày} & \thead{Nội dung thay đổi} & \thead{Người thực hiện} \\
+    \midrule
+    1.0 & 12/11/2026 & Bản đầu, gồm ba tài liệu riêng: Project Charter, Business Case và lựa chọn phương pháp & \canDien \\
+    2.0 & 13/11/2026 & Gộp thành một tài liệu, đánh lại số mục (CR-08) & \canDien \\
+    2.1 & 24/11/2026 & Chuyển sang định dạng báo cáo PDF (LaTeX), sắp xếp lại thành năm chương & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\heading{Quy ước trong tài liệu}
+\begin{itemize}
+  \item \canDien[\ldots]: số liệu đã có ở Azure Boards, dashboard chi phí hoặc biên bản họp nhưng chưa chép
+        vào tài liệu; cần bổ sung trước khi trình duyệt.
+  \item \textbf{Giả định}: con số đặt ra để tính toán. Mọi bảng tài chính đều ghi rõ cách tính để thay bằng số
+        thật rồi tính lại.
+\end{itemize}
+
+\tableofcontents
+
+\chapter*{Tóm tắt}
+\addcontentsline{toc}{chapter}{Tóm tắt}
+
+Ghi biên bản họp hiện vẫn làm thủ công: thư ký vừa nghe vừa gõ và mất thêm 30--60 phút sau mỗi buổi để hoàn
+thiện. Họp trực tuyến và họp trộn tiếng Anh -- tiếng Việt càng làm việc ghi chép dễ sót, trong khi các dịch vụ
+ghi chú bằng AI sẵn có đưa audio lên cloud nước ngoài và tính phí theo người dùng. Dự án \textbf{SumTalk} xây
+dựng một ứng dụng ghi âm, phiên âm, tóm tắt và dịch biên bản cuộc họp, chạy được trên máy của người dùng hoặc
+trên server của đơn vị.
+
+Tài liệu này là \textbf{hồ sơ khởi động dự án} (Project Initiation Document -- PID), làm căn cứ để Sponsor phê
+duyệt khởi động và cấp ngân sách. Hồ sơ gồm ba phần. \emph{Điều lệ dự án} xác định sáu mục tiêu SMART (M1--M6),
+phạm vi, sản phẩm bàn giao, các bên liên quan, ngân sách, mốc và phân quyền ra quyết định. \emph{Business case}
+so sánh ba phương án: giữ nguyên cách làm hiện tại, tự xây SumTalk, hoặc mua dịch vụ SaaS. Với các giả định
+nêu trong tài liệu, phương án tự xây đạt NPV khoảng \textbf{+109,1 triệu VND} sau 3 năm, ROI \textbf{89,4\%}
+và hoàn vốn sau khoảng \textbf{16 tháng}, vượt xa phương án SaaS (NPV +25,3 triệu VND) và giữ dữ liệu họp
+trong đơn vị. Cuối cùng, tài liệu lý giải việc chọn \textbf{Scrum} làm phương pháp quản lý, bổ sung các tài
+liệu quản lý cần cho việc báo cáo với Sponsor.
+
+\textbf{Từ khoá:} hồ sơ khởi động dự án, điều lệ dự án, business case, NPV, ROI, Scrum, speech-to-text,
+tóm tắt cuộc họp.
+
+\chapter*{Danh mục từ viết tắt}
+\addcontentsline{toc}{chapter}{Danh mục từ viết tắt}
+
+\begin{center}
+  \setstretch{1.1}
+  \begin{tabular}{@{}P{2.4cm}P{11cm}@{}}
+    \toprule
+    \thead{Viết tắt} & \thead{Ý nghĩa} \\
+    \midrule
+    API   & Application Programming Interface -- giao diện lập trình ứng dụng \\
+    AWS   & Amazon Web Services (EC2: máy chủ ảo; S3: lưu trữ đối tượng) \\
+    BA    & Business Analyst -- chuyên viên phân tích nghiệp vụ \\
+    CPI   & Cost Performance Index -- chỉ số hiệu quả chi phí \\
+    CPM   & Critical Path Method -- phương pháp đường găng \\
+    DoD   & Definition of Done -- tiêu chí hoàn thành \\
+    E2E   & End-to-End -- kiểm thử đầu cuối \\
+    EVA   & Earned Value Analysis -- phân tích giá trị thu được \\
+    LLM   & Large Language Model -- mô hình ngôn ngữ lớn \\
+    NPV   & Net Present Value -- giá trị hiện tại ròng \\
+    PID   & Project Initiation Document -- hồ sơ khởi động dự án \\
+    PM    & Project Manager -- quản lý dự án \\
+    PO    & Product Owner -- chủ sản phẩm \\
+    POC   & Proof of Concept -- bản thử nghiệm khái niệm \\
+    QC    & Quality Control -- kiểm soát chất lượng \\
+    ROI   & Return on Investment -- tỷ suất hoàn vốn \\
+    SaaS  & Software as a Service -- phần mềm dạng dịch vụ \\
+    SLA   & Service Level Agreement -- cam kết mức dịch vụ \\
+    SMART & Specific, Measurable, Achievable, Relevant, Time-bound \\
+    STT   & Speech-to-Text -- chuyển giọng nói thành văn bản \\
+    UAT   & User Acceptance Testing -- kiểm thử chấp nhận của người dùng \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listfigurename}
+\listoffigures
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listtablename}
+\listoftables
+
+% ============================================================ Chapter 1
+\chapter{Giới thiệu}
+\label{chap:intro}
+
+\section{Bối cảnh và vấn đề}
+
+Trong nhiều đơn vị, biên bản họp vẫn được ghi bằng tay. Thư ký vừa theo dõi nội dung vừa gõ, rồi mất thêm
+30--60 phút sau mỗi buổi để chỉnh sửa và gửi đi. Ba xu hướng đang làm việc này khó hơn:
+\begin{itemize}
+  \item \textbf{Họp trực tuyến} trên Meet, Teams hay Zoom: âm thanh nằm trong cuộc gọi, muốn nghe lại phải ghi
+        âm riêng.
+  \item \textbf{Họp trộn ngôn ngữ}: người nói chuyển qua lại giữa tiếng Anh và tiếng Việt, nên rất dễ ghi sót
+        hoặc phải dịch tay.
+  \item \textbf{Dịch vụ AI ghi chú có sẵn} thường đưa audio lên cloud nước ngoài, hỗ trợ tiếng Việt và họp đa
+        ngôn ngữ còn yếu, lại tính phí theo từng người dùng.
+\end{itemize}
+Nói cách khác, vấn đề không chỉ là tốn thời gian ghi chép, mà còn là \emph{chất lượng} biên bản (sót quyết định,
+sót việc cần làm) và \emph{chủ quyền dữ liệu} của các cuộc họp có nội dung nhạy cảm.
+
+\section{Giải pháp đề xuất: SumTalk}
+
+SumTalk là ứng dụng ghi âm, phiên âm, tóm tắt và dịch biên bản cuộc họp. Người dùng ghi âm trực tiếp (micro,
+hoặc micro cùng âm thanh cuộc họp trực tuyến) hay tải lên file có sẵn; hệ thống dùng Whisper để chuyển giọng
+nói thành văn bản, giữ đúng ngôn ngữ của từng câu, hiển thị transcript ngay khi đang nói, sau đó dùng LLM để
+tạo biên bản tóm tắt và dịch Việt $\leftrightarrow$ Anh. Sản phẩm có bản web triển khai trên AWS và ứng dụng
+desktop cho Windows, nên có thể chạy hoàn toàn trên máy hoặc server của đơn vị. Phạm vi chi tiết được nêu ở
+Mục~\ref{sec:scope}.
+
+\section{Mục đích và người đọc của tài liệu}
+
+Tài liệu trả lời năm câu hỏi trước khi dự án được khởi động: \emph{vì sao} làm SumTalk, \emph{nhắm tới} mục
+tiêu gì, làm trong \emph{phạm vi} nào, có \emph{đáng đầu tư} không, và \emph{quản lý} theo phương pháp nào.
+Người đọc chính là Sponsor (phê duyệt và cấp ngân sách), Product Owner và Project Manager. Các kế hoạch chi
+tiết (WBS, lịch trình, rủi ro, chi phí) nằm trong \docref{03}{Kế hoạch quản lý dự án}~\cite{pmp}; yêu cầu
+sản phẩm nằm trong \docref{02}{Đặc tả yêu cầu phần mềm}~\cite{srs}.
+
+\section{Cấu trúc tài liệu}
+
+Phần còn lại của tài liệu gồm bốn chương:
+\begin{itemize}
+  \item \textbf{Chương~\ref{chap:charter} -- Điều lệ dự án:} mục tiêu, phạm vi, sản phẩm bàn giao, các bên liên
+        quan, ngân sách, mốc chính, giả định, rủi ro cấp cao và phân quyền.
+  \item \textbf{Chương~\ref{chap:business} -- Business case:} bài toán nghiệp vụ, các phương án, giả định tài
+        chính, dòng tiền, NPV, ROI, thời gian hoàn vốn và phân tích độ nhạy.
+  \item \textbf{Chương~\ref{chap:method} -- Phương pháp quản lý dự án:} so sánh Waterfall, Scrum, Kanban và mô
+        hình lai; cách áp dụng Scrum trong dự án.
+  \item \textbf{Chương~\ref{chap:conclusion} -- Kết luận và đề nghị phê duyệt.}
+\end{itemize}
+
+% ============================================================ Chapter 2
+\chapter{Điều lệ dự án}
+\label{chap:charter}
+
+Điều lệ dự án (Project Charter) chính thức xác lập dự án SumTalk, trao quyền cho Project Manager sử dụng nguồn
+lực đã duyệt và là điểm tham chiếu khi có yêu cầu thay đổi phạm vi. Thông tin chính được tóm tắt trong
+Bảng~\ref{tab:charter-info}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Thông tin chính của dự án}
+  \label{tab:charter-info}
+  \begin{tabularx}{0.9\linewidth}{@{}P{5cm}L@{}}
+    \toprule
+    Tên dự án & SumTalk -- ghi âm, phiên âm, tóm tắt và dịch biên bản cuộc họp \\
+    Nhà tài trợ (Sponsor) & \canDien[đại diện đơn vị tài trợ] \\
+    Product Owner & \canDien \\
+    Project Manager / Scrum Master & \canDien \\
+    Ngày phê duyệt & \canDien \\
+    Phiên bản điều lệ & 1.0 -- 12/11/2026 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Mục tiêu dự án}
+
+Mỗi mục tiêu được viết theo tiêu chí SMART: có thước đo kiểm chứng được và gắn với một sprint hoặc mốc cụ thể.
+Các mục tiêu M1--M4 thuộc về sản phẩm, M5 về khả năng triển khai, còn M6 ràng buộc ngân sách
+(Bảng~\ref{tab:objectives}). Một số thước đo đã có kết quả đo thực tế, được ghi kèm để đối chiếu.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Mục tiêu dự án theo tiêu chí SMART}
+  \label{tab:objectives}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{0.9cm}LLP{2.1cm}@{}}
+    \toprule
+    \thead{Mã} & \thead{Mục tiêu} & \thead{Thước đo} & \thead{Hạn} \\
+    \midrule
+    M1 & Ghi âm hoặc tải file cuộc họp và nhận transcript đúng ngôn ngữ người nói (Anh, Việt, trộn)
+       & Chạy được trên Chrome/Edge, điện thoại, app Windows; test E2E đạt & Sprint 1--2 \\
+    M2 & Transcript hiện trực tiếp khi đang nói
+       & Chữ hiện trễ $\leq$ 3--5\,s (đo được: khoảng 1\,s cho từ mới, 1,9\,s cho câu đã chốt) & Sprint 4 \\
+    M3 & Tự động tóm tắt (tổng quan, ý chính, quyết định, việc cần làm) và dịch Việt $\leftrightarrow$ Anh
+       & Story \#67 và \#60 đạt toàn bộ acceptance criteria & Sprint 3 \\
+    M4 & Xử lý được cuộc họp từ 60 phút trở lên
+       & Đã đo: file 11,6 phút xong trong 18--57\,s, dòng đầu hiện sau 3--5\,s & Sprint 4 \\
+    M5 & Có bản web trên AWS để test, demo và bộ cài Windows không bắt tải model nặng
+       & Có URL HTTPS và bộ cài \texttt{SumTalk-Setup-x.y.z.exe} & Sprint 4 \\
+    M6 & Nằm trong ngân sách
+       & Chi phí thực tế $\leq$ ngân sách duyệt (Mục~\ref{sec:budget}), CPI $\geq$ 0,9 & Cuối dự án \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Phạm vi}
+\label{sec:scope}
+
+\heading{Trong phạm vi}
+\begin{itemize}
+  \item \textbf{Ghi âm:} micro, hoặc micro cùng âm thanh cuộc họp trực tuyến; tạm dừng và tiếp tục; vẫn ghi khi
+        mất mạng rồi tự đồng bộ khi có mạng lại.
+  \item \textbf{Tải file:} file audio/video đến 1\,GB, nhiều định dạng, tự chuẩn hoá về WAV 16\,kHz.
+  \item \textbf{Speech-to-text:} Whisper chạy local (GPU/CPU) hoặc qua API/server; giữ ngôn ngữ gốc của từng câu.
+  \item \textbf{Transcript:} hiển thị trực tiếp trong khi họp và bản cuối chính xác; tìm kiếm, phát lại đồng bộ,
+        xuất TXT, SRT, VTT, JSON và WAV.
+  \item \textbf{Tóm tắt và dịch} bằng LLM (tiếng Việt, tiếng Anh), xuất được bản dịch.
+  \item \textbf{Nền tảng:} ứng dụng desktop Windows (Electron), bản web trên AWS (EC2 và S3), cùng bộ tài liệu dự án.
+\end{itemize}
+
+\heading{Ngoài phạm vi (phiên bản này)}
+\begin{itemize}
+  \item Tài khoản người dùng, phân quyền, đa tổ chức; bản test dùng một mật khẩu chung.
+  \item Nhận diện người nói (diarization), dịch trực tiếp khi đang họp (\#84), trang việc cần làm (\#79).
+  \item Ứng dụng iOS/Android native, ghi âm khi khoá màn hình trên iOS.
+  \item Cam kết SLA vận hành thương mại.
+\end{itemize}
+
+\section{Sản phẩm bàn giao}
+
+Bảng~\ref{tab:deliverables} liệt kê năm nhóm sản phẩm bàn giao. Mã nguồn được tổ chức theo nhánh feature của
+từng sprint; bản web trên AWS và ứng dụng desktop thuộc mốc M4 (Mục~\ref{sec:milestones}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Sản phẩm bàn giao chính}
+  \label{tab:deliverables}
+  \begin{tabularx}{\linewidth}{@{}P{3.6cm}L@{}}
+    \toprule
+    \thead{Sản phẩm} & \thead{Mô tả} \\
+    \midrule
+    Mã nguồn & Kho \texttt{DatTapTanhCode/SumTalk}, các nhánh feature theo sprint \\
+    Bản web & Docker image và hướng dẫn deploy trên AWS EC2/S3 \\
+    Ứng dụng desktop & Bộ cài Windows (NSIS) và bản GPU dạng thư mục \\
+    Tài liệu & README, ARCHITECTURE, bộ sáu tài liệu quản lý dự án, test case \\
+    Kết quả kiểm thử & pytest (backend), Playwright (trình duyệt, desktop) và báo cáo kiểm thử~\cite{qtd} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Các bên liên quan}
+
+Ba bên có ảnh hưởng cao là Sponsor, Product Owner và nhóm phát triển; họ tham gia trực tiếp vào các sự kiện của
+mỗi sprint. Các bên còn lại được cập nhật qua kênh phù hợp với mức ảnh hưởng (Bảng~\ref{tab:stakeholders}).
+Phân công chi tiết theo ma trận RACI được trình bày trong~\cite{pmp}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Các bên liên quan và cách làm việc}
+  \label{tab:stakeholders}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{3.4cm}LQ{1.9cm}L@{}}
+    \toprule
+    \thead{Bên liên quan} & \thead{Vai trò / mối quan tâm} & \thead{Ảnh hưởng} & \thead{Cách làm việc} \\
+    \midrule
+    Sponsor (đơn vị tài trợ) & Cấp ngân sách, duyệt phạm vi và mốc, nghiệm thu & Cao
+      & Sprint Review, báo cáo trạng thái mỗi sprint \\
+    Product Owner & Ưu tiên backlog, chấp nhận story & Cao & Sprint Planning/Review, Azure Boards \\
+    Nhóm phát triển & Xây dựng sản phẩm, kiểm thử đơn vị & Cao & Daily, code review \\
+    BA & Yêu cầu, acceptance criteria, mẫu tham chiếu để đánh giá & Trung bình & Refinement \\
+    QC & Test case, test E2E, báo lỗi & Trung bình & Test plan, Bug trên Azure Boards \\
+    Người dùng thử (thư ký, trưởng nhóm họp) & Dễ dùng, đúng nội dung, bảo mật & Trung bình & UAT trên bản web \\
+    Nhà cung cấp (AWS, Groq/OpenAI, Ollama) & Hạ tầng, API & Thấp & Theo dõi chi phí, rate limit \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Ngân sách tóm tắt}
+\label{sec:budget}
+
+Chi phí chủ yếu là nhân công, tính theo đơn giá 100.000~VND/giờ:
+\begin{equation}
+  \label{eq:labour}
+  \text{Chi phí nhân công} = \text{tổng giờ kế hoạch} \times 100.000~\text{VND}
+\end{equation}
+Chi phí ngoài nhân công (AWS, API) ước tính khoảng 3~triệu VND/tháng khi chạy bản test 24/7. Ngân sách giữ thêm
+10\% dự phòng (Bảng~\ref{tab:budget}). Kế hoạch chi phí chi tiết theo sprint nằm trong~\cite{pmp}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Ngân sách tóm tắt}
+  \label{tab:budget}
+  \begin{tabularx}{\linewidth}{@{}P{5.2cm}LP{3.3cm}@{}}
+    \toprule
+    \thead{Khoản} & \thead{Giá trị} & \thead{Nguồn} \\
+    \midrule
+    Đơn giá nhân công & 100.000 VND/giờ & Dashboard chi phí \\
+    Tổng giờ kế hoạch & \canDien[tổng giờ theo sprint] & Azure Boards \\
+    Chi phí nhân công kế hoạch & Theo công thức~\eqref{eq:labour} & -- \\
+    Chi phí ngoài nhân công & Khoảng 3 triệu VND/tháng khi chạy bản test 24/7 & Ước tính \\
+    Dự phòng & 10\% tổng ngân sách & -- \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Mốc chính}
+\label{sec:milestones}
+
+Dự án có sáu mốc: M0 khi được duyệt khởi động, M1--M4 ứng với kết quả cuối Sprint 1--4, và M5 khi nghiệm thu
+(Hình~\ref{fig:milestones}). Ngày cụ thể của từng mốc
+được ghi trong Bảng~\ref{tab:milestones}; lịch chi tiết với sơ đồ mạng, CPM và Gantt nằm trong~\cite{pmp}.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      ms/.style={circle,draw=white,line width=1pt,fill=primaryblue,inner sep=3pt},
+      lbl/.style={text width=3cm,align=center,font=\footnotesize,inner sep=1pt,
+                  execute at begin node=\setstretch{1.05}}]
+    \draw[-{Stealth[length=3mm]},line width=1.2pt,primaryblue] (0,0) -- (15.8,0);
+    \foreach \x/\m/\when/\what in {
+        1.5/M0/Khởi động/{Charter, backlog, yêu cầu và UI/UX được duyệt},
+        6.6/M2/Hết Sprint 2/{Benchmark và chọn model LLM},
+        11.7/M4/Hết Sprint 4/{Desktop, transcript streaming, STT qua server, bản web AWS}} {
+      \node[ms] at (\x,0) {};
+      \node[lbl,above=7pt] at (\x,0) {\textbf{\m} -- \when\\ \what};
+    }
+    \foreach \x/\m/\when/\what in {
+        4.05/M1/Hết Sprint 1/{Ghi âm, upload, transcript gốc (POC E1)},
+        9.15/M3/Hết Sprint 3/{Tóm tắt (\#67), dịch (\#60), test E2E},
+        14.25/M5/Kết thúc/{Nghiệm thu, báo cáo tổng kết}} {
+      \node[ms] at (\x,0) {};
+      \node[lbl,below=7pt] at (\x,0) {\textbf{\m} -- \when\\ \what};
+    }
+  \end{tikzpicture}
+  \caption{Các mốc chính của dự án}
+  \label{fig:milestones}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Mốc chính và ngày hoàn thành}
+  \label{tab:milestones}
+  \begin{tabularx}{\linewidth}{@{}P{3.2cm}LP{2.6cm}@{}}
+    \toprule
+    \thead{Mốc} & \thead{Nội dung} & \thead{Ngày} \\
+    \midrule
+    M0 & Charter, backlog, tài liệu yêu cầu và UI/UX được duyệt & \canDien \\
+    M1 (hết Sprint 1) & Ghi âm, upload, transcript gốc chạy được (POC E1) & \canDien \\
+    M2 (hết Sprint 2) & Benchmark và chọn model LLM & \canDien \\
+    M3 (hết Sprint 3) & Tóm tắt (\#67), dịch (\#60), test E2E (\#99, \#100) & \canDien \\
+    M4 (hết Sprint 4) & App desktop, transcript streaming, STT qua server, bản web trên AWS & \canDien \\
+    M5 & Nghiệm thu, báo cáo tổng kết & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Giả định và ràng buộc}
+
+\begin{itemize}
+  \item \textbf{Nhân lực:} nhóm làm bán thời gian, song song với công việc khác; mỗi sprint dài
+        \canDien[1--2] tuần.
+  \item \textbf{Hạ tầng:} không có ngân sách thuê GPU cố định. Nhóm phát triển dùng laptop RTX 4050; bản test
+        trên AWS dùng EC2 CPU kết hợp Whisper API, hoặc bật GPU theo giờ.
+  \item \textbf{Bảo mật dữ liệu:} nội dung họp có thể nhạy cảm, nên mặc định chạy local; khi deploy bắt buộc có
+        HTTPS, đăng nhập và bucket S3 private.
+  \item \textbf{Công cụ:} Azure Boards (backlog), GitHub (mã nguồn), Python/FastAPI, React, Electron.
+\end{itemize}
+
+\section{Rủi ro cấp cao}
+
+Bốn rủi ro sau được xác định ngay khi khởi động; phân tích xác suất, tác động và kế hoạch ứng phó nằm trong
+Risk Register~\cite{pmp}.
+\begin{enumerate}
+  \item Độ chính xác của STT với tiếng Việt và họp trộn ngôn ngữ.
+  \item Phụ thuộc GPU và API bên ngoài: chi phí và giới hạn số lượng yêu cầu (rate limit).
+  \item Trễ tiến độ do nhóm làm bán thời gian.
+  \item Bảo mật dữ liệu cuộc họp.
+\end{enumerate}
+
+\section{Phân quyền ra quyết định}
+
+Bảng~\ref{tab:decision-rights} xác định ai có quyền quyết định cuối cùng (in đậm) với từng loại quyết định. Quy
+tắc quan trọng nhất là thay đổi phạm vi, mốc hoặc ngân sách vượt 10\% phải được Sponsor phê duyệt; mọi thay đổi
+được ghi vào Change Log~\cite{mcr}.
+
+% Last table of the chapter: [H] so it is not pushed onto a page of its own.
+\begin{table}[H]
+  \centering
+  \caption{Phân quyền ra quyết định}
+  \label{tab:decision-rights}
+  \small
+  \begin{tabularx}{\linewidth}{@{}LQ{1.9cm}Q{1.9cm}Q{1.9cm}Q{1.9cm}@{}}
+    \toprule
+    \thead{Quyết định} & \thead{PM} & \thead{PO} & \thead{Nhóm Dev} & \thead{Sponsor} \\
+    \midrule
+    Thêm/bớt story trong sprint đang chạy & đề xuất & \textbf{quyết định} & tư vấn & -- \\
+    Thay đổi phạm vi, mốc, ngân sách $>$ 10\% & đề xuất & đồng ý & -- & \textbf{phê duyệt} \\
+    Giải pháp kỹ thuật & tư vấn & -- & \textbf{quyết định} & -- \\
+    Phân công, lịch họp & \textbf{quyết định} & -- & tư vấn & -- \\
+    Chấp nhận story (Definition of Done) & -- & \textbf{quyết định} & -- & -- \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ Chapter 3
+\chapter{Business case}
+\label{chap:business}
+
+Chương này đánh giá dự án có đáng đầu tư hay không. \textbf{Kết luận: nên tự xây SumTalk.} Với các giả định ở
+Mục~\ref{sec:fin-assumptions}, sau 3 năm phương án tự xây đạt NPV khoảng +109,1 triệu VND, ROI 89,4\% và hoàn
+vốn sau khoảng 1,3 năm. Phương án mua SaaS chỉ đạt NPV khoảng +25,3 triệu VND, ROI 12,8\%, và audio họp phải đưa
+ra cloud nước ngoài.
+
+Mọi số tiền trong chương là \textbf{ước tính dựa trên giả định} với tỷ giá 26.000~VND/USD. Khi có số thật (tổng
+giờ công trên dashboard, số cuộc họp của đơn vị dùng thử), có thể tính lại bằng công cụ
+\texttt{docs/project/tools/pm\_calc.py}~\cite{pmcalc}.
+
+\section{Bài toán nghiệp vụ}
+
+Bảng~\ref{tab:as-is-to-be} so sánh hiện trạng với trạng thái mong muốn ở bốn khía cạnh. Ba khía cạnh đầu liên
+quan tới năng suất; khía cạnh thứ tư là lý do khiến các dịch vụ AI có sẵn khó được chấp nhận.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Hiện trạng và trạng thái mong muốn}
+  \label{tab:as-is-to-be}
+  \begin{tabularx}{\linewidth}{@{}P{2.8cm}LL@{}}
+    \toprule
+    \thead{Khía cạnh} & \thead{Hiện trạng} & \thead{Mong muốn} \\
+    \midrule
+    Ghi biên bản & Thư ký gõ tay trong và sau họp, mất 30--60 phút mỗi buổi
+      & Transcript có sẵn khi họp xong; biên bản (tóm tắt, quyết định, việc cần làm) tự tạo \\
+    Họp trực tuyến & Phải ghi âm riêng rồi nghe lại & Thu cả micro và âm thanh cuộc gọi, chữ hiện ngay khi nói \\
+    Họp trộn Anh -- Việt & Dễ sót, phải dịch tay & Giữ đúng ngôn ngữ từng câu, dịch Việt $\leftrightarrow$ Anh một chạm \\
+    Bảo mật & Dịch vụ AI bên ngoài đưa dữ liệu ra nước ngoài & Chạy trên máy hoặc server của đơn vị; bucket S3 private \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Giá trị mang lại}
+
+\begin{itemize}
+  \item \textbf{Tiết kiệm thời gian:} giả định tiết kiệm 45 phút cho mỗi cuộc họp cần biên bản; đây là nguồn
+        lợi ích duy nhất được lượng hoá trong Mục~\ref{sec:cashflow}.
+  \item \textbf{Chất lượng biên bản:} không sót quyết định hay việc cần làm; tìm kiếm và phát lại đúng đoạn.
+  \item \textbf{Khả năng tiếp cận:} người vắng mặt đọc tóm tắt hoặc bản dịch thay vì nghe lại một giờ ghi âm.
+  \item \textbf{Chủ quyền dữ liệu:} tự host được, trên máy cá nhân hoặc server riêng.
+\end{itemize}
+
+\section{Các phương án}
+
+Ba phương án được đưa vào so sánh (Bảng~\ref{tab:options}). Phương án P0 là mốc tham chiếu; P1 và P2 mang lại
+cùng lợi ích về thời gian nhưng khác nhau về chi phí và nơi lưu dữ liệu.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Các phương án được xem xét}
+  \label{tab:options}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{2.7cm}LLL@{}}
+    \toprule
+    \thead{Phương án} & \thead{Mô tả} & \thead{Ưu điểm} & \thead{Nhược điểm} \\
+    \midrule
+    P0 -- Giữ nguyên & Ghi tay như hiện tại & Không tốn đầu tư & Tốn giờ công, sót nội dung \\
+    \textbf{P1 -- Tự xây SumTalk} & Dự án này: web và desktop, Whisper và LLM
+      & Làm theo nhu cầu tiếng Việt và họp trộn ngôn ngữ, tự host, chi phí vận hành thấp
+      & Tốn công phát triển, cần bảo trì \\
+    P2 -- Mua SaaS & Dịch vụ AI note-taker trả phí theo người & Dùng được ngay
+      & Phí theo người cao, dữ liệu ra nước ngoài, tiếng Việt và họp trộn còn yếu \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Giả định tài chính}
+\label{sec:fin-assumptions}
+
+Bảng~\ref{tab:fin-assumptions} liệt kê các giả định đầu vào. Lợi ích tối đa mỗi năm bằng số cuộc họp nhân với
+thời gian tiết kiệm và đơn giá giờ công: $1.920 \times 0{,}75 \times 100.000 = 144$ triệu VND, nhân với tỷ lệ
+áp dụng của từng năm.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Giả định tài chính}
+  \label{tab:fin-assumptions}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{3.6cm}LP{4.3cm}@{}}
+    \toprule
+    \thead{Giả định} & \thead{Giá trị} & \thead{Ghi chú} \\
+    \midrule
+    Tổng công phát triển & \textbf{600 giờ} $\times$ 100.000 VND = \textbf{60.000.000 VND}
+      & \canDien[thay bằng tổng giờ thực tế] \\
+    Đơn vị dùng thử & 40 cuộc họp/tuần $\times$ 48 tuần = 1.920 cuộc/năm & Ví dụ một công ty khoảng 50 người \\
+    Thời gian tiết kiệm & 0,75 giờ/cuộc họp, quy đổi 100.000 VND/giờ & Lợi ích tối đa 144.000.000 VND/năm \\
+    Tỷ lệ áp dụng & Năm 1: 50\%, năm 2: 80\%, năm 3: 90\% & -- \\
+    Vận hành P1 & 35.744.000 VND/năm & Chi tiết ở Bảng~\ref{tab:opex} \\
+    Phí SaaS P2 & 20 người $\times$ 15 USD/tháng = 93.600.000 VND/năm & Giá tham khảo, cần kiểm tra \\
+    Suất chiết khấu, thời gian & 10\%/năm, 3 năm & -- \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Chi phí vận hành của P1 chủ yếu là máy chủ EC2; chi phí API cho STT và LLM chỉ chiếm khoảng 9\% tổng
+(Bảng~\ref{tab:opex}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Chi phí vận hành hằng năm của phương án P1}
+  \label{tab:opex}
+  \begin{tabular}{@{}P{10cm}r@{}}
+    \toprule
+    \thead{Khoản} & \thead{VND/năm} \\
+    \midrule
+    EC2 t3.large, EBS và IP (khoảng 85 USD/tháng) & 26.520.000 \\
+    Whisper API (1.600 giờ audio $\times$ 0,04 USD) & 1.664.000 \\
+    LLM API tóm tắt và dịch (khoảng 5 USD/tháng) & 1.560.000 \\
+    Bảo trì (10\% chi phí phát triển) & 6.000.000 \\
+    \midrule
+    \textbf{Tổng} & \textbf{35.744.000} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Dòng tiền, NPV, ROI và thời gian hoàn vốn}
+\label{sec:cashflow}
+
+Dòng tiền ròng mỗi năm bằng lợi ích trừ chi phí. Bảng~\ref{tab:cashflow} trình bày dòng tiền của hai phương án
+có đầu tư; lợi ích của P1 và P2 như nhau vì cùng tiết kiệm thời gian ghi biên bản.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Dòng tiền theo năm (triệu VND)}
+  \label{tab:cashflow}
+  \begin{tabular}{@{}lrrrr@{}}
+    \toprule
+    \thead{Hạng mục} & \thead{Năm 0} & \thead{Năm 1} & \thead{Năm 2} & \thead{Năm 3} \\
+    \midrule
+    Lợi ích (P1 và P2) & 0 & 72,0 & 115,2 & 129,6 \\
+    \midrule
+    P1 -- chi phí & 60,0 & 35,7 & 35,7 & 35,7 \\
+    P1 -- dòng tiền ròng & $-60{,}0$ & 36,3 & 79,5 & 93,9 \\
+    P1 -- luỹ kế & $-60{,}0$ & $-23{,}7$ & 55,7 & 149,6 \\
+    \midrule
+    P2 -- chi phí & 0 & 93,6 & 93,6 & 93,6 \\
+    P2 -- dòng tiền ròng & 0 & $-21{,}6$ & 21,6 & 36,0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Ba chỉ số được dùng để so sánh. Giá trị hiện tại ròng chiết khấu dòng tiền $CF_t$ của từng năm với suất
+chiết khấu $r$:
+\begin{equation}
+  \label{eq:npv}
+  \mathrm{NPV} = \sum_{t=0}^{3} \frac{CF_t}{(1+r)^t}, \qquad r = 10\%
+\end{equation}
+Áp dụng cho P1 với dòng tiền chưa làm tròn:
+\begin{equation*}
+  \mathrm{NPV}_{P1} = -60 + \frac{36{,}256}{1{,}1} + \frac{79{,}456}{1{,}1^2} + \frac{93{,}856}{1{,}1^3}
+  \approx 109{,}1~\text{triệu VND}
+\end{equation*}
+Tỷ suất hoàn vốn so sánh tổng lợi ích $B_t$ với tổng chi phí $C_t$ trong 3 năm:
+\begin{equation}
+  \label{eq:roi}
+  \mathrm{ROI} = \frac{\sum_t B_t - \sum_t C_t}{\sum_t C_t}
+  \qquad\Rightarrow\qquad
+  \mathrm{ROI}_{P1} = \frac{316{,}8 - 167{,}2}{167{,}2} \approx 89{,}4\%
+\end{equation}
+Thời gian hoàn vốn được nội suy trong năm dòng tiền luỹ kế đổi dấu. Với P1, luỹ kế hết năm 1 là
+$-23{,}7$ triệu và năm 2 thu thêm 79,5 triệu:
+\begin{equation}
+  \label{eq:payback}
+  T_{\text{hoàn vốn}} = 1 + \frac{23{,}7}{79{,}5} \approx 1{,}30~\text{năm} \quad (\text{khoảng 16 tháng})
+\end{equation}
+
+Kết quả của cả ba phương án được tổng hợp trong Bảng~\ref{tab:fin-results}, và dòng tiền luỹ kế được minh hoạ
+ở Hình~\ref{fig:cumulative}. P1 lỗ nhiều hơn trong năm đầu vì phải trả chi phí phát triển, nhưng từ năm 2 trở đi
+vượt hẳn P2 do chi phí vận hành thấp hơn phí SaaS gần 58 triệu VND mỗi năm.
+
+\begin{table}[htbp]
+  \centering
+  \caption{So sánh chỉ số tài chính của các phương án}
+  \label{tab:fin-results}
+  \begin{tabularx}{\linewidth}{@{}LCCC@{}}
+    \toprule
+    \thead{Chỉ số} & \thead{P0 -- Giữ nguyên} & \thead{P1 -- Tự xây} & \thead{P2 -- SaaS} \\
+    \midrule
+    NPV (3 năm, 10\%) & 0 & \textbf{+109,1 triệu} & +25,3 triệu \\
+    ROI (3 năm) & -- & \textbf{89,4\%} & 12,8\% \\
+    Thời gian hoàn vốn & -- & \textbf{1,3 năm (khoảng 16 tháng)} & khoảng 2 năm \\
+    Nơi lưu dữ liệu họp & Trong đơn vị & Trong đơn vị & Nước ngoài \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.88\linewidth, height=7.2cm,
+        xmin=-0.25, xmax=3.35, ymin=-85, ymax=175,
+        xtick={0,1,2,3}, xticklabels={Năm 0,Năm 1,Năm 2,Năm 3},
+        ylabel={Dòng tiền luỹ kế (triệu VND)},
+        grid=major, grid style={gray!25},
+        legend pos=north west, legend cell align=left,
+        legend style={font=\small,draw=gray!40},
+        tick label style={font=\small},
+        /pgf/number format/.cd, use comma, 1000 sep={.}]
+      \addplot[gray!70, forget plot] coordinates {(-0.25,0) (3.35,0)};
+      \addplot[very thick, primaryblue, mark=*,
+               nodes near coords, every node near coord/.append style={font=\scriptsize,anchor=north west}]
+        coordinates {(0,-60) (1,-23.7) (2,55.7) (3,149.6)};
+      \addlegendentry{P1 -- Tự xây SumTalk}
+      \addplot[thick, chartgray, dashed, mark=square*]
+        coordinates {(0,0) (1,-21.6) (2,0) (3,36)};
+      \addlegendentry{P2 -- Mua SaaS}
+      \addplot[only marks, mark=diamond*, mark size=3.5pt, todored]
+        coordinates {(1.30,0)};
+      \addlegendentry{Điểm hoàn vốn của P1 ($\approx$ 1,3 năm)}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Dòng tiền luỹ kế của hai phương án có đầu tư}
+  \label{fig:cumulative}
+\end{figure}
+
+\section{Phân tích độ nhạy}
+
+Để kiểm tra mức độ chắc chắn của kết luận, NPV của P1 được tính lại khi thay đổi từng giả định chính
+(Bảng~\ref{tab:sensitivity}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Độ nhạy của NPV phương án P1}
+  \label{tab:sensitivity}
+  \begin{tabularx}{\linewidth}{@{}LP{5.4cm}@{}}
+    \toprule
+    \thead{Kịch bản} & \thead{NPV của P1} \\
+    \midrule
+    Cơ sở & +109,1 triệu \\
+    Công phát triển gấp đôi (1.200 giờ) & +49,1 triệu (vẫn có lời) \\
+    Lợi ích chỉ bằng một nửa (ít họp hoặc áp dụng chậm) & $-19{,}9$ triệu (lỗ) \\
+    Điểm hoà vốn & Khoảng \textbf{23 cuộc họp/tuần} thì NPV = 0 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Kết quả nhạy với \emph{số cuộc họp thực tế} hơn là với chi phí phát triển: tăng gấp đôi công phát triển vẫn có
+lời, nhưng lợi ích giảm một nửa thì lỗ. Vì vậy, trước khi mở rộng cần đo số cuộc họp và thời gian tiết kiệm thật
+trong đợt UAT.
+
+\section{Rủi ro tài chính}
+
+\begin{itemize}
+  \item \textbf{Chi phí API vượt dự kiến} khi dùng nhiều (rủi ro R6). Biện pháp: đã có cấu hình
+        \texttt{LIVE\_INTERVAL\_SEC} và nhật ký token, chi phí cho từng lần gọi.
+  \item \textbf{GPU đắt nếu chạy 24/7.} Biện pháp: bật/tắt theo giờ, hoặc dùng cấu hình CPU kết hợp API.
+  \item \textbf{Tỷ lệ áp dụng thấp}, kéo lợi ích xuống dưới điểm hoà vốn (Bảng~\ref{tab:sensitivity}).
+\end{itemize}
+Các rủi ro này được theo dõi cùng các rủi ro khác trong Risk Register~\cite{pmp}.
+
+\section{Khuyến nghị}
+
+Chọn \textbf{phương án P1}. Bắt đầu bằng bản web trên EC2 CPU kết hợp Whisper API để giữ chi phí thấp. Chỉ chuyển
+sang server GPU (\texttt{STT\_SERVER\_API\_KEYS}) khi số cuộc họp vượt khoảng 25 cuộc mỗi tuần, hoặc khi có
+nhiều người dùng ứng dụng desktop.
+
+% ============================================================ Chapter 4
+\chapter{Phương pháp quản lý dự án}
+\label{chap:method}
+
+\textbf{Quyết định: dùng Scrum}, với sprint dài \canDien[1--2] tuần và backlog trên Azure Boards. Lý do chính là
+các yêu cầu về AI (độ chính xác STT, chất lượng tóm tắt) chỉ biết được sau khi thử, và phạm vi đã thay đổi nhiều
+lần: dời story \#60 vào Sprint 3, thêm app desktop, transcript streaming và deploy cloud. Waterfall sẽ khoá yêu
+cầu quá sớm.
+
+\section{Đặc điểm dự án ảnh hưởng tới lựa chọn}
+
+Bảng~\ref{tab:characteristics} đối chiếu sáu đặc điểm của dự án với cách tiếp cận phù hợp cho từng đặc điểm.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Đặc điểm của dự án và phương pháp phù hợp}
+  \label{tab:characteristics}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{3.1cm}LL@{}}
+    \toprule
+    \thead{Đặc điểm} & \thead{Ở dự án SumTalk} & \thead{Cách tiếp cận phù hợp} \\
+    \midrule
+    Độ rõ của yêu cầu & Rõ ở mức tính năng, mơ hồ ở mức chất lượng AI (độ chính xác, độ trễ) & Lặp, đo, điều chỉnh \\
+    Rủi ro công nghệ & Cao: Whisper, LLM, GPU, trình duyệt, Electron & Làm POC sớm, demo mỗi sprint \\
+    Thay đổi phạm vi & Thường xuyên (xem Change Log~\cite{mcr}) & Ưu tiên lại backlog mỗi sprint \\
+    Nhóm & Nhỏ, bán thời gian, kiêm nhiều vai & Tự tổ chức, họp ngắn \\
+    Sponsor & Muốn thấy tiến độ đều và sản phẩm chạy được & Sprint Review có demo \\
+    Ràng buộc báo cáo & Sponsor cần báo cáo ngân sách, tiến độ, rủi ro
+      & Scrum kèm bộ tài liệu quản lý tối thiểu, cập nhật theo sprint \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Phần lớn đặc điểm của dự án (yêu cầu chưa rõ ở mức chất lượng, rủi ro công nghệ cao, phạm vi hay thay đổi) đều
+nghiêng về cách làm lặp. Đặc điểm duy nhất kéo về phía kế hoạch cố định
+là yêu cầu báo cáo của Sponsor, và được giải quyết bằng các tài liệu bổ sung ở Mục~\ref{sec:scrum-apply}.
+
+\section{So sánh các phương pháp}
+
+Bốn phương pháp được so sánh theo sáu tiêu chí rút ra từ các đặc điểm ở Bảng~\ref{tab:characteristics}
+(Bảng~\ref{tab:methods}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{So sánh bốn phương pháp quản lý dự án}
+  \label{tab:methods}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{3.3cm}LLLL@{}}
+    \toprule
+    \thead{Tiêu chí} & \thead{Waterfall} & \thead{Scrum} & \thead{Kanban} & \thead{Lai (Water-Scrum-Fall)} \\
+    \midrule
+    Yêu cầu thay đổi & Đắt, phải làm lại tài liệu & Rẻ, đưa vào sprint sau & Rẻ & Trung bình \\
+    Thấy sản phẩm chạy được & Cuối dự án & Mỗi sprint & Liên tục & Giữa dự án \\
+    Kiểm soát rủi ro kỹ thuật & Muộn & Sớm (POC Sprint 1, benchmark Sprint 2) & Sớm & Trung bình \\
+    Kế hoạch, ngân sách cố định & Tốt & Theo velocity, cần bổ sung EVA & Yếu & Tốt \\
+    Nhóm nhỏ, bán thời gian & Trung bình & Tốt (nhịp đều, mục tiêu ngắn) & Tốt, nhưng khó đo tiến độ theo mốc & Trung bình \\
+    Đáp ứng báo cáo cho Sponsor & Tốt & Tốt khi bổ sung tài liệu quản lý & Yếu & Tốt \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Theo Bảng~\ref{tab:methods}, Scrum và Kanban đều đón nhận thay đổi dễ dàng, kiểm soát rủi ro kỹ thuật sớm và hợp
+với nhóm nhỏ làm bán thời gian. Scrum được chọn vì đo được tiến độ theo mốc và đáp ứng được yêu cầu báo cáo của
+Sponsor khi bổ sung tài liệu quản lý, hai điểm Kanban còn yếu. Waterfall và mô hình lai mạnh về kế hoạch cố định
+nhưng phát hiện rủi ro kỹ thuật muộn hơn.
+
+\section{Cách áp dụng Scrum trong dự án}
+\label{sec:scrum-apply}
+
+\begin{itemize}
+  \item \textbf{Vai trò:} Product Owner, Scrum Master kiêm Project Manager, và Developers (gồm cả BA và QC).
+        Tổ chức nhóm và ma trận RACI xem~\cite{pmp}.
+  \item \textbf{Sự kiện:} Sprint Planning (ước lượng bằng Planning Poker), Daily, Refinement, Sprint Review có
+        demo và Retrospective.
+  \item \textbf{Artefact:} Product Backlog~\cite{srs}; Sprint Backlog và burndown trên Azure Boards; Increment là
+        nhánh feature chạy được, kèm test.
+  \item \textbf{Tài liệu bổ sung cho Sponsor:} Charter, Business Case, WBS, CPM/Gantt, EVA và Risk Register là
+        phần quản lý ``bên ngoài'' Scrum. Chúng được cập nhật mỗi sprint, không làm một lần rồi khoá.
+  \item \textbf{Definition of Done:} áp dụng chung cho mọi story, định nghĩa trong Quality Plan~\cite{qtd}.
+  \item \textbf{Quản lý mã nguồn:} mỗi nhóm việc một nhánh \texttt{feature/\ldots}, commit nhỏ theo task, tạo
+        pull request trước khi merge vào \texttt{main}; thay đổi được ghi vào Change Log~\cite{mcr} và Release
+        Notes~\cite{pcr}.
+\end{itemize}
+
+\section{Hạn chế và cách bù}
+
+Scrum có bốn hạn chế đáng kể với một dự án phải báo cáo ngân sách và tiến độ cho Sponsor. Bảng~\ref{tab:limitations}
+nêu cách dự án bù cho từng hạn chế.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Hạn chế của Scrum và biện pháp bù trong dự án}
+  \label{tab:limitations}
+  \begin{tabularx}{\linewidth}{@{}P{5.2cm}L@{}}
+    \toprule
+    \thead{Hạn chế của Scrum} & \thead{Cách bù trong dự án} \\
+    \midrule
+    Khó cam kết ngày kết thúc và ngân sách & Kết hợp velocity, lịch CPM~\cite{pmp} và EVA~\cite{mcr} \\
+    Dễ phình phạm vi & Change Log có PO duyệt; phân quyền trong điều lệ (Bảng~\ref{tab:decision-rights}) \\
+    Ít tài liệu & Bộ sáu tài liệu quản lý dự án; README và ARCHITECTURE trong repo \\
+    Phụ thuộc kỷ luật họp & Daily ngắn; có thể họp không đồng bộ qua chat khi thành viên trùng lịch \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ Chapter 5
+\chapter{Kết luận và đề nghị phê duyệt}
+\label{chap:conclusion}
+
+\section{Tóm tắt}
+
+Dự án SumTalk giải quyết việc ghi biên bản họp thủ công bằng một ứng dụng ghi âm, phiên âm, tóm tắt và dịch,
+có thể tự host để giữ dữ liệu trong đơn vị. Hồ sơ này đã xác định:
+\begin{itemize}
+  \item sáu mục tiêu SMART, phạm vi và năm nhóm sản phẩm bàn giao, cùng sáu mốc gắn với các sprint;
+  \item phương án tự xây (P1) là lựa chọn tốt nhất về tài chính: NPV khoảng +109,1 triệu VND, ROI 89,4\%, hoàn vốn
+        sau khoảng 16 tháng, với điều kiện đơn vị có từ khoảng 23 cuộc họp mỗi tuần trở lên;
+  \item Scrum là phương pháp quản lý, bổ sung bộ tài liệu quản lý để đáp ứng yêu cầu báo cáo của Sponsor.
+\end{itemize}
+
+\section{Việc cần làm trước khi trình duyệt}
+
+\begin{enumerate}
+  \item Điền các ô \canDien: người phụ trách, ngày phê duyệt, tổng giờ kế hoạch, độ dài sprint và ngày của các mốc.
+  \item Thay giả định 600 giờ công bằng tổng giờ thực tế trên dashboard, rồi tính lại NPV, ROI và thời gian hoàn
+        vốn bằng \texttt{pm\_calc.py}~\cite{pmcalc}.
+  \item Lên kế hoạch đo số cuộc họp và thời gian tiết kiệm thật trong đợt UAT, vì đây là giả định có ảnh hưởng lớn
+        nhất tới kết luận.
+\end{enumerate}
+
+\needspace{14\baselineskip}
+\section{Phê duyệt}
+
+Nhóm dự án đề nghị Sponsor phê duyệt khởi động dự án SumTalk theo phạm vi, ngân sách và phương pháp đã trình bày.
+
+\begin{table}[H]
+  \centering
+  \renewcommand{\arraystretch}{2.4}
+  \begin{tabularx}{\linewidth}{@{}P{3.6cm}LP{3.2cm}P{2.6cm}@{}}
+    \toprule
+    \thead{Vai trò} & \thead{Họ tên} & \thead{Chữ ký} & \thead{Ngày} \\
+    \midrule
+    Sponsor & & & \\
+    Product Owner & & & \\
+    Project Manager & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ References
+\begin{thebibliography}{9}
+\addcontentsline{toc}{chapter}{\bibname}
+  \bibitem{srs} Nhóm SumTalk, \emph{Đặc tả yêu cầu phần mềm (Software Requirements Specification)},
+    Tài liệu 02, mã SUMTALK-SRS, phiên bản 2.1, 24/11/2026.
+  \bibitem{pmp} Nhóm SumTalk, \emph{Kế hoạch quản lý dự án (Project Management Plan)}, Tài liệu 03,
+    mã SUMTALK-PMP, phiên bản 2.1, 24/11/2026.
+  \bibitem{qtd} Nhóm SumTalk, \emph{Chất lượng và kiểm thử (Quality \& Test Document)}, Tài liệu 04,
+    mã SUMTALK-QTD, phiên bản 2.1, 24/11/2026.
+  \bibitem{mcr} Nhóm SumTalk, \emph{Báo cáo theo dõi và kiểm soát (Monitoring \& Control Report)}, Tài liệu 05,
+    mã SUMTALK-MCR, phiên bản 2.1, 24/11/2026.
+  \bibitem{pcr} Nhóm SumTalk, \emph{Báo cáo kết thúc dự án (Project Closure Report)}, Tài liệu 06,
+    mã SUMTALK-PCR, phiên bản 2.1, 24/11/2026.
+  \bibitem{pmcalc} Nhóm SumTalk, \emph{Công cụ tính NPV, ROI và thời gian hoàn vốn},
+    kho mã nguồn \texttt{DatTapTanhCode/SumTalk}, tệp \path{docs/project/tools/pm_calc.py}.
+\end{thebibliography}
+
+\end{document}
