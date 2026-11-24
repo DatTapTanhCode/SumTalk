@@ -1,0 +1,685 @@
+% =============================================================================
+%  Tài liệu 06 - Báo cáo kết thúc dự án (Project Closure Report)
+%  Build: latexmk 06-project-closure-report.tex   (pdfLaTeX, output in build/)
+% =============================================================================
+\documentclass[12pt,a4paper]{report}
+\usepackage{sumtalk-report}
+\input{sumtalk-info}
+
+\newcommand{\DocTitle}{BÁO CÁO KẾT THÚC DỰ ÁN}
+\newcommand{\DocTitleNormal}{Báo cáo kết thúc dự án}
+\newcommand{\DocTitleEn}{Project Closure Report}
+\newcommand{\DocRunningTitle}{Báo cáo kết thúc dự án}
+\newcommand{\DocCode}{SUMTALK-PCR}
+\newcommand{\DocVersion}{2.1 -- 24/11/2026}
+\newcommand{\DocStatus}{Chờ duyệt}
+\newcommand{\DocAuthor}{\canDien[Project Manager]}
+\newcommand{\DocReviewers}{Sponsor, Product Owner, Project Manager}
+\newcommand{\DocReaders}{Sponsor, Product Owner, Project Manager}
+\newcommand{\CoverDate}{TP. HỒ CHÍ MINH, THÁNG 11/2026}
+\hypersetup{pdftitle={SumTalk -- Báo cáo kết thúc dự án},pdfauthor={Nhóm SumTalk}}
+
+% "Passed" mark used in the assessment table.
+\newcommand{\pass}{$\checkmark$}
+
+\begin{document}
+
+\makereportcover
+
+% ============================================================ Front matter
+\chapter*{Thông tin tài liệu}
+\addcontentsline{toc}{chapter}{Thông tin tài liệu}
+
+\docinfotable
+
+\section*{Lịch sử phiên bản}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\linewidth}{@{}Q{1.6cm}Q{2.3cm}LP{3.2cm}@{}}
+    \toprule
+    \thead{Phiên bản} & \thead{Ngày} & \thead{Nội dung thay đổi} & \thead{Người thực hiện} \\
+    \midrule
+    1.0 & 12/11/2026 & Bản đầu, gồm ba tài liệu riêng: SOW và nghiệm thu, Release Notes, Lessons Learned
+      & \canDien \\
+    2.0 & 13/11/2026 & Gộp thành một tài liệu, đánh lại số mục (CR-08) & \canDien \\
+    2.1 & 24/11/2026 & Chuyển sang định dạng báo cáo PDF (LaTeX), sắp xếp lại thành năm chương; thêm đánh giá sơ bộ
+      theo mục tiêu M1--M6, dòng thời gian phát hành và biểu đồ phạm vi & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\needspace{8\baselineskip}
+\heading{Quy ước trong tài liệu}
+\begin{itemize}
+  \item \canDien[\ldots]: số liệu đã có ở Azure Boards, dashboard chi phí hoặc biên bản họp nhưng chưa chép
+        vào tài liệu, hoặc chỉ có khi kết thúc dự án; cần bổ sung trước khi trình duyệt.
+  \item \textbf{Mốc M0--M5} và \textbf{mục tiêu M1--M6} theo điều lệ dự án~\cite{pid}. Hai hệ mã này dùng chung chữ M
+        nhưng khác nhau: mốc gắn với thời điểm, mục tiêu gắn với kết quả.
+  \item \textbf{Số liệu kỹ thuật} (độ trễ, thời gian xử lý, số test) lấy từ repo ngày 12/11/2026.
+\end{itemize}
+
+\tableofcontents
+
+\chapter*{Tóm tắt}
+\addcontentsline{toc}{chapter}{Tóm tắt}
+
+Tài liệu này là \textbf{báo cáo kết thúc dự án} SumTalk: khép lại dự án bằng phạm vi đã thoả thuận và tiêu chí
+nghiệm thu, các phiên bản đã phát hành, so sánh kế hoạch với thực tế, bài học kinh nghiệm và xác nhận đóng dự án.
+Phần \emph{Statement of Work} (SOW) xác định tám hạng mục bàn giao, mỗi hạng mục có tiêu chí nghiệm thu kiểm tra
+được, cùng quy trình xử lý thay đổi và mẫu biên bản nghiệm thu dùng cho từng mốc.
+
+Bốn phiên bản đã được phát hành, từ v0.1 (ghi lại cuộc họp) tới \textbf{v0.4} ngày 12/11/2026 (app desktop,
+transcript live dạng streaming, engine STT remote, bản web sẵn sàng deploy). So với kế hoạch, phạm vi tăng từ 4 lên
+\textbf{7 epic} (thêm 29 story point); hiệu năng live tốt hơn mục tiêu (khoảng 1--2\,s so với ngưỡng 3--5\,s). Đánh
+giá sơ bộ theo sáu mục tiêu cho thấy M2 và M4 đã đạt, M1, M3 và M5 đạt một phần, M6 chưa có số liệu. Dự án
+\textbf{chưa đủ điều kiện đóng}: còn deploy thật lên AWS, chạy lại test E2E trình duyệt, UAT và nghiệm thu cuối.
+Phần Lessons Learned ghi năm điều làm tốt, năm vấn đề cần cải thiện và năm bài học kỹ thuật đáng giữ.
+
+\textbf{Từ khoá:} báo cáo kết thúc dự án, Statement of Work, nghiệm thu, release notes, lessons learned, kế hoạch
+so với thực tế.
+
+\chapter*{Danh mục từ viết tắt}
+\addcontentsline{toc}{chapter}{Danh mục từ viết tắt}
+
+\begin{center}
+  \setstretch{1.1}
+  \begin{tabular}{@{}P{2.2cm}P{13.2cm}@{}}
+    \toprule
+    \thead{Viết tắt} & \thead{Ý nghĩa} \\
+    \midrule
+    AC     & Actual Cost -- chi phí thực tế \\
+    API    & Application Programming Interface -- giao diện lập trình ứng dụng \\
+    AWS    & Amazon Web Services (EC2: máy chủ ảo; S3: lưu trữ đối tượng) \\
+    BAC    & Budget at Completion -- ngân sách khi hoàn thành \\
+    CI     & Continuous Integration -- tích hợp liên tục \\
+    CPI    & Cost Performance Index -- chỉ số hiệu quả chi phí \\
+    CR     & Change Request -- yêu cầu thay đổi \\
+    E2E    & End-to-End -- kiểm thử đầu cuối \\
+    GPU    & Graphics Processing Unit -- bộ xử lý đồ hoạ, dùng để chạy model \\
+    HTTPS  & Hypertext Transfer Protocol Secure -- giao thức web có mã hoá \\
+    IAM    & Identity and Access Management -- quản lý danh tính và quyền trên AWS \\
+    LLM    & Large Language Model -- mô hình ngôn ngữ lớn \\
+    NFR    & Non-Functional Requirement -- yêu cầu phi chức năng \\
+    NSIS   & Nullsoft Scriptable Install System -- công cụ tạo bộ cài Windows \\
+    PM     & Project Manager -- quản lý dự án \\
+    PO     & Product Owner -- chủ sản phẩm \\
+    POC    & Proof of Concept -- bản thử nghiệm khái niệm \\
+    SLA    & Service Level Agreement -- cam kết mức dịch vụ \\
+    SOW    & Statement of Work -- văn bản thoả thuận phạm vi công việc \\
+    SP     & Story Point -- điểm ước lượng độ lớn của story \\
+    SPI    & Schedule Performance Index -- chỉ số hiệu quả tiến độ \\
+    STT    & Speech-to-Text -- chuyển giọng nói thành văn bản \\
+    UAT    & User Acceptance Testing -- kiểm thử chấp nhận của người dùng \\
+    VAC    & Variance at Completion -- chênh lệch ngân sách khi hoàn thành \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listfigurename}
+\listoffigures
+
+\cleardoublepage\phantomsection
+\addcontentsline{toc}{chapter}{\listtablename}
+\listoftables
+
+% ============================================================ Chapter 1
+\chapter{Giới thiệu}
+\label{chap:intro}
+
+\section{Bối cảnh}
+
+Dự án SumTalk được khởi động với sáu mục tiêu SMART và sáu mốc M0--M5~\cite{pid}, thực hiện theo Scrum qua bốn
+sprint. Đến ngày 12/11/2026, Sprint 4 đã kết thúc với bản v0.4; các hồ sơ theo dõi (báo cáo sprint, Change Log)
+nằm trong~\cite{mcr} và kết quả kiểm thử nằm trong~\cite{qtd}. Tài liệu này là bước cuối của vòng đời dự án: đối
+chiếu những gì đã giao với những gì đã thoả thuận, và chuẩn bị cho việc nghiệm thu, đóng dự án.
+
+\section{Mục đích và người đọc của tài liệu}
+
+Tài liệu khép lại dự án ở năm khía cạnh: phạm vi đã thoả thuận và tiêu chí nghiệm thu, các phiên bản đã phát hành,
+so sánh kế hoạch với thực tế, bài học kinh nghiệm, và xác nhận đóng dự án. Người đọc chính là Sponsor (bên giao việc,
+nghiệm thu và xác nhận đóng), Product Owner (xác nhận sản phẩm đáp ứng backlog) và Project Manager (lập báo cáo,
+chuyển bài học cho các dự án sau). Phần số liệu cuối dự án và bài học quản lý sẽ được điền khi kết thúc dự án.
+
+\section{Cấu trúc tài liệu}
+
+Phần còn lại của tài liệu gồm bốn chương:
+\begin{itemize}
+  \item \textbf{Chương~\ref{chap:sow} -- Statement of Work và nghiệm thu:} các bên, phạm vi và tiêu chí nghiệm thu,
+        sản phẩm bàn giao, trách nhiệm của bên giao việc, quản lý thay đổi và mẫu biên bản nghiệm thu.
+  \item \textbf{Chương~\ref{chap:release} -- Release Notes:} các phiên bản v0.1 đến v0.4 và mẫu cho phiên bản sau.
+  \item \textbf{Chương~\ref{chap:lessons} -- Báo cáo tổng kết và Lessons Learned:} đánh giá theo mục tiêu, kế hoạch so
+        với thực tế, điều làm tốt, điều cần cải thiện, bài học kỹ thuật và khuyến nghị.
+  \item \textbf{Chương~\ref{chap:conclusion} -- Kết luận và xác nhận đóng dự án.}
+\end{itemize}
+
+% ============================================================ Chapter 2
+\chapter{Statement of Work và nghiệm thu}
+\label{chap:sow}
+
+\textbf{SOW là thoả thuận giữa nhóm thực hiện và bên giao việc (Sponsor) về phạm vi giao, tiêu chí nghiệm thu và
+cách xử lý thay đổi.} Tám hạng mục bàn giao đều có tiêu chí nghiệm thu dựa trên acceptance criteria của backlog,
+yêu cầu phi chức năng hoặc test case đã có. Mẫu biên bản ở Mục~\ref{sec:acceptance-form} dùng cho từng mốc và cho
+lần nghiệm thu cuối.
+
+\section{Các bên}
+
+Hai bên của SOW và vai trò của mỗi bên được nêu trong Bảng~\ref{tab:parties}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Các bên của Statement of Work}
+  \label{tab:parties}
+  \begin{tabularx}{\linewidth}{@{}P{4.4cm}LP{4.2cm}@{}}
+    \toprule
+    \thead{Bên} & \thead{Đại diện} & \thead{Vai trò} \\
+    \midrule
+    Bên giao việc (khách hàng) & \canDien[đại diện Sponsor] & Phê duyệt phạm vi, nghiệm thu \\
+    Bên thực hiện & Nhóm SumTalk -- \canDien[PM] & Xây dựng, bàn giao \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Mục đích}
+
+Bên thực hiện xây dựng hệ thống SumTalk để ghi âm, phiên âm, tóm tắt và dịch cuộc họp, theo các mục tiêu trong
+điều lệ dự án~\cite{pid}.
+
+\section{Phạm vi công việc và tiêu chí nghiệm thu}
+
+Bảng~\ref{tab:sow-scope} liệt kê tám hạng mục thuộc phạm vi. Tiêu chí nghiệm thu dẫn chiếu tới acceptance criteria
+và yêu cầu phi chức năng trong đặc tả yêu cầu~\cite{srs}, và tới test case trong tài liệu chất lượng~\cite{qtd}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Phạm vi công việc và tiêu chí nghiệm thu}
+  \label{tab:sow-scope}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}Q{0.6cm}P{2.8cm}P{4.4cm}L@{}}
+    \toprule
+    \thead{\#} & \thead{Hạng mục} & \thead{Mô tả} & \thead{Tiêu chí nghiệm thu} \\
+    \midrule
+    1 & Ghi âm và upload & Trình duyệt, điện thoại (offline), upload $\leq$ 1\,GB
+      & Acceptance criteria của US1.1--US1.3 đạt; test E2E trình duyệt đạt \\
+    2 & Transcript & Ngôn ngữ gốc theo câu, live $\leq$ 3--5\,s, file $\geq$ 60 phút, xem, tìm, xuất
+      & Acceptance criteria của US2.1--US2.4; NFR-P1, NFR-P2 \\
+    3 & Tóm tắt & Story \#67 & 7 acceptance criteria của \#67; test case S-01\ldots S-11 \\
+    4 & Dịch & Story \#60 & 6 acceptance criteria của \#60; test case T-01\ldots T-12 \\
+    5 & App desktop & Bộ cài Windows & Acceptance criteria của US5.1; smoke test bản đóng gói 8/8 \\
+    6 & Engine STT dùng chung & Remote, API \path{/v1} & Acceptance criteria của US6.1--US6.2 \\
+    7 & Bản web trên AWS & Docker, HTTPS, đăng nhập, S3, hướng dẫn
+      & Acceptance criteria của US7.1; checklist trong hướng dẫn deploy đạt trên AWS thật \\
+    8 & Tài liệu & README, ARCHITECTURE, 6 tài liệu quản lý dự án, test case
+      & Đủ file, không còn ô \canDien{} ở phần bắt buộc \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\heading{Ngoài phạm vi}
+Các hạng mục ngoài phạm vi giữ như trong điều lệ dự án~\cite{pid}: tài khoản và phân quyền, nhận diện người nói
+(diarization), app iOS/Android native, và cam kết SLA thương mại.
+
+\section{Sản phẩm bàn giao và thời hạn}
+
+Năm sản phẩm bàn giao gắn với hai mốc cuối của dự án (Bảng~\ref{tab:sow-deliverables}): bộ cài và bản web thuộc mốc
+M4, còn mã nguồn đã merge, tài liệu và báo cáo test thuộc mốc M5. Ngày của từng mốc theo điều lệ dự án~\cite{pid}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Sản phẩm bàn giao và mốc}
+  \label{tab:sow-deliverables}
+  \begin{tabularx}{\linewidth}{@{}P{3.6cm}LQ{1.6cm}@{}}
+    \toprule
+    \thead{Sản phẩm} & \thead{Hình thức} & \thead{Mốc} \\
+    \midrule
+    Mã nguồn & Repo GitHub, các nhánh đã merge vào \path{main} & M5 \\
+    Bộ cài Windows & \texttt{SumTalk-Setup-<version>.exe} & M4 \\
+    Bản web & URL HTTPS và tài khoản test & M4 \\
+    Tài liệu & Thư mục \path{docs/} & M5 \\
+    Báo cáo test & Test Summary Report~\cite{qtd} & M5 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Giả định và trách nhiệm của bên giao việc}
+
+Để nhóm thực hiện bàn giao đúng hạn, bên giao việc cam kết ba điều:
+\begin{itemize}
+  \item \textbf{Phản hồi và nghiệm thu đúng hạn:} phản hồi trong Sprint Review; nghiệm thu trong vòng
+        \canDien[3] ngày làm việc sau khi nhận bàn giao.
+  \item \textbf{Chi phí hạ tầng:} cung cấp hoặc chấp nhận chi phí tài khoản AWS và API trong thời gian test, khoảng
+        2,5--3 triệu VND/tháng với cấu hình CPU.
+  \item \textbf{Dữ liệu đánh giá:} cung cấp mẫu audio thật (tiếng Việt, họp trộn ngôn ngữ) cho việc đánh giá chất
+        lượng, nếu có.
+\end{itemize}
+
+\section{Quản lý thay đổi}
+
+Mọi yêu cầu thay đổi đi theo quy trình của Change Log~\cite{mcr}. Thay đổi làm tăng hơn 10\% công sức hoặc dời mốc
+phải được bên giao việc ký duyệt. Công sức phát sinh được tính theo đơn giá 100.000~VND/giờ, hoặc đổi lấy việc cắt
+các hạng mục Should/Could có công sức tương đương.
+
+\section{Mẫu biên bản nghiệm thu}
+\label{sec:acceptance-form}
+
+Hình~\ref{fig:acceptance-form} là mẫu biên bản dùng cho mỗi mốc M1--M5 và cho lần nghiệm thu cuối. Biên bản ghi rõ
+phiên bản được nghiệm thu, kết quả theo từng hạng mục của Bảng~\ref{tab:sow-scope}, lỗi còn tồn và một trong ba kết
+luận.
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\begin{minipage}{0.94\linewidth}
+    \setstretch{1.3}\small
+    \begin{center}
+      {\bfseries\large BIÊN BẢN NGHIỆM THU}\\[2pt]
+      Mốc: M1\ldots M5 / nghiệm thu cuối \hfill Ngày: \dotfill
+    \end{center}
+    \textbf{Thành phần:} Bên giao việc: \dotfill \quad Bên thực hiện: \dotfill\par
+    \textbf{Phiên bản nghiệm thu:} tag/commit, bộ cài, URL: \dotfill\par
+    \medskip
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabularx}{\linewidth}{@{}P{3.2cm}LP{2.6cm}P{2.6cm}@{}}
+      \toprule
+      \thead{Hạng mục} & \thead{Tiêu chí} & \thead{Kết quả (Đạt / Không đạt)} & \thead{Ghi chú} \\
+      \midrule
+      & & & \\
+      & & & \\
+      & & & \\
+      \bottomrule
+    \end{tabularx}
+    \medskip
+
+    \textbf{Lỗi còn tồn} (mức, ID trên Azure Boards, hạn khắc phục): \dotfill\par
+    \textbf{Kết luận:}\par
+    \hspace*{1em}$\square$ Nghiệm thu toàn bộ\par
+    \hspace*{1em}$\square$ Nghiệm thu có điều kiện (khắc phục trước ngày \makebox[2.6cm]{\dotfill})\par
+    \hspace*{1em}$\square$ Không nghiệm thu\par
+    \medskip
+    \begin{tabularx}{\linewidth}{@{}CC@{}}
+      \textbf{Bên giao việc} & \textbf{Bên thực hiện} \\
+      (ký, ghi rõ họ tên) & (ký, ghi rõ họ tên) \\[1.6cm]
+    \end{tabularx}
+  \end{minipage}}
+  \caption{Mẫu biên bản nghiệm thu}
+  \label{fig:acceptance-form}
+\end{figure}
+
+% ============================================================ Chapter 3
+\chapter{Release Notes}
+\label{chap:release}
+
+\textbf{Bốn phiên bản đã được phát hành, mỗi sprint một phiên bản; v0.4 ngày 12/11/2026 là bản mới nhất.} Mỗi
+phiên bản liệt kê tính năng mới, thay đổi, lỗi đã sửa và hạn chế; chương trình bày bản mới nhất trước.
+Hình~\ref{fig:releases} tóm tắt nội dung chính của từng phiên bản và bản v1.0 dự kiến sau nghiệm thu.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      ms/.style={circle,draw=white,line width=1pt,fill=primaryblue,inner sep=3pt},
+      plan/.style={circle,draw=primaryblue,line width=1pt,fill=white,inner sep=3pt},
+      lbl/.style={text width=2.9cm,align=center,font=\footnotesize,inner sep=1pt,
+                  execute at begin node=\setstretch{1.05}}]
+    % Solid: releases so far; dashed: planned v1.0.
+    \draw[line width=1.2pt,primaryblue] (0,0) -- (12.0,0);
+    \draw[-{Stealth[length=3mm]},line width=1.2pt,primaryblue,dashed] (12.0,0) -- (15.6,0);
+    \foreach \x/\v/\when/\what in {
+        1.4/v0.1/Sprint 1/{Ghi âm, offline, upload, transcript gốc, xuất file},
+        7.4/v0.3/Sprint 3/{Tóm tắt (\#67), dịch (\#60), giao diện mới}} {
+      \node[ms] at (\x,0) {};
+      \node[lbl,above=7pt] at (\x,0) {\textbf{\v} -- \when\\ \what};
+    }
+    \foreach \x/\v/\when/\what in {
+        4.4/v0.2/Sprint 2/{Transcript live, chọn model LLM},
+        10.4/v0.4/{12/11/2026}/{App desktop, live streaming, STT remote, bản web sẵn sàng deploy}} {
+      \node[ms] at (\x,0) {};
+      \node[lbl,below=7pt] at (\x,0) {\textbf{\v} -- \when\\ \what};
+    }
+    \node[plan] at (13.6,0) {};
+    \node[lbl,above=7pt] at (13.6,0) {\textbf{v1.0} -- dự kiến\\ Sau UAT và nghiệm thu cuối};
+  \end{tikzpicture}
+  \caption{Dòng thời gian các phiên bản phát hành}
+  \label{fig:releases}
+\end{figure}
+
+\section{v0.4 -- desktop, transcript live dạng streaming, cloud}
+
+\begin{sloppypar}
+Phiên bản v0.4 thuộc Sprint 4, phát hành ngày 12/11/2026, gồm các nhánh \path{feature/desktop-app},
+\path{feature/streaming-stt}, \path{feature/aws-deploy} và \path{docs/project-management}.
+\end{sloppypar}
+
+\heading{Mới}
+\begin{sloppypar}
+\begin{itemize}
+  \item \textbf{App Windows (Electron):} mở như phần mềm, backend tự chạy và tự tắt; thu âm thanh hệ thống (Zoom,
+        Teams bản desktop) mà không cần chia sẻ tab; bộ cài \texttt{SumTalk-Setup-0.3.0.exe} (khoảng 200\,MB).
+  \item \textbf{Transcript live ``nói tới đâu hiện tới đó'':} từ mới hiện khoảng 1\,s sau khi nói; chữ đã chắc chắn
+        in đậm, phần đang sửa in nghiêng mờ.
+  \item \textbf{Engine STT remote} (\texttt{STT\_PROVIDER=remote}): dùng server GPU của nhóm, Groq hoặc OpenAI; máy
+        khách không tải model.
+  \item \textbf{API chuẩn OpenAI:} server có \path{/v1/audio/transcriptions}, bật bằng \texttt{STT\_SERVER\_API\_KEYS}.
+  \item \textbf{File dài:} chia đoạn 5 phút tại chỗ im lặng; dòng đầu hiện sau vài giây; 1 giờ audio mất 1,5--5 phút
+        trên GPU.
+  \item \textbf{Bản web trên AWS:} Dockerfile, Docker Compose với Caddy (HTTPS tự động, đăng nhập), lưu audio và sao
+        lưu database trên S3, hướng dẫn deploy từng bước.
+  \item \textbf{Cấu hình sẵn trong bộ cài:} bộ cài có thể ghi sẵn cấu hình (\texttt{SUMTALK\_DEFAULT\_*}).
+\end{itemize}
+\end{sloppypar}
+
+\heading{Thay đổi}
+\begin{itemize}
+  \item Chunk ghi âm giảm từ 3\,s xuống 1\,s; chu kỳ polling khi ghi từ 1,5\,s xuống 0,7\,s; cửa sổ live tối đa từ
+        25\,s xuống 15\,s.
+  \item Thêm thư viện \texttt{python-multipart} (server); \texttt{boto3} chỉ dùng cho bản server.
+\end{itemize}
+
+\heading{Hạn chế}
+Bộ cài chưa ký số; bản GPU của app desktop là một thư mục khoảng 2,5\,GB (không đóng được bằng NSIS); bản web chưa
+được deploy lên AWS thật.
+
+\section{v0.3 -- tóm tắt và dịch}
+
+Phiên bản v0.3 thuộc Sprint 3, trên nhánh \path{feature/sprint3-summary-translation}:
+\begin{itemize}
+  \item \textbf{Tóm tắt tự động} sau khi có transcript (\#67, \#68--\#71): tổng quan, ý chính, quyết định, việc cần
+        làm, câu hỏi mở; tạo lại bằng tiếng Việt hoặc tiếng Anh; map-reduce cho transcript dài.
+  \item \textbf{Dịch transcript} (\#60, \#61--\#65): chọn ngôn ngữ, thanh tiến độ, hiển thị song ngữ, xuất TXT/SRT.
+  \item \textbf{Đánh giá và kiểm thử:} script đánh giá chất lượng (\#66, \#72); test E2E (\#99, \#100).
+  \item \textbf{Giao diện mới:} sidebar, danh sách cuộc họp, recorder, player.
+\end{itemize}
+
+\section{v0.2 -- transcript live, chọn LLM}
+
+Phiên bản v0.2 thuộc Sprint 2: \canDien[theo báo cáo Sprint 2: transcript live khoảng 3\,s, kết quả benchmark và
+model LLM được chọn].
+
+\section{v0.1 -- ghi lại cuộc họp}
+
+Phiên bản v0.1 thuộc Sprint 1, gồm hai commit \texttt{c483e36 Initial commit} và \texttt{163e2fa Update the UI}:
+ghi âm trên trình duyệt (micro, hoặc micro cùng âm thanh tab), ghi offline trên điện thoại, upload file lớn,
+transcript ngôn ngữ gốc, xuất TXT/SRT/VTT/JSON/WAV.
+
+\section{Mẫu cho phiên bản sau}
+
+Các phiên bản sau dùng cùng một khung gồm sáu mục (Bảng~\ref{tab:release-template}), tiêu đề theo dạng
+``vX.Y -- tên phiên bản (sprint, ngày phát hành)''.
+
+% Last table of the chapter: [H] so it is not pushed onto a page of its own.
+\begin{table}[H]
+  \centering
+  \caption{Mẫu release notes cho phiên bản sau}
+  \label{tab:release-template}
+  \begin{tabularx}{\linewidth}{@{}P{4cm}L@{}}
+    \toprule
+    \thead{Mục} & \thead{Nội dung} \\
+    \midrule
+    Nhánh / tag & Nhánh hoặc tag của phiên bản \\
+    Mới & Tính năng mới \\
+    Thay đổi & Thay đổi hành vi, cấu hình, thư viện \\
+    Sửa lỗi & Lỗi đã sửa, kèm ID trên Azure Boards \\
+    Hạn chế đã biết & Hạn chế còn lại của phiên bản \\
+    Nâng cấp & Các bước cần làm khi cập nhật, ví dụ biến cấu hình mới \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ Chapter 4
+\chapter{Báo cáo tổng kết và Lessons Learned}
+\label{chap:lessons}
+
+\textbf{Đến Sprint 4, sản phẩm vượt mục tiêu về hiệu năng và mở rộng phạm vi từ 4 lên 7 epic, nhưng còn thiếu
+deploy thật, UAT và số liệu chi phí để đóng dự án.} Phần kỹ thuật của chương được ghi từ kinh nghiệm đến hết
+Sprint 4; phần số liệu và bài học quản lý sẽ được điền khi kết thúc dự án: \canDien.
+
+\section{Đánh giá sơ bộ theo mục tiêu dự án}
+
+Bảng~\ref{tab:objectives-check} đối chiếu sáu mục tiêu SMART của điều lệ dự án~\cite{pid} với bằng chứng đã có tại
+ngày 12/11/2026 trong đặc tả yêu cầu~\cite{srs}, tài liệu kiểm thử~\cite{qtd} và báo cáo Sprint 4~\cite{mcr}. Đây
+là đánh giá sơ bộ để chuẩn bị nghiệm thu, không thay cho biên bản nghiệm thu.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Đánh giá sơ bộ theo mục tiêu M1--M6 (12/11/2026)}
+  \label{tab:objectives-check}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}Q{0.8cm}P{3.6cm}LP{2.3cm}@{}}
+    \toprule
+    \thead{Mã} & \thead{Mục tiêu} & \thead{Bằng chứng} & \thead{Đánh giá} \\
+    \midrule
+    M1 & Ghi âm hoặc tải file, transcript đúng ngôn ngữ người nói & Story E1, E2 Done; chạy trên Chrome/Edge, điện
+      thoại, app Windows; test E2E trình duyệt cần chạy lại sau Sprint 4 & Đạt một phần (chờ E2E) \\
+    M2 & Transcript hiện trực tiếp khi đang nói & Từ mới khoảng 1\,s, câu chốt trung bình 1,9\,s (mục tiêu
+      $\leq$ 3--5\,s) & \pass{} Đạt \\
+    M3 & Tóm tắt và dịch Việt $\leftrightarrow$ Anh & Story \#67, \#60 Done, test tự động đạt; 23 test case thủ công
+      chưa có kết quả & Đạt một phần (chờ QC) \\
+    M4 & Xử lý cuộc họp từ 60 phút trở lên & File 11,6 phút xong trong 18--57\,s, dòng đầu sau 3--5\,s; tóm tắt
+      map-reduce cho transcript dài & \pass{} Đạt theo thước đo \\
+    M5 & Bản web trên AWS và bộ cài Windows & Bộ cài v0.4 đạt smoke test 8/8; bản web chạy local, chưa deploy lên
+      AWS thật & Đạt một phần \\
+    M6 & Nằm trong ngân sách (CPI $\geq$ 0,9) & Chưa chép CPI từ dashboard & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Hai mục tiêu về hiệu năng (M2, M4) đã đạt với khoảng cách lớn. Ba mục tiêu M1, M3, M5 chỉ còn thiếu các bước kiểm
+chứng cuối (E2E trình duyệt, test case QC, deploy thật), không còn thiếu tính năng; M6 cần số liệu chi phí.
+
+\section{Kế hoạch so với thực tế}
+
+Bảng~\ref{tab:plan-actual} so sánh kế hoạch với thực tế ở sáu khía cạnh. Phạm vi là khía cạnh thay đổi nhiều nhất.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Kế hoạch so với thực tế}
+  \label{tab:plan-actual}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\linewidth}{@{}P{2.4cm}P{2.9cm}P{2.9cm}P{1.9cm}L@{}}
+    \toprule
+    \thead{Khía cạnh} & \thead{Kế hoạch} & \thead{Thực tế} & \thead{Chênh lệch} & \thead{Nguyên nhân} \\
+    \midrule
+    Phạm vi & E1--E4 (ghi âm, transcript, tóm tắt, dịch) & E1--E7 (thêm desktop, engine dùng chung, bản web AWS)
+      & +3 epic & Thay đổi CR-03\ldots CR-06 trong Change Log~\cite{mcr} \\
+    Thời gian & \canDien[số] sprint & \canDien & & \\
+    Chi phí nhân công (BAC) & \canDien & \canDien[AC] & VAC = & \\
+    CPI / SPI cuối & 1,0 / 1,0 & \canDien & & \\
+    Chất lượng & 0 lỗi Critical/High khi phát hành & \canDien & & \\
+    Hiệu năng live & $\leq$ 3--5\,s & Khoảng 1--2\,s & Tốt hơn mục tiêu & Chunk 1\,s, LocalAgreement, engine GPU
+      hoặc remote \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Hình~\ref{fig:scope} lượng hoá phần tăng phạm vi theo story point đề xuất trong Product Backlog~\cite{srs}: bốn
+epic ban đầu chiếm 105 SP; ba epic thêm vào (E5 app desktop, E6 engine STT dùng chung, E7 bản web) chiếm 29 SP,
+khớp với tổng tác động của CR-03, CR-05 và CR-06 trong Change Log~\cite{mcr}. Như vậy phạm vi tăng khoảng 28\% so
+với ban đầu.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.86\linewidth, height=6.2cm,
+        ybar, bar width=0.62cm, bar shift=0pt,
+        ymin=0, ymax=40,
+        symbolic x coords={E1,E2,E3,E4,E5,E6,E7},
+        xtick=data,
+        xticklabels={E1 Ghi âm,E2 Transcript,E3 Tóm tắt,E4 Dịch,E5 Desktop,E6 Engine STT,E7 Web},
+        x tick label style={font=\footnotesize,text width=1.5cm,align=center},
+        ylabel={Story point (đề xuất)},
+        legend style={at={(0.97,0.95)},anchor=north east,font=\small,draw=gray!40},
+        legend cell align=left,
+        grid=major, xmajorgrids=false, grid style={gray!25},
+        tick label style={font=\small},
+        /pgf/number format/.cd, use comma, 1000 sep={.}]
+      \addplot[fill=primaryblue, draw=primaryblue, nodes near coords,
+               every node near coord/.append style={font=\footnotesize}]
+        coordinates {(E1,34) (E2,34) (E3,18) (E4,19)};
+      \addlegendentry{Phạm vi ban đầu (105 SP)}
+      \addplot[fill=todored!70, draw=todored, nodes near coords,
+               every node near coord/.append style={font=\footnotesize}]
+        coordinates {(E5,8) (E6,13) (E7,8)};
+      \addlegendentry{Thêm qua thay đổi (29 SP)}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Phạm vi ban đầu và phần tăng thêm theo epic (story point đề xuất)}
+  \label{fig:scope}
+\end{figure}
+
+\section{Điều làm tốt}
+
+Năm cách làm sau đã giúp dự án giao được nhiều hơn kế hoạch mà vẫn giữ chất lượng, và nên được giữ cho các dự án
+sau:
+\begin{itemize}
+  \item \textbf{Đo thay vì đoán:} độ trễ live và thời gian xử lý file dài được đo bằng script mô phỏng (số liệu trong
+        Test Summary Report~\cite{qtd}), nên mọi tranh luận đều dựa trên số liệu.
+  \item \textbf{Kiến trúc mở:} STT và LLM đều đi qua API chuẩn OpenAI. Đổi giữa Ollama, Groq, OpenAI hay server riêng
+        chỉ bằng cấu hình; engine remote được thêm vào mà không sửa pipeline.
+  \item \textbf{Không mất dữ liệu:} lưu chunk trên máy trước khi gửi; khôi phục sau crash; backend desktop tự tắt khi
+        app chết.
+  \item \textbf{Test tự động nhanh} (STT giả, LLM mock, S3 giả lập): 88 test chạy trong khoảng 6\,s, nên chạy được
+        sau mỗi thay đổi.
+  \item \textbf{Chia commit theo task trên nhánh feature:} dễ review, dễ đối chiếu với Azure Boards.
+\end{itemize}
+
+\section{Điều cần cải thiện}
+
+Bảng~\ref{tab:improve} ghi các vấn đề đã gặp, tác động của chúng và bài học rút ra. Hai vấn đề đầu đều liên quan tới
+việc quản lý mã nguồn, và cùng dẫn tới một rủi ro đã có trong Risk Register~\cite{pmp}: code chỉ nằm trên một máy
+(R11).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Điều cần cải thiện và bài học}
+  \label{tab:improve}
+  \small
+  \begin{tabularx}{\linewidth}{@{}P{4.4cm}P{3.6cm}L@{}}
+    \toprule
+    \thead{Vấn đề} & \thead{Tác động} & \thead{Bài học / hành động} \\
+    \midrule
+    Nhiều thay đổi Sprint 3 nằm chưa commit trong máy khi bắt đầu Sprint 4 & Khó tách commit, dễ mất code
+      & Commit và push sau mỗi task; không để thay đổi qua đêm \\
+    Push bị 403 do sai tài khoản hoặc quyền repo (R11) & Code chỉ có ở một máy, không review được
+      & Kiểm tra quyền repo cho mọi thành viên từ Sprint 1; mỗi người dùng tài khoản của mình \\
+    Phạm vi tăng 3 epic giữa dự án & Áp lực lịch và chi phí
+      & Đánh giá tác động trước, cắt Should/Could tương ứng, ghi Change Log ngay \\
+    Live trên CPU chậm (cửa sổ tới 25\,s được phiên âm lại mỗi lần) & Chữ hiện muộn trên máy không có GPU
+      & Thiết kế live phải tính chi phí mỗi lượt; có engine remote ngay từ đầu cho máy yếu \\
+    Bộ cài GPU quá lớn cho NSIS ($>$ 2\,GB) & Không có bộ cài GPU
+      & Ưu tiên server GPU dùng chung thay vì GPU trên từng máy \\
+    \canDien[bài học quản lý từ retro: họp, ước lượng, phân công] & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Bài học kỹ thuật đáng giữ}
+
+Năm bài học kỹ thuật sau có giá trị vượt ra ngoài dự án này:
+\begin{enumerate}
+  \item Phiên âm live tốt cần ba thứ cùng lúc: chunk ngắn, cửa sổ ngắn (chỉ chốt các từ mà hai lượt phiên âm liên
+        tiếp cho kết quả giống nhau), và đường truyền kết quả nhanh (polling ngắn hoặc push).
+  \item Với họp trộn ngôn ngữ, nhận ngôn ngữ theo từng câu quan trọng hơn chọn model lớn hơn.
+  \item Mọi API bên ngoài phải có retry, back-off và thông báo lỗi rõ trên giao diện; lỗi key phải hiện ngay ở header.
+  \item Bản deploy POC chưa có tài khoản vẫn phải có HTTPS, đăng nhập, bucket private và IAM role tối thiểu.
+  \item Môi trường dev có thể gây lỗi khó thấy. Ví dụ, VS Code đặt biến môi trường
+        \texttt{ELECTRON\_RUN\_AS\_NODE=1}; vì vậy script khởi động phải tự làm sạch môi trường.
+\end{enumerate}
+
+\section{Khuyến nghị cho giai đoạn sau}
+
+\begin{itemize}
+  \item \textbf{Bảo mật:} làm tài khoản và phân quyền trước khi cho người ngoài dùng thật.
+  \item \textbf{Tính năng:} nhận diện người nói; trang action items (\#79); dịch trực tiếp khi đang họp (\#84).
+  \item \textbf{Phát hành:} ký số bộ cài, tự cập nhật app; CI chạy test tự động trên mỗi Pull Request.
+  \item \textbf{Tài chính:} theo dõi chi phí API thật trong UAT để cập nhật Business Case~\cite{pid}.
+\end{itemize}
+
+% ============================================================ Chapter 5
+\chapter{Kết luận và xác nhận đóng dự án}
+\label{chap:conclusion}
+
+\section{Tóm tắt}
+
+Báo cáo đã chuẩn bị đầy đủ khung để nghiệm thu và đóng dự án SumTalk:
+\begin{itemize}
+  \item \textbf{SOW:} tám hạng mục bàn giao với tiêu chí nghiệm thu kiểm tra được, năm sản phẩm bàn giao gắn với mốc
+        M4, M5, quy trình thay đổi và mẫu biên bản nghiệm thu.
+  \item \textbf{Phát hành:} bốn phiên bản v0.1--v0.4; v0.4 mang lại app desktop, live streaming, engine STT remote và
+        bản web sẵn sàng deploy.
+  \item \textbf{Tổng kết:} M2, M4 đạt; M1, M3, M5 đạt một phần, chỉ còn các bước kiểm chứng; M6 chưa có số liệu.
+        Phạm vi tăng 3 epic (khoảng 28\%), hiệu năng live tốt hơn mục tiêu.
+  \item \textbf{Bài học:} năm điều làm tốt, năm vấn đề cần cải thiện, năm bài học kỹ thuật và bốn nhóm khuyến nghị.
+\end{itemize}
+
+\section{Xác nhận đóng dự án}
+
+Dự án chỉ được đóng khi cả bốn hạng mục trong Bảng~\ref{tab:closure} được xác nhận.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Danh mục xác nhận đóng dự án}
+  \label{tab:closure}
+  \begin{tabularx}{\linewidth}{@{}LP{4.6cm}@{}}
+    \toprule
+    \thead{Hạng mục} & \thead{Trạng thái} \\
+    \midrule
+    Nghiệm thu cuối theo SOW (Chương~\ref{chap:sow}) & \canDien \\
+    Bàn giao mã nguồn, bộ cài, URL, tài liệu & \canDien \\
+    Gỡ tài nguyên AWS không dùng (EC2, Elastic IP, bucket) & \canDien \\
+    Lưu trữ tài liệu, biên bản & \canDien \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Việc cần làm trước khi đóng dự án}
+
+\begin{enumerate}
+  \item Deploy bản web lên AWS thật và chạy checklist trong hướng dẫn deploy; chạy lại test E2E trình duyệt và bộ
+        test Sprint 3; QC chạy 23 test case thủ công.
+  \item Chạy UAT với người dùng thử, đo độ chính xác tiếng Việt; tổ chức nghiệm thu cuối bằng mẫu ở
+        Hình~\ref{fig:acceptance-form}.
+  \item Điền số liệu cuối dự án vào Bảng~\ref{tab:plan-actual} (số sprint, BAC, AC, CPI, SPI, lỗi khi phát hành) và
+        mục M6 của Bảng~\ref{tab:objectives-check}.
+  \item Bổ sung release notes v0.2 và bài học quản lý từ các buổi Retrospective.
+  \item Điền tên đại diện hai bên, thời hạn nghiệm thu và các mục của Bảng~\ref{tab:closure}.
+\end{enumerate}
+
+\needspace{14\baselineskip}
+\section{Phê duyệt}
+
+Nhóm dự án đề nghị Sponsor, Product Owner và Project Manager xác nhận báo cáo kết thúc dự án này và ký đóng dự án
+SumTalk sau khi các hạng mục của Bảng~\ref{tab:closure} hoàn tất.
+
+\begin{table}[H]
+  \centering
+  \renewcommand{\arraystretch}{2.4}
+  \begin{tabularx}{\linewidth}{@{}P{3.6cm}LP{3.2cm}P{2.6cm}@{}}
+    \toprule
+    \thead{Vai trò} & \thead{Họ tên} & \thead{Chữ ký} & \thead{Ngày} \\
+    \midrule
+    Sponsor & & & \\
+    Product Owner & & & \\
+    Project Manager & & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ============================================================ References
+\begin{thebibliography}{9}
+\addcontentsline{toc}{chapter}{\bibname}
+  \bibitem{pid} Nhóm SumTalk, \emph{Hồ sơ khởi động dự án (Project Initiation Document)}, Tài liệu 01,
+    mã SUMTALK-PID, phiên bản 2.1, 24/11/2026.
+  \bibitem{srs} Nhóm SumTalk, \emph{Đặc tả yêu cầu phần mềm (Software Requirements Specification)},
+    Tài liệu 02, mã SUMTALK-SRS, phiên bản 2.1, 24/11/2026.
+  \bibitem{pmp} Nhóm SumTalk, \emph{Kế hoạch quản lý dự án (Project Management Plan)}, Tài liệu 03,
+    mã SUMTALK-PMP, phiên bản 2.1, 24/11/2026.
+  \bibitem{qtd} Nhóm SumTalk, \emph{Chất lượng và kiểm thử (Quality \& Test Document)}, Tài liệu 04,
+    mã SUMTALK-QTD, phiên bản 2.1, 24/11/2026.
+  \bibitem{mcr} Nhóm SumTalk, \emph{Báo cáo theo dõi và kiểm soát (Monitoring \& Control Report)}, Tài liệu 05,
+    mã SUMTALK-MCR, phiên bản 2.1, 24/11/2026.
+\end{thebibliography}
+
+\end{document}
