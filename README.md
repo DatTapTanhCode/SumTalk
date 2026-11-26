@@ -127,7 +127,7 @@ in the POC.
 
 Open a meeting to rename it, add or remove tags (for a project or client), or choose **Share**. On the Meetings page, combine a title or tag search, a tag, and inclusive local calendar dates, then choose the sort order. The same filters are available from the API: `GET /api/meetings?q=&tag=&start=&end=&sort=newest|oldest|longest|title`.
 
-A share link opens a read-only page with the minutes, action items, transcript and completed translations; audio is optional. Turning the link off stops it working at once, and creating another link generates a new URL. On the hosted server, share pages (`/share/...`) are the only part of the app reachable without the test-phase login.
+A share link opens a read-only page with the minutes, action items, transcript and completed translations; audio is optional. Turning the link off stops it working at once, and creating another link generates a new URL. On the hosted server, share pages (`/share/...`) are the only part of the app reachable without signing in (the hosted server has a sign-in page with one shared test account, set by `LOGIN_USER` / `LOGIN_PASSWORD_HASH`).
 
 For teammates on other devices, use a hosted SumTalk server or start the web server with `--https --lan` and use its LAN address. A loopback URL works only on the computer hosting SumTalk.
 

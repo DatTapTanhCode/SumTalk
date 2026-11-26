@@ -103,6 +103,8 @@ async function syncRecording(recording: LocalRecording): Promise<void> {
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       await localStore.patchRecording(id, { createdOnServer: false }) // server lost it: create again
+    } else if (error instanceof ApiError && error.status === 401) {
+      throw error // signed out: keep the audio on this device and retry once signed in again
     } else if (error instanceof ApiError && error.status < 500) {
       await localStore.patchRecording(id, { error: error.message }) // needs a human; don't block others
       return

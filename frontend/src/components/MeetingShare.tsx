@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { copyText } from '@/lib/clipboard'
+import { cn } from '@/lib/utils'
 
 function ShareControls({ id }: { id: string }) {
   const [share, setShare] = useState<ShareLink | null>()
@@ -49,16 +50,44 @@ function ShareControls({ id }: { id: string }) {
   return (
     <>
       {share !== undefined && (
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={includeAudio} disabled={busy} onChange={(e) => {
-            if (share) void change(e.target.checked)
-            else setIncludeAudio(e.target.checked)
-          }} />
+        <div
+          role="status"
+          className="flex items-center gap-2.5 rounded-md border border-border bg-secondary/40 px-3 py-2.5"
+        >
+          <span className={cn('size-2 shrink-0 rounded-[1px]', share ? 'bg-online' : 'bg-muted-foreground/40')} />
+          <div className="min-w-0 flex-1">
+            <div className="font-mono text-[11px] font-semibold tracking-[0.12em] text-foreground uppercase">
+              {share ? 'Link is on' : 'No active link'}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {share
+                ? `Anyone with the link can read this meeting${share.include_audio ? ' and play its audio' : ''}.`
+                : 'Guests cannot open this meeting until you create a link.'}
+            </div>
+          </div>
+        </div>
+      )}
+      {share !== undefined && (
+        <label className="flex items-center gap-2 text-base">
+          <input
+            type="checkbox"
+            className="size-4 accent-foreground"
+            checked={includeAudio}
+            disabled={busy}
+            onChange={(e) => {
+              if (share) void change(e.target.checked)
+              else setIncludeAudio(e.target.checked)
+            }}
+          />
           Include audio
         </label>
       )}
       {share === undefined && !error && <p role="status">Loading sharing settings…</p>}
-      {share === null && <Button disabled={busy} onClick={() => void change(includeAudio)}>Create share link</Button>}
+      {share === null && (
+        <Button loading={busy} onClick={() => void change(includeAudio)}>
+          Create share link
+        </Button>
+      )}
       {share && (
         <>
           <Input readOnly aria-label="Read-only share link" value={url} onFocus={(e) => e.target.select()} />
@@ -73,7 +102,11 @@ function ShareControls({ id }: { id: string }) {
           </div>
         </>
       )}
-      {error && <p role="alert" className="text-destructive">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-live">
+          {error}
+        </p>
+      )}
     </>
   )
 }
@@ -81,8 +114,12 @@ function ShareControls({ id }: { id: string }) {
 export function MeetingShare({ id }: { id: string }) {
   return (
     <Dialog>
-      <DialogTrigger asChild><Button variant="secondary" size="sm"><Share2 className="size-4" /> Share</Button></DialogTrigger>
-      <DialogContent>
+      <DialogTrigger asChild>
+        <Button variant="secondary" size="sm">
+          <Share2 className="size-4" /> Share
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="gap-4">
         <DialogHeader>
           <DialogTitle>Share meeting</DialogTitle>
           <DialogDescription>Anyone with the link can read the summary, action items, transcript, and available translations.</DialogDescription>

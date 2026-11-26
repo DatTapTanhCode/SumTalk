@@ -3,10 +3,11 @@ import mimetypes
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .api import ai, meetings, sharing, stt_server, system, uploads
+from .api import ai, auth, meetings, sharing, stt_server, system, uploads
 from .config import get_settings
 from .db import init_db
 from .services import pipeline
@@ -40,14 +41,22 @@ app = FastAPI(title="SumTalk API", version="0.3.0", lifespan=lifespan)
 
 
 @app.middleware("http")
+async def require_sign_in(request, call_next):
+    if auth.needs_login(request):
+        return JSONResponse({"detail": "Sign in required"}, status_code=401)
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def private_response_headers(request, call_next):
     response = await call_next(request)
-    if request.url.path.startswith(("/api/meetings", "/api/uploads", "/api/shared/", "/share/")):
+    if request.url.path.startswith(("/api/meetings", "/api/uploads", "/api/shared/", "/api/auth/", "/share/")):
         response.headers["Cache-Control"] = "private, no-store"
         response.headers["Referrer-Policy"] = "no-referrer"
     return response
 
 
+app.include_router(auth.router)
 app.include_router(sharing.router)
 app.include_router(system.router)
 app.include_router(meetings.router)

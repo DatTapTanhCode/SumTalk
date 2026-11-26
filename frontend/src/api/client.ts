@@ -1,8 +1,10 @@
 import type {
+  AuthState,
   ClientConfig,
   ExportFormat,
   Health,
   Meeting,
+  MeetingFilters,
   ShareLink,
   SharedMeeting,
   Summary,
@@ -14,6 +16,9 @@ import type {
   TranslationInfo,
   UploadSession,
 } from './types'
+
+/** Fired on window when an API call answers 401 (sign-in required). */
+export const SIGNED_OUT_EVENT = 'sumtalk:signed-out'
 
 /** The server answered with an error status. */
 export class ApiError extends Error {
@@ -59,7 +64,11 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   } catch {
     throw new NetworkError()
   }
-  if (!response.ok) throw await parseError(response.status, await response.text())
+  if (!response.ok) {
+    // The session ran out or was signed out elsewhere: the app goes back to the sign-in page.
+    if (response.status === 401 && !path.startsWith('/api/auth/')) window.dispatchEvent(new Event(SIGNED_OUT_EVENT))
+    throw await parseError(response.status, await response.text())
+  }
   if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
 }
@@ -71,10 +80,19 @@ const json = (method: string, body: unknown): RequestInit => ({
 })
 
 export const api = {
+  authSession: () => request<AuthState>('/api/auth/session', { signal: AbortSignal.timeout?.(8_000) }),
+  login: (username: string, password: string) => request<AuthState>('/api/auth/login', json('POST', { username, password })),
+  logout: () => request<void>('/api/auth/logout', { method: 'POST' }),
   health: () => request<Health>('/api/health'),
   config: () => request<ClientConfig>('/api/config'),
 
-  listMeetings: () => request<Meeting[]>('/api/meetings'),
+  listMeetings: (filters: MeetingFilters = {}) => {
+    const params = new URLSearchParams()
+    for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value)
+    const query = params.toString()
+    return request<Meeting[]>(query ? `/api/meetings?${query}` : '/api/meetings')
+  },
+  listTags: () => request<string[]>('/api/meetings/tags'),
   getMeeting: (id: string) => request<Meeting>(`/api/meetings/${id}`),
   renameMeeting: (id: string, title: string) => request<Meeting>(`/api/meetings/${id}`, json('PATCH', { title })),
   addTag: (id: string, name: string) => request<Meeting>(`/api/meetings/${id}/tags`, json('POST', { name })),

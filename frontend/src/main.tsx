@@ -5,12 +5,14 @@ import '@fontsource-variable/geist-mono'
 import '@fontsource-variable/handjet/full.css'
 import { App } from './App'
 import './index.css'
+import { startAuth } from './lib/auth'
 import { isDesktop } from './lib/desktop'
 import { startServerWatch } from './lib/server'
 import { startSync } from './offline/sync'
 
 const sharedPage = window.location.pathname.startsWith('/share/')
 if (!sharedPage) {
+  startAuth()
   startServerWatch()
   startSync()
 }

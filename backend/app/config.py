@@ -3,6 +3,7 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
@@ -87,6 +88,14 @@ class Settings(BaseSettings):
     s3_keep_local_copy: bool = False
     s3_url_expiry_sec: int = 3 * 3600
     s3_db_backup_hours: float = 6.0  # copy the SQLite database to S3 every N hours (0 = off)
+
+    # --- Sign-in page (hosted test server) ---
+    # Off while either is empty (local, LAN and desktop use). The hash is bcrypt, e.g. the output of
+    # `caddy hash-password`; the BASIC_AUTH_* names from an older deploy/.env are accepted too.
+    login_user: str = Field(default="", validation_alias=AliasChoices("LOGIN_USER", "BASIC_AUTH_USER"))
+    login_password_hash: str = Field(default="", validation_alias=AliasChoices("LOGIN_PASSWORD_HASH", "BASIC_AUTH_HASH"))
+    login_session_hours: float = 7 * 24
+    session_secret: str = ""  # signs the sign-in cookie; empty = a random key kept in the data folder
 
     # --- Recording / upload limits ---
     chunk_seconds: float = 1.0  # length of the PCM chunks the browser sends while recording
