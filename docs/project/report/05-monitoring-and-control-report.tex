@@ -13,9 +13,9 @@
 \newcommand{\DocCode}{SUMTALK-MCR}
 \newcommand{\DocVersion}{2.1 -- 24/11/2026}
 \newcommand{\DocStatus}{Chờ duyệt}
-\newcommand{\DocAuthor}{\canDien[Project Manager]}
-\newcommand{\DocReviewers}{Project Manager, Product Owner (Sponsor nhận bản báo cáo mỗi sprint)}
-\newcommand{\DocReaders}{Project Manager, Product Owner, Sponsor}
+\newcommand{\DocAuthor}{Trần Phan Đăng Khôi}
+\newcommand{\DocReviewers}{Project Manager, Product Owner}
+\newcommand{\DocReaders}{Project Manager, Product Owner}
 \newcommand{\CoverDate}{TP. HỒ CHÍ MINH, THÁNG 11/2026}
 \hypersetup{pdftitle={SumTalk -- Báo cáo theo dõi và kiểm soát},pdfauthor={Nhóm SumTalk}}
 
@@ -38,10 +38,10 @@
     \thead{Phiên bản} & \thead{Ngày} & \thead{Nội dung thay đổi} & \thead{Người thực hiện} \\
     \midrule
     1.0 & 12/11/2026 & Bản đầu, gồm bốn tài liệu riêng: báo cáo trạng thái sprint, Earned Value, biên bản họp và
-      Retrospective, Change Log & \canDien \\
-    2.0 & 13/11/2026 & Gộp thành một tài liệu, đánh lại số mục (CR-08) & \canDien \\
+      Retrospective, Change Log & Đỗ Thành Đạt \\
+    2.0 & 13/11/2026 & Gộp thành một tài liệu, đánh lại số mục (CR-08) & Đỗ Thành Đạt \\
     2.1 & 24/11/2026 & Chuyển sang định dạng báo cáo PDF (LaTeX), sắp xếp lại thành sáu chương; vẽ biểu đồ
-      burndown, đường S và quy trình kiểm soát thay đổi & \canDien \\
+      burndown, đường S và quy trình kiểm soát thay đổi & Đỗ Thành Đạt \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -49,9 +49,9 @@
 \needspace{8\baselineskip}
 \heading{Quy ước trong tài liệu}
 \begin{itemize}
-  \item \canDien[\ldots]: số liệu đã có ở Azure Boards, dashboard chi phí hoặc biên bản họp nhưng chưa chép
+  \item \canDien[\ldots]: số liệu hoặc bằng chứng còn cần bổ sung từ Azure Boards, dashboard chi phí hoặc biên bản họp, chưa chép
         vào tài liệu; cần bổ sung trước khi trình duyệt.
-  \item \textbf{Số minh hoạ}: số dùng để giải thích phương pháp (ví dụ EVA, biểu đồ burndown và đường S), không
+  \item \textbf{Số minh hoạ}: số dùng để giải thích phương pháp (ví dụ EVA và đường S), không
         phải số của nhóm; chú thích của bảng và hình ghi rõ điều này.
   \item \textbf{Mã thay đổi}: CR-xx là yêu cầu thay đổi đã ghi nhận, CR-Hx là thay đổi bị hoãn hoặc từ chối;
         R-xx là mã rủi ro trong Risk Register~\cite{pmp}.
@@ -69,13 +69,13 @@ trong lúc thực hiện, đối chiếu với đường cơ sở của kế ho�
 sau mỗi sprint: báo cáo trạng thái từng sprint, phân tích giá trị thu được (EVA), biên bản họp và Retrospective,
 và nhật ký thay đổi phạm vi (Change Log).
 
-Sprint 4 là sprint đã ghi đầy đủ theo repo: app desktop Windows, transcript live dạng streaming (từ mới hiện sau
+Tại mốc chốt Sprint 4, repo ghi nhận app desktop Windows, transcript live dạng streaming (từ mới hiện sau
 khoảng \textbf{1\,s}), engine STT remote và xử lý file dài đều xong; bản web đã sẵn sàng để deploy nhưng
 \textbf{chưa được deploy lên AWS thật}; 88 test pytest đạt. Sự cố đáng chú ý nhất là việc push lên GitHub bị từ
-chối (rủi ro R11). Change Log ghi \textbf{8 yêu cầu thay đổi} (CR-01 đến CR-08) và 3 đề xuất bị hoãn; các thay đổi
-lớn nhất là thêm app desktop, live streaming, engine STT remote và bản web trên AWS. Số liệu EVA, burndown và
-velocity của Sprint 1--3 đã có trên Azure Boards và dashboard nhưng chưa được chép vào; tài liệu ghi sẵn phương
-pháp, công thức, cách diễn giải và một ví dụ tính đầy đủ.
+chối (rủi ro R11). Sau mốc chốt, nhóm thông báo đã deploy bản mới. Change Log ghi các mục CR-01 đến CR-08 và 3 đề xuất bị hoãn; các thay đổi
+lớn nhất là thêm app desktop, live streaming, engine STT remote và bản web trên AWS. Báo cáo trạng thái dùng
+backlog, burndown và velocity của Sprint 1--4 trên Azure Boards. Dashboard xác nhận chi phí nhân công luỹ kế
+21,90 triệu VND hết Sprint 4. Đường cơ sở và số SP đạt DoD tại từng mốc còn chờ xác nhận để chốt EVA.
 
 \textbf{Từ khoá:} báo cáo trạng thái, sprint report, burndown, velocity, Earned Value, CPI, SPI, Retrospective,
 Change Log, kiểm soát thay đổi.
@@ -136,7 +136,7 @@ Change Log, kiểm soát thay đổi.
 
 Kế hoạch quản lý dự án~\cite{pmp} đặt đường cơ sở cho phạm vi (WBS), lịch trình (CPM, Gantt) và chi phí (PV theo
 sprint), cùng ngưỡng hành động CPI hoặc SPI $<$ 0,9. Điều lệ dự án~\cite{pid} quy định ai được duyệt thay đổi: PO
-duyệt thay đổi trong sprint, Sponsor duyệt thay đổi mốc, ngân sách vượt 10\% hoặc phạm vi dự án. Tài liệu này ghi
+duyệt thay đổi trong sprint, Project Manager duyệt thay đổi mốc, ngân sách vượt 10\% hoặc phạm vi dự án. Tài liệu này ghi
 lại những gì \emph{thực sự} diễn ra so với đường cơ sở đó, và các quyết định kiểm soát đã đưa ra.
 
 \section{Mục đích và người đọc của tài liệu}
@@ -144,7 +144,7 @@ lại những gì \emph{thực sự} diễn ra so với đường cơ sở đó,
 Tài liệu tập hợp số liệu và hồ sơ sinh ra trong lúc thực hiện dự án: báo cáo từng sprint, phân tích giá trị thu
 được, biên bản họp, Retrospective và nhật ký thay đổi phạm vi. Tài liệu được cập nhật sau mỗi sprint. Người đọc
 chính là Project Manager (lập và dùng báo cáo để điều hành), Product Owner (duyệt thay đổi trong sprint, ưu tiên
-lại backlog) và Sponsor (nhận bản báo cáo mỗi sprint, duyệt các thay đổi lớn).
+lại backlog).
 
 \section{Cấu trúc tài liệu}
 
@@ -165,9 +165,9 @@ Phần còn lại của tài liệu gồm năm chương:
 \chapter{Báo cáo trạng thái theo sprint}
 \label{chap:status}
 
-\textbf{Mỗi sprint có một báo cáo theo cùng mẫu, để Sponsor so sánh được các sprint với nhau.} Báo cáo gồm mục
-tiêu, kế hoạch so với thực tế, burndown, velocity, chi phí (CPI, SPI), vấn đề, rủi ro và quyết định. Số liệu
-Sprint 1--3 nhóm đã có: \canDien[chép từ báo cáo S1--S3 hiện có]. Sprint 4 được ghi theo các commit trong repo.
+\textbf{Mỗi sprint có một báo cáo theo cùng mẫu, để Project Manager so sánh được các sprint với nhau.} Báo cáo gồm mục
+tiêu, kế hoạch so với thực tế, burndown, velocity, chi phí (CPI, SPI), vấn đề, rủi ro và quyết định. Bảng tổng
+hợp dựa trên Azure Boards~\cite{azure-sprints}. Phần kỹ thuật Sprint 4 bổ sung bằng chứng từ repo.
 
 \section{Mẫu báo cáo sprint}
 
@@ -218,49 +218,72 @@ mục: D-1 (8), S-1 (13), O-1 (8), US6.2 (5) và tài liệu (3).
     \thead{Sprint} & \thead{Mục tiêu} & \thead{SP cam kết} & \thead{SP xong} & \thead{Velocity} & \thead{CPI}
       & \thead{SPI} & \thead{Ghi chú} \\
     \midrule
-    1 & Ghi âm, upload, transcript gốc (E1) & \canDien & & & & & \\
-    2 & Transcript live, benchmark LLM & \canDien & & & & & \\
-    3 & Tóm tắt \#67 và dịch \#60, test E2E & \canDien & & & & & \#60 dời vào sprint này \\
-    4 & Desktop, streaming, STT remote, deploy AWS & 37 (đề xuất) & & & & & Mục~\ref{sec:sprint4} \\
+    1 & Ghi âm, upload, transcript gốc (E1) & 19 & 19 & 0 & 1,45 & 1,07 & Backlog hiện tại; widget ghi 31 Effort xong muộn \\
+    2 & Transcript live, benchmark LLM & 34 & 34 & 29 & 1,09 & 1,08 & Cuối sprint còn 8 SP; widget ghi 13 Effort xong muộn \\
+    3 & Tóm tắt \#67 và dịch \#60, test E2E & 16 & 16 & 16 & 0,88 & 0,89 & \#60 dời vào sprint này \\
+    4 & Desktop, streaming, STT remote, deploy AWS & 37 (đề xuất) & 18 & 18 & 0,85 & 0,87 & Mục~\ref{sec:sprint4} \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
+SP xong lấy theo backlog Azure Boards, có đối chiếu ghi chú chuyển kỳ của \#79~\cite{azure-action-items}.
+Velocity lấy cột Completed của dashboard Năng suất~\cite{azure-velocity}, đơn vị Effort.
+CPI và SPI là số tham chiếu luỹ kế đến cuối mỗi sprint, lấy từ Bảng~\ref{tab:eva-track}.
+
+\subsection{Kết quả đối chiếu Sprint 1--3}
+
+Số SP cam kết ở bảng cho Sprint 1--3 lấy theo tổng Story Point trong backlog Azure Boards hiện có. Widget Velocity ghi Planned bằng 0 cho cả ba sprint. Cam kết đầu kỳ cần biên bản Planning để xác nhận. Số liệu
+dưới đây tổng hợp backlog, Burndown Trend và dashboard chi phí~\cite{azure-sprints,azure-cost}.
+
+\begin{itemize}
+  \item \textbf{Sprint 1 (11/09--25/09):} Azure Boards ghi ba story Done, tổng 19 SP, gồm phân tích yêu cầu
+    và UI/UX, khảo sát mô hình AI và thiết lập nền tảng kỹ thuật. Kế hoạch nhân công là 38 giờ. Dashboard
+    ghi 28 giờ thực tế, còn bảng kế hoạch chi tiết ghi 33,5 giờ.
+  \item \textbf{Sprint 2 (25/09--09/10):} Năm story ghi âm, tải tệp, phiên âm gốc, transcript trực tiếp và
+    xem/xuất transcript hiện đều Done, tổng 34 SP. Burndown cuối sprint còn 8 SP. Chi phí nhân công ghi
+    76 giờ thực tế so với 67 giờ dự kiến.
+  \item \textbf{Sprint 3 (19/10--30/10):} Story tóm tắt \#67 và story dịch \#60 đều Done, tổng 16 SP.
+    Story \#60 được dời vào sprint này. Chi phí nhân công ghi 64,5 giờ thực tế so với 61 giờ dự kiến.
+\end{itemize}
+
 \section{Burndown}
 \label{sec:burndown}
 
-Biểu đồ burndown của mỗi sprint vẽ số story point còn lại theo ngày, cạnh đường lý tưởng giảm đều về 0.
-Hình~\ref{fig:burndown} là mẫu với \textbf{số minh hoạ} cho một sprint 10 ngày, 37 SP;
-\canDien[thay bằng điểm còn lại theo ngày trên Azure Boards].
+Hình~\ref{fig:burndown} lấy chuỗi \texttt{Remaining} và \texttt{Total Scope} trong Burndown Trend của Azure
+Boards, với bộ lọc \texttt{User Story} và chỉ số \texttt{Sum of Story Point}. N1 là ngày làm việc đầu
+tiên của từng sprint: 11/09, 25/09, 19/10 và 02/11/2026. Trong ngày có dữ liệu, hiệu số giữa phạm vi và điểm còn lại
+là số điểm Azure ghi nhận đã hoàn thành.
 
 \begin{figure}[htbp]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
-        width=0.85\linewidth, height=6.4cm,
-        xmin=0.6, xmax=10.4, ymin=0, ymax=40,
-        xtick={1,...,10}, xticklabels={N1,N2,N3,N4,N5,N6,N7,N8,N9,N10},
-        ylabel={Story point còn lại},
-        grid=major, grid style={gray!25},
-        legend pos=north east, legend cell align=left,
-        legend style={font=\small,draw=gray!40},
-        tick label style={font=\small},
-        /pgf/number format/.cd, use comma, 1000 sep={.}]
-      \addplot[thick, chartgray, dashed, mark=none]
-        coordinates {(1,37) (2,33) (3,29) (4,26) (5,22) (6,18) (7,15) (8,11) (9,7) (10,0)};
-      \addlegendentry{Lý tưởng}
-      \addplot[very thick, primaryblue, mark=*]
-        coordinates {(1,37) (2,37) (3,34) (4,30) (5,30) (6,24) (7,20) (8,14) (9,8) (10,0)};
-      \addlegendentry{Thực tế}
+        width=0.93\linewidth, height=7.2cm,
+        xmin=0.7, xmax=11.3, ymin=-1, ymax=38,
+        xtick={1,...,11}, xticklabels={N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11},
+        ylabel={Story point}, grid=major, grid style={gray!25},
+        legend pos=north west, legend cell align=left,
+        legend style={font=\small,draw=gray!40}, tick label style={font=\small}]
+      \addplot[thick, primaryblue, mark=*]
+        coordinates {(1,0) (2,0) (3,0) (4,0) (5,0) (6,0) (7,0) (8,0) (9,0) (10,8) (11,8)};
+      \addlegendentry{Sprint 2: điểm còn lại}
+      \addplot[thick, primaryblue, dashed, mark=square*]
+        coordinates {(1,0) (2,0) (3,0) (4,0) (5,0) (6,0) (7,0) (8,0) (9,0) (10,34) (11,34)};
+      \addlegendentry{Sprint 2: phạm vi}
+      \addplot[thick, todored, dotted, mark=triangle*]
+        coordinates {(1,0) (2,0) (3,0) (4,0) (5,0) (6,0) (7,0) (8,0) (9,23)};
+      \addlegendentry{Sprint 4: phạm vi}
     \end{axis}
   \end{tikzpicture}
-  \caption{Mẫu biểu đồ burndown của một sprint (số minh hoạ)}
+  \caption{Burndown theo Azure Boards, hiển thị các chuỗi có giá trị khác 0}
   \label{fig:burndown}
 \end{figure}
 
-Cách đọc: đường thực tế nằm \emph{trên} đường lý tưởng nghĩa là sprint đang chậm. Theo Risk Register~\cite{pmp},
-burndown nằm trên đường lý tưởng 2 ngày liền là dấu hiệu cảnh báo của rủi ro R3 (trễ tiến độ); trong ví dụ, điều
-này xảy ra từ ngày N2 và cần được nêu trong Daily.
+Sprint 1 (11 điểm đo) và Sprint 3 (10 điểm đo) có cả hai chuỗi bằng 0 trong thời gian sprint. Sprint 4
+có điểm còn lại bằng 0 ở cả 9 điểm đo. Các chuỗi 0 này được lược khỏi hình để tránh chồng đường. Azure
+Boards lần đầu ghi 34 SP phạm vi Sprint 2 vào ngày 08/10 và 23 SP phạm vi Sprint 4 vào ngày 12/11.
+Vì ảnh chụp đầu kỳ ghi nhận phạm vi bằng 0, không dùng đường lý tưởng để kết luận đạt hay trễ tiến độ.
+Cụ thể, ảnh chụp Sprint 4 cho thấy 0 SP còn lại, trong khi ghi chú trên \#79 xác nhận 5 SP chuyển kỳ.
 
 \section{Báo cáo Sprint 4 -- desktop, streaming, cloud}
 \label{sec:sprint4}
@@ -268,7 +291,7 @@ này xảy ra từ ngày N2 và cần được nêu trong Daily.
 Sprint 4 được ghi theo repo ngày 12/11/2026 (Bảng~\ref{tab:sprint4}). Sáu trên bảy hạng mục đã xong; riêng deploy
 AWS mới xong phần chuẩn bị.
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{Kết quả Sprint 4 theo repo (12/11/2026)}
   \label{tab:sprint4}
@@ -304,9 +327,8 @@ AWS mới xong phần chuẩn bị.
 \label{chap:eva}
 
 \textbf{EVA so sánh giá trị công việc đã làm được (EV) với chi phí thực tế (AC) và kế hoạch (PV) theo từng sprint,
-rồi dự báo tổng chi phí khi hoàn thành (EAC).} Nhóm đã có CPI và SPI trên dashboard:
-\canDien[chép số vào Bảng~\ref{tab:eva-track}]. Chương này ghi phương pháp, cách diễn giải và một ví dụ tính đầy đủ
-với số minh hoạ.
+rồi dự báo tổng chi phí khi hoàn thành (EAC).} Dashboard Chi phí cung cấp giờ thực tế và giờ dự kiến theo
+sprint~\cite{azure-cost}. Bảng EVA sử dụng chi phí nhân công theo đơn giá 100.000 VND/giờ.
 
 \section{Định nghĩa và công thức}
 
@@ -363,8 +385,7 @@ Bảng~\ref{tab:eva-meaning} cho biết ý nghĩa của từng chỉ số khi l�
   \end{tabularx}
 \end{table}
 
-Ngưỡng hành động của dự án giữ như trong kế hoạch chi phí~\cite{pmp}: khi CPI hoặc SPI nhỏ hơn 0,9, PM báo PO và
-Sponsor.
+Khi CPI hoặc SPI nhỏ hơn 0,9, PM trao đổi với PO và quyết định hành động theo kế hoạch chi phí~\cite{pmp}.
 
 \section{Bảng theo dõi theo sprint}
 
@@ -373,7 +394,7 @@ ba cột đầu theo~\eqref{eq:eva-index} và~\eqref{eq:eva-forecast}.
 
 \begin{table}[htbp]
   \centering
-  \caption{Theo dõi EVA theo sprint (luỹ kế, VND)}
+  \caption{Theo dõi EVA theo sprint (luỹ kế, VND, số tham chiếu)}
   \label{tab:eva-track}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -382,10 +403,10 @@ ba cột đầu theo~\eqref{eq:eva-index} và~\eqref{eq:eva-forecast}.
     \thead{Hết sprint} & \thead{PV} & \thead{EV} & \thead{AC} & \thead{CV} & \thead{SV} & \thead{CPI} & \thead{SPI}
       & \thead{EAC} \\
     \midrule
-    1 & \canDien & & & & & & & \\
-    2 & \canDien & & & & & & & \\
-    3 & \canDien & & & & & & & \\
-    4 & \canDien & & & & & & & \\
+    1 & 3.800.000 & 4.070.000 & 2.800.000 & 1.270.000 & 270.000 & 1,45 & 1,07 & 17.410.000 \\
+    2 & 10.500.000 & 11.360.000 & 10.400.000 & 960.000 & 860.000 & 1,09 & 1,08 & 23.160.000 \\
+    3 & 16.600.000 & 14.790.000 & 16.850.000 & $-$2.060.000 & $-$1.810.000 & 0,88 & 0,89 & 28.820.000 \\
+    4 & 21.500.000 & 18.650.000 & 21.900.000 & $-$3.250.000 & $-$2.850.000 & 0,85 & 0,87 & 29.710.000 \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -396,7 +417,7 @@ ba cột đầu theo~\eqref{eq:eva-index} và~\eqref{eq:eva-forecast}.
 giờ) và tổng 125 SP. Hết Sprint 3, kế hoạch là 450 giờ, thực tế 480 giờ, đã Done 90 SP. Các bước tính được trình bày
 trong Bảng~\ref{tab:eva-example}.
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{Ví dụ tính EVA hết Sprint 3 (số minh hoạ)}
   \label{tab:eva-example}
@@ -418,16 +439,15 @@ trong Bảng~\ref{tab:eva-example}.
 
 Kết luận của ví dụ: CPI chạm ngưỡng 0,9, nên PM báo PO để dời một story Should sang phiên bản sau.
 
-Hình~\ref{fig:scurve} vẽ ba đường luỹ kế PV, EV, AC qua bốn sprint với cùng bộ số minh hoạ (giá trị hết Sprint 3
-khớp với Bảng~\ref{tab:eva-example}). Khoảng cách giữa AC và EV là chênh lệch chi phí CV; khoảng cách giữa PV và EV
-là chênh lệch tiến độ SV. \canDien[thay bằng số thật từ Bảng~\ref{tab:eva-track}].
+Hình~\ref{fig:scurve} vẽ ba đường luỹ kế PV, EV và AC qua bốn sprint theo số liệu tham chiếu trong
+Bảng~\ref{tab:eva-track}. Chênh lệch chi phí CV bằng EV trừ AC. Chênh lệch tiến độ SV bằng EV trừ PV.
 
 \begin{figure}[htbp]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
         width=0.85\linewidth, height=6.6cm,
-        xmin=0.7, xmax=4.3, ymin=0, ymax=70,
+        xmin=0.7, xmax=4.3, ymin=0, ymax=25,
         xtick={1,2,3,4}, xticklabels={Sprint 1,Sprint 2,Sprint 3,Sprint 4},
         ylabel={Triệu VND (luỹ kế)},
         grid=major, grid style={gray!25},
@@ -435,19 +455,15 @@ là chênh lệch tiến độ SV. \canDien[thay bằng số thật từ Bảng~
         legend style={font=\small,draw=gray!40},
         tick label style={font=\small},
         /pgf/number format/.cd, use comma, 1000 sep={.}]
-      \addplot[thick, chartgray, dashed, mark=square*] coordinates {(1,15) (2,30) (3,45) (4,60)};
-      \addlegendentry{PV -- kế hoạch}
-      \addplot[very thick, primaryblue, mark=*] coordinates {(1,13) (2,27) (3,43.2) (4,58)};
+      \addplot[thick, primaryblue, dashed, mark=square*] coordinates {(1,3.8) (2,10.5) (3,16.6) (4,21.5)};
+      \addlegendentry{PV -- chi phí kế hoạch}
+      \addplot[thick, chartgray, mark=*] coordinates {(1,4.07) (2,11.36) (3,14.79) (4,18.65)};
       \addlegendentry{EV -- giá trị thu được}
-      \addplot[thick, todored, mark=triangle*] coordinates {(1,14) (2,31) (3,48) (4,62)};
+      \addplot[thick, todored, mark=triangle*] coordinates {(1,2.8) (2,10.4) (3,16.85) (4,21.9)};
       \addlegendentry{AC -- chi phí thực tế}
-      \draw[{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]},todored] (axis cs:3.12,43.2) -- (axis cs:3.12,48)
-        node[midway,right,font=\scriptsize,text=todored] {CV};
-      \draw[{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]},chartgray] (axis cs:2.88,43.2) -- (axis cs:2.88,45)
-        node[midway,left,font=\scriptsize,text=chartgray] {SV};
     \end{axis}
   \end{tikzpicture}
-  \caption{Đường S của PV, EV và AC luỹ kế (số minh hoạ)}
+  \caption{Đường S của PV, EV và AC luỹ kế qua Sprint 1--4}
   \label{fig:scurve}
 \end{figure}
 
@@ -456,8 +472,7 @@ là chênh lệch tiến độ SV. \canDien[thay bằng số thật từ Bảng~
 \label{chap:minutes}
 
 \textbf{Mỗi sprint cần đủ biên bản Sprint Planning, Sprint Review và Retrospective; Daily chỉ cần ghi khi có vướng
-mắc.} Nhóm đã có biên bản các buổi họp: \canDien[dán liên kết hoặc chép vào Mục~\ref{sec:archive}]. Chương này đưa
-ra bảng kiểm tra độ đầy đủ, mẫu biên bản cho bốn loại họp và gợi ý nội dung Retrospective Sprint 4.
+mắc.} Mục~\ref{sec:archive} lưu các bằng chứng tìm được trên Azure Boards và ghi rõ biên bản cần bổ sung.
 
 \section{Kiểm tra độ đầy đủ}
 
@@ -472,10 +487,10 @@ nhất cần có trong biên bản của sprint đó.
     \toprule
     \thead{Sprint} & \thead{Planning} & \thead{Review} & \thead{Retrospective} & \thead{Ghi chú} \\
     \midrule
-    1 & $\square$ & $\square$ & $\square$ & \\
+    1 & $\square$ & $\square$ & $\square$ & Có ghi chú Planning, xem Mục~\ref{sec:archive} \\
     2 & $\square$ & $\square$ & $\square$ & Benchmark LLM; ghi rủi ro R1--R6 \\
-    3 & $\square$ & $\square$ & $\square$ & Quyết định dời \#60 vào Sprint 3 \\
-    4 & $\square$ & $\square$ & $\square$ & Quyết định thêm desktop, streaming, cloud \\
+    3 & $\square$ & $\square$ & $\square$ & Có task Planning, Review và Retro; xem Mục~\ref{sec:archive} \\
+    4 & $\square$ & $\square$ & $\square$ & Có task Planning và Review; xem Mục~\ref{sec:archive} \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -511,9 +526,9 @@ luôn kiểm tra lại hành động của lần trước.
   Quyết định & Các quyết định của buổi họp \\
   \midrule
   \multicolumn{2}{@{}l}{\textbf{Sprint Review}}\\
-  Thông tin chung & Sprint N Review -- ngày -- thành phần: nhóm và Sponsor \\
+  Thông tin chung & Sprint N Review -- ngày -- thành phần: nhóm và Project Manager \\
   Demo & Story -- người demo -- kết quả: chấp nhận hoặc chưa \\
-  Phản hồi & Phản hồi của Sponsor và PO \\
+  Phản hồi & Phản hồi của Project Manager và PO \\
   Thay đổi backlog & Thay đổi sau review; ghi vào Change Log nếu là thay đổi phạm vi \\
   Số liệu & SP Done trên cam kết, giờ thực tế, CPI, SPI \\
   \midrule
@@ -556,7 +571,64 @@ Hai hành động Start nhắm thẳng vào hai vấn đề của sprint: sự c
 \section{Lưu trữ biên bản}
 \label{sec:archive}
 
-\canDien[liên kết tới biên bản các sprint (Azure Boards Wiki, Google Drive\ldots), hoặc chép nội dung vào đây].
+\subsection*{Sprint 1 (11/09--25/09/2026)}
+
+\textbf{Planning -- tóm tắt ghi chú ngày 11/09.} Nhóm đặt mục tiêu có bản mô phỏng giao diện và chọn được mô hình AI
+phù hợp với yêu cầu người dùng. Công việc dự kiến gồm thiết lập repo và công nghệ, phân tích yêu cầu kỹ thuật và
+phi kỹ thuật, chuẩn bị dữ liệu âm thanh, khảo sát và so sánh mô hình, thiết kế luồng UI/UX. Nhóm xem xét hỗ trợ
+cuộc họp đa nền tảng, nhiều ngôn ngữ, dịch và tóm tắt. Ghi chú chưa ghi tổng SP cam kết.
+
+\textbf{Review -- tóm tắt hồ sơ.} Azure Boards hiện ghi ba story Done, tổng 19 SP, gồm phân tích yêu cầu và UI/UX,
+khảo sát mô hình AI và thiết lập nền tảng kỹ thuật. Nội dung demo và phản hồi của PO chờ nhóm xác nhận.
+
+\textbf{Retrospective -- tóm tắt hồ sơ.} Công việc khảo sát mô hình đã được ghi nhận Done, còn ghi chú Planning
+thiếu tổng điểm cam kết. Hướng cải tiến là tiếp tục so sánh mô hình theo tiêu chí và để Scrum Master ghi danh sách
+story cùng tổng SP cam kết vào biên bản Planning trước khi chốt backlog sprint kế tiếp.
+
+\subsection*{Sprint 2 (25/09--09/10/2026)}
+
+\textbf{Planning -- tóm tắt hồ sơ.} Backlog có năm story về ghi âm trên trình duyệt, tải tệp, phiên âm gốc, xem
+transcript trực tiếp và xem hoặc xuất transcript. Các story bao quát luồng từ thu âm hoặc tải tệp đến xuất
+bản phiên âm. Kế hoạch nhân công là 67 giờ. Cam kết đầu kỳ chờ nhóm xác nhận.
+
+\textbf{Review -- tóm tắt hồ sơ.} Cả năm story hiện Done, tổng 34 SP. Ảnh chụp burndown ngày 09/10 còn 8 SP và
+dashboard ghi 76 giờ thực tế, cao hơn kế hoạch 9 giờ. Cần xác nhận thời điểm hoàn thành từng story trước khi
+chốt kết quả nghiệm thu.
+
+\textbf{Retrospective -- tóm tắt hồ sơ.} Chênh lệch giữa ảnh chụp cuối kỳ và trạng thái hiện tại làm khó việc
+đối chiếu kết quả. Hướng cải tiến là để Scrum Master lưu ảnh chụp backlog và burndown tại Review kế tiếp,
+đồng thời ghi riêng các story đóng sau hạn.
+
+\subsection*{Sprint 3 (19/10--30/10/2026)}
+
+\textbf{Planning -- tóm tắt hồ sơ.} Work item \#94 theo dõi Planning, Daily và vướng mắc. Phạm vi gồm
+tóm tắt bản ghi (\#67) và dịch transcript (\#60). Story \#60 được dời vào sprint này. Kế hoạch nhân công là 61 giờ.
+Hai story có tiêu chí chấp nhận riêng để PO đối chiếu khi review.
+
+\textbf{Review -- tóm tắt hồ sơ.} Work item \#97 giao PO đối chiếu hai story với tiêu chí chấp nhận. Repo lưu
+các ca kiểm thử E2E \#99 cho tóm tắt và \#100 cho dịch transcript. Hai story hiện Done, tổng 16 SP.
+Dashboard ghi 64,5 giờ thực tế, cao hơn kế hoạch 3,5 giờ.
+Work item \#59 về báo cáo Review và Retro đã Done và chưa có tệp đính kèm.
+
+\textbf{Retrospective -- tóm tắt hồ sơ.} Repo đã lưu ca kiểm thử nhưng work item báo cáo thiếu tệp đính kèm.
+Hướng cải tiến là để QC tiếp tục kiểm thử E2E theo tiêu chí chấp nhận và phối hợp với Scrum Master lưu kết quả
+kiểm thử, Review và Retro cùng work item trước khi chốt Review kế tiếp.
+
+\subsection*{Sprint 4 (02/11--12/11/2026)}
+
+\textbf{Planning -- tóm tắt hồ sơ.} Work item \#110 theo dõi Planning, Daily và vướng mắc. Work item \#111
+theo dõi mục tiêu và ưu tiên backlog. Backlog có action items, dịch trực tiếp, đăng nhập và quyền riêng tư,
+chỉnh sửa transcript. Kế hoạch nhân công là 49 giờ. Phần kết quả desktop, streaming và cloud được theo dõi
+thêm qua các commit và bản đo trong Mục~\ref{sec:sprint4}.
+
+\textbf{Review -- tóm tắt hồ sơ.} Work item \#112 theo dõi việc PO xét tiêu chí chấp nhận. Dashboard ghi 50,5 giờ
+thực tế, cao hơn kế hoạch 1,5 giờ. Ghi chú ngày 13/11 trên \#79 xác nhận action items chưa đạt DoD và chuyển
+sang Sprint 5. Phần còn dở
+gồm màn hình action items, xuất Markdown/TXT và đánh giá chất lượng trích xuất.
+
+\textbf{Retrospective -- tóm tắt hồ sơ.} Sprint có số đo độ trễ và kiểm thử tự động, đồng thời ghi nhận sự cố
+quyền push ở Mục~\ref{sec:sprint4}. Hướng cải tiến là duy trì đo độ trễ và kiểm thử tự động, để Scrum Master
+kiểm tra quyền push tại Planning kế tiếp và nhóm triển khai chuẩn bị bản web để QC kiểm thử trước Review.
 
 % ============================================================ Chapter 5
 \chapter{Change Log}
@@ -564,7 +636,7 @@ Hai hành động Start nhắm thẳng vào hai vấn đề của sprint: sự c
 
 \textbf{Mọi thay đổi phạm vi, mốc hoặc ngân sách phải được ghi vào Change Log trước khi làm, kèm lý do, tác động và
 người duyệt.} Theo phân quyền trong điều lệ dự án~\cite{pid}, thay đổi trong sprint do PO duyệt; thay đổi mốc, ngân
-sách vượt 10\% hoặc phạm vi dự án do Sponsor duyệt.
+sách vượt 10\% hoặc phạm vi dự án do Project Manager duyệt.
 
 \section{Quy trình kiểm soát thay đổi}
 
@@ -573,7 +645,7 @@ Một yêu cầu thay đổi đi qua bốn bước (Hình~\ref{fig:cr-flow}):
   \item Người đề xuất ghi một dòng vào nhật ký, trạng thái ``Đề xuất''.
   \item PM đánh giá tác động: story point và giờ công, chi phí, lịch (ảnh hưởng tới đường găng trong~\cite{pmp}),
         rủi ro.
-  \item PO, hoặc Sponsor với thay đổi lớn, duyệt hoặc từ chối.
+  \item PO, hoặc Project Manager với thay đổi lớn, duyệt hoặc từ chối.
   \item Nếu được duyệt: cập nhật backlog, kế hoạch, ngân sách, và thông báo theo kế hoạch truyền thông~\cite{pmp}.
 \end{enumerate}
 
@@ -587,7 +659,7 @@ Một yêu cầu thay đổi đi qua bốn bước (Hình~\ref{fig:cr-flow}):
       ar/.style={-{Stealth[length=2.2mm]},thick,primaryblue}]
     \node[st] (p) at (0,0) {\textbf{1. Đề xuất}\\ ghi một dòng vào Change Log};
     \node[st] (a) at (3.7,0) {\textbf{2. PM đánh giá}\\ SP, giờ, chi phí, lịch, rủi ro};
-    \node[dc] (d) at (7.4,0) {\textbf{3. Duyệt?}\\ PO / Sponsor};
+    \node[dc] (d) at (7.4,0) {\textbf{3. Duyệt?}\\ PO / Project Manager};
     \node[st] (u) at (12.2,0) {\textbf{4. Cập nhật}\\ backlog, kế hoạch, ngân sách; thông báo};
     \node[st,draw=chartgray,fill=gray!10] (r) at (7.4,-2.3) {Từ chối hoặc hoãn\\ (bảng CR-H)};
     \draw[ar] (p) -- (a);
@@ -600,12 +672,12 @@ Một yêu cầu thay đổi đi qua bốn bước (Hình~\ref{fig:cr-flow}):
 \end{figure}
 
 Quyền duyệt ở bước 3 phụ thuộc vào quy mô thay đổi: thay đổi trong một sprint do PO quyết định; thay đổi làm dời
-mốc, tăng ngân sách quá 10\% hoặc mở rộng phạm vi dự án phải lên Sponsor.
+mốc, tăng ngân sách quá 10\% hoặc mở rộng phạm vi dự án phải lên Project Manager.
 
 \section{Nhật ký thay đổi}
 
-Bảng~\ref{tab:changelog} ghi tám yêu cầu thay đổi theo thứ tự mới nhất trước. Người đề xuất và người duyệt của
-mọi yêu cầu chưa được chép vào: \canDien[điền theo biên bản và Azure Boards].
+Bảng~\ref{tab:changelog} ghi các mục CR-01 đến CR-08. Hồ sơ đã đối chiếu chưa ghi riêng người đề xuất và người
+duyệt cho từng CR. Với CR-02, lịch sử Azure Boards ghi Đỗ Thành Đạt cập nhật sprint và trạng thái của story.
 
 \begingroup\small
 \setlength{\tabcolsep}{4pt}
@@ -629,23 +701,29 @@ mọi yêu cầu chưa được chép vào: \canDien[điền theo biên bản v�
     & Dễ chia việc, quản lý phiên bản cùng code & Không đổi lịch & Đã làm \\
   CR-06 & 12/11/2026 & Thêm bản web deploy trên AWS EC2 và S3 (Docker, Caddy, hướng dẫn) & Test và demo cho khách
     mà không cần cài app & +8 SP; chi phí AWS khoảng 2,5--3 triệu VND/tháng nếu chạy 24/7
-    & Đã làm (chưa deploy thật) \\
+    & Đã deploy theo thông báo sau sprint \\
   CR-05 & 12/11/2026 & Engine STT remote và API \path{/v1}: máy khách không cần model & Máy văn phòng không có GPU;
     giữ độ chính xác của \texttt{large-v3-turbo} & +13 SP (gộp với CR-04); thêm phụ thuộc vào server hoặc API
     & Đã làm \\
   CR-04 & 12/11/2026 & Live ``nói tới đâu hiện tới đó'' (trễ $\leq$ 3--5\,s) và xử lý file dài $\geq$ 1 giờ
     & Yêu cầu của PO sau khi dùng thử & Chunk 1\,s, LocalAgreement, chia đoạn file dài & Đã làm \\
-  CR-03 & \canDien & Chuyển từ web app sang có thêm app desktop Windows & Khách muốn cài như phần mềm; thu được âm
+  CR-03 & 12/11 (repo) & Chuyển từ web app sang có thêm app desktop Windows & Khách muốn cài như phần mềm; thu được âm
     thanh từ Zoom/Teams bản desktop & +8 SP; thêm bộ cài, rủi ro R12 (chưa ký số) & Đã làm \\
-  CR-02 & \canDien & Dời story dịch \#60 vào Sprint 3 & \canDien[lý do theo biên bản]
-    & Sprint 3 nhận thêm 19 SP (\#61--\#66) & Đã làm \\
-  CR-01 & \canDien & \canDien[các thay đổi trước đó trong biên bản S1--S2, ví dụ chọn model sau benchmark] & & & \\
+  CR-02 & 23/10/2026 (Boards) & Dời story dịch \href{https://dev.azure.com/CC3011-261-1/Project-SumTalk/_workitems/edit/60}{\#60} từ Sprint 4 sang Sprint 3
+    & Kế hoạch phát hành v0.3 gộp tóm tắt và dịch vào Sprint 3. Lý do phê duyệt chưa được ghi trong hồ sơ đã xem.
+    & Chuyển 8 SP của story \#60 vào Sprint 3. Các task con được theo dõi riêng.
+    & Done ngày 30/10 \\
+  CR-01 & 09/10/2026 (mốc M2) & Benchmark và chọn mô hình LLM theo mốc M2 của điều lệ dự án~\cite{pid}
+    & So sánh mô hình để đáp ứng yêu cầu tóm tắt và dịch transcript
+    & Kết quả benchmark là đầu vào cho triển khai Sprint 3. Chưa xác nhận mô hình được chọn tại M2.
+    & Công việc khảo sát Done trên Boards \\
 \end{longtable}
 \endgroup
 
 Ba thay đổi mở rộng phạm vi có ghi tác động bằng story point là CR-03 (app desktop, +8 SP), CR-05 gộp CR-04
-(live streaming và STT remote, +13 SP) và CR-06 (bản web trên AWS, +8 SP), tổng cộng 29 SP; CR-02 chỉ dời 19 SP đã
-có trong backlog vào Sprint 3. Đây là biểu hiện cụ thể của rủi ro R5 (phình phạm vi) trong Risk Register~\cite{pmp};
+(live streaming và STT remote, +13 SP) và CR-06 (bản web trên AWS, +8 SP), tổng cộng 29 SP theo ước lượng
+của nhật ký. CR-02 ghi nhận việc đổi lịch của story \#60. Các mục mở rộng phạm vi liên quan đến rủi ro R5
+(phình phạm vi) trong Risk Register~\cite{pmp};
 các thay đổi đều được ghi lại, đúng với chiến lược ``chấp nhận có kiểm soát'' đã chọn.
 
 \section{Thay đổi đã từ chối hoặc hoãn}
@@ -702,8 +780,7 @@ Báo cáo đã tập hợp các hồ sơ theo dõi và kiểm soát của dự �
 \needspace{14\baselineskip}
 \section{Phê duyệt}
 
-Nhóm dự án đề nghị Project Manager và Product Owner xác nhận báo cáo theo dõi và kiểm soát này; bản báo cáo được gửi
-Sponsor theo kế hoạch truyền thông.
+Nhóm dự án đề nghị Project Manager và Product Owner xác nhận báo cáo theo dõi và kiểm soát này.
 
 \begin{table}[H]
   \centering
@@ -712,8 +789,8 @@ Sponsor theo kế hoạch truyền thông.
     \toprule
     \thead{Vai trò} & \thead{Họ tên} & \thead{Chữ ký} & \thead{Ngày} \\
     \midrule
-    Project Manager & & & \\
-    Product Owner & & & \\
+    Project Manager & Trần Phan Đăng Khôi & & \\
+    Product Owner & Nguyễn Phúc Điền & & \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -722,15 +799,29 @@ Sponsor theo kế hoạch truyền thông.
 \begin{thebibliography}{9}
 \addcontentsline{toc}{chapter}{\bibname}
   \bibitem{pid} Nhóm SumTalk, \emph{Hồ sơ khởi động dự án (Project Initiation Document)}, Tài liệu 01,
-    mã SUMTALK-PID, phiên bản 2.1, 24/11/2026.
+    mã SUMTALK-PID, phiên bản 2.1, nhánh \texttt{01-docs-updated}, commit \texttt{2287049}.
   \bibitem{srs} Nhóm SumTalk, \emph{Đặc tả yêu cầu phần mềm (Software Requirements Specification)},
     Tài liệu 02, mã SUMTALK-SRS, phiên bản 2.1, 24/11/2026.
   \bibitem{pmp} Nhóm SumTalk, \emph{Kế hoạch quản lý dự án (Project Management Plan)}, Tài liệu 03,
-    mã SUMTALK-PMP, phiên bản 2.1, 24/11/2026.
+    mã SUMTALK-PMP, bảng chi phí nhân công trên nhánh \texttt{docs/sumtalk-pmp-update}, commit \texttt{92e6a7a}.
   \bibitem{qtd} Nhóm SumTalk, \emph{Chất lượng và kiểm thử (Quality \& Test Document)}, Tài liệu 04,
     mã SUMTALK-QTD, phiên bản 2.1, 24/11/2026.
   \bibitem{pmbok} Project Management Institute, \emph{A Guide to the Project Management Body of Knowledge
     (PMBOK Guide)}, 6th ed., Newtown Square, PA: PMI, 2017.
+  \bibitem{azure-sprints} Nhóm SumTalk, Azure Boards, Project-SumTalk Team, Backlog và Analytics, Sprint 1--4.
+    \href{https://dev.azure.com/CC3011-261-1/Project-SumTalk/_sprints/analytics/Project-SumTalk\%20Team/Project-SumTalk/Sprint\%201}{Sprint 1},
+    \href{https://dev.azure.com/CC3011-261-1/Project-SumTalk/_sprints/analytics/Project-SumTalk\%20Team/Project-SumTalk/Sprint\%202}{Sprint 2},
+    \href{https://dev.azure.com/CC3011-261-1/Project-SumTalk/_sprints/analytics/Project-SumTalk\%20Team/Project-SumTalk/Sprint\%203}{Sprint 3},
+    \href{https://dev.azure.com/CC3011-261-1/Project-SumTalk/_sprints/analytics/Project-SumTalk\%20Team/Project-SumTalk/Sprint\%204}{Sprint 4}.
+  \bibitem{azure-action-items} Nhóm SumTalk, Azure Boards,
+    \href{https://dev.azure.com/CC3011-261-1/Project-SumTalk/_workitems/edit/79}{User Story \#79, Get the action items of a meeting},
+    ghi chú ngày 13/11/2026.
+  \bibitem{azure-cost} Nhóm SumTalk, Azure DevOps,
+    \href{https://dev.azure.com/CC3011-261-1/ee3d7079-7e4a-4f7a-814c-654e0d993dfe/45b6cb83-8144-4528-9deb-f7dc9d37ff46/_dashboards/dashboard/54dcbfda-bc9c-4bf8-b39a-9169b387bebf}{Dashboard 6. Chi phí},
+    bảng ngày 13/11/2026 và biểu đồ Completed Work.
+  \bibitem{azure-velocity} Nhóm SumTalk, Azure DevOps,
+    \href{https://dev.azure.com/CC3011-261-1/ee3d7079-7e4a-4f7a-814c-654e0d993dfe/45b6cb83-8144-4528-9deb-f7dc9d37ff46/_dashboards/dashboard/acc45bdc-ffa8-43f3-a7df-46b7b828273e}{Dashboard 2. Năng suất},
+    widget Velocity (Effort).
 \end{thebibliography}
 
 \end{document}
