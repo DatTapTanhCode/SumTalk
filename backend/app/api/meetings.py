@@ -90,6 +90,15 @@ def list_meetings(
     return [to_out(db, m) for m in meetings]
 
 
+@router.get("/tags", response_model=list[str])
+def list_tags(db: Session = Depends(get_db)):
+    """Every tag in the library once (as first written), for the tag filter of the meeting list."""
+    names: dict[str, str] = {}
+    for key, name in db.execute(select(MeetingTag.key, MeetingTag.name).order_by(MeetingTag.key)):
+        names.setdefault(key, name)
+    return sorted(names.values(), key=str.casefold)
+
+
 @router.put("/{meeting_id}", response_model=MeetingOut)
 def create_recording(meeting_id: str, body: MeetingCreate, db: Session = Depends(get_db)):
     """Idempotent create. The browser generates the id, so it can start recording offline and retry safely."""

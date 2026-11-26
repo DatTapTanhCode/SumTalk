@@ -1,4 +1,4 @@
-# SumTalk on one server (e.g. AWS EC2): the app + Caddy (automatic HTTPS, login page for the test phase).
+# SumTalk on one server (e.g. AWS EC2): the app + Caddy (automatic HTTPS); the app has a sign-in page for the test phase.
 #   cd deploy && cp .env.example .env   (fill it in)
 #   docker compose up -d --build                                          CPU instance
 #   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build   GPU instance
@@ -33,8 +33,6 @@ services:
       - "443:443/udp"
     environment:
       SITE_ADDRESS: "${SITE_ADDRESS:?set SITE_ADDRESS in deploy/.env}"
-      BASIC_AUTH_USER: "${BASIC_AUTH_USER:-sumtalk}"
-      BASIC_AUTH_HASH: "${BASIC_AUTH_HASH:?set BASIC_AUTH_HASH in deploy/.env}"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data

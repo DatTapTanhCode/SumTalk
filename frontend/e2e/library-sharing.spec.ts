@@ -43,7 +43,9 @@ test('organizes meetings with names and tags, and revokes a guest link', async (
     await page.getByRole('button', { name: 'Remove tag Client A' }).click()
     await expect(page.getByRole('button', { name: 'Remove tag Client A' })).toHaveCount(0)
     await page.getByRole('button', { name: 'Share', exact: true }).click()
+    await expect(page.getByText('No active link')).toBeVisible()
     await page.getByRole('button', { name: 'Create share link' }).click()
+    await expect(page.getByText('Link is on')).toBeVisible()
     const url = await page.getByLabel('Read-only share link').inputValue()
     const reader = await guest.newPage()
     await reader.goto(url)
@@ -53,7 +55,7 @@ test('organizes meetings with names and tags, and revokes a guest link', async (
     await page.getByRole('button', { name: 'Turn off link' }).click()
     await expect(page.getByRole('button', { name: 'Create share link' })).toBeVisible()
     await reader.reload()
-    await expect(reader.getByRole('alert')).toHaveText('Share link is unavailable')
+    await expect(reader.getByRole('alert')).toHaveText('This share link is no longer available')
   } finally {
     await guest.close()
     await page.request.delete(oldMeeting)

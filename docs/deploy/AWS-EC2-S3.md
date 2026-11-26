@@ -11,7 +11,7 @@ sao lưu lên S3. Thời gian làm lần đầu khoảng 45–60 phút.
 
 ```mermaid
 flowchart LR
-  U["Trình duyệt / app desktop"] -- "HTTPS 443" --> C["Caddy<br/>chứng chỉ tự động + đăng nhập"]
+  U["Trình duyệt / app desktop"] -- "HTTPS 443" --> C["Caddy<br/>chứng chỉ tự động"]
   subgraph EC2["EC2 (Docker Compose)"]
     C --> A["SumTalk app<br/>FastAPI + web app"]
     A --- V[("Volume /data<br/>SQLite, audio đang xử lý,<br/>model Whisper")]
@@ -157,7 +157,7 @@ nano .env
 | Biến                                                                                        | Giá trị                                                                  | Ghi chú                                                                |
 | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | `SITE_ADDRESS`                                                                             | `sumtalk.ten-mien.vn` hoặc `13-229-10-20.sslip.io`                    | không có`https://`                                                  |
-| `BASIC_AUTH_USER` / `BASIC_AUTH_HASH`                                                    | user / hash vừa tạo                                                      | **giữ dấu nháy đơn** quanh hash                              |
+| `LOGIN_USER` / `LOGIN_PASSWORD_HASH` (tên cũ `BASIC_AUTH_USER` / `BASIC_AUTH_HASH` vẫn dùng được) | user / hash vừa tạo, dùng cho trang đăng nhập của app | **giữ dấu nháy đơn** quanh hash                              |
 | `GPU`                                                                                      | `0` (A) hoặc `1` (B)                                                  |                                                                         |
 | `STT_PROVIDER`                                                                             | A:`remote`; B: `local`                                                 |                                                                         |
 | `STT_BASE_URL`, `STT_API_KEY`, `STT_MODEL`                                             | A:`https://api.groq.com/openai/v1`, key Groq, `whisper-large-v3-turbo` | OpenAI:`https://api.openai.com/v1`, `whisper-1`                     |
@@ -249,7 +249,7 @@ nguyên.
 | Triệu chứng                                       | Nguyên nhân thường gặp                               | Cách xử lý                                                                                                                |
 | --------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Caddy báo lỗi lấy chứng chỉ                    | DNS chưa trỏ đúng IP, hoặc cổng 80/443 chưa mở    | `dig +short <SITE_ADDRESS>` phải ra Elastic IP; kiểm tra security group; `docker compose restart caddy`                |
-| Trình duyệt hỏi đăng nhập liên tục          | Hash sai, hoặc mất dấu nháy đơn trong`.env`       | Tạo lại hash, đặt trong`'...'`, rồi `docker compose up -d`                                                          |
+| Trang đăng nhập báo sai mật khẩu             | Hash sai, hoặc mất dấu nháy đơn trong`.env`       | Tạo lại hash, đặt trong`'...'`, rồi `docker compose up -d`                                                          |
 | Header báo "Speech model error … refused the key" | Sai`STT_API_KEY`                                        | Sửa`.env`, `docker compose up -d`                                                                                       |
 | Lỗi HTTP 429 trong log app                         | Vượt rate limit của Groq/OpenAI                        | Tăng`LIVE_INTERVAL_SEC` lên 2–3, giảm `STT_CONCURRENCY`, hoặc nâng gói của nhà cung cấp                        |
 | Upload xong nhưng không phát được audio       | Role thiếu quyền S3, hoặc sai bucket/region            | `docker compose logs app \| grep -i s3`; kiểm tra policy và `S3_BUCKET`/`S3_REGION`                                   |

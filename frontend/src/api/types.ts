@@ -149,3 +149,19 @@ export interface SharedMeeting {
   translations: { target_lang: string; segments: TranslatedSegment[] }[]
   has_audio: boolean
 }
+
+export interface AuthState {
+  /** False when the server has no sign-in (local, LAN and desktop use). */
+  enabled: boolean
+  signed_in: boolean
+  username: string | null
+}
+
+/** Query of GET /api/meetings. Dates are instants (ISO), so local calendar days are converted by the caller. */
+export interface MeetingFilters {
+  q?: string
+  tag?: string
+  start?: string
+  end?: string
+  sort?: 'newest' | 'oldest' | 'longest' | 'title'
+}

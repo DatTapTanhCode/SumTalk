@@ -51,6 +51,8 @@ def test_list_filter_search_and_sort(client):
     assert ids(start="2024-05-11T00:00:00Z", end="2024-05-12T00:00:00Z") == [gamma]
     assert ids(start="2024-05-11T00:00:00+07:00") == [beta, gamma]
     assert client.get("/api/meetings", params={"sort": "random"}).status_code == 422
+    tags = client.get("/api/meetings/tags").json()
+    assert tags.count(f"Client {marker}") == 1 and tags == sorted(tags, key=str.casefold)
     for meeting_id in (alpha, beta, gamma):
         client.delete(f"/api/meetings/{meeting_id}").raise_for_status()
 

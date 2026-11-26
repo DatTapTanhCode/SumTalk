@@ -2,7 +2,7 @@ import { CircleAlert, CloudOff, FileAudio, Inbox, Mic, MoreHorizontal, Search, U
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { api, errorMessage } from '@/api/client'
-import type { Meeting } from '@/api/types'
+import type { Meeting, MeetingFilters } from '@/api/types'
 import { StatusBadge } from '@/components/StatusBadge'
 import {
   AlertDialog,
@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Notice, PageHeader } from '@/components/primitives'
+import { FieldLabel, Notice, PageHeader } from '@/components/primitives'
 import { cn, formatDateTime, formatDuration } from '@/lib/format'
 import { languageName } from '@/lib/languages'
 import { useStore } from '@/lib/store'
@@ -44,11 +44,22 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: 'title', label: 'Title A–Z' },
 ]
 
+/** Local calendar days (yyyy-mm-dd) as the instants the API filters on: [from 00:00, day after "to" 00:00). */
+function dayBounds(from: string, to: string): Pick<MeetingFilters, 'start' | 'end'> {
+  const localMidnight = (day: string, addDays = 0) => {
+    const [y, m, d] = day.split('-').map(Number)
+    return new Date(y, m - 1, d + addDays).toISOString()
+  }
+  return { start: from ? localMidnight(from) : undefined, end: to ? localMidnight(to, 1) : undefined }
+}
+
 function inDateRange(iso: string, from: string, to: string) {
   const date = new Date(iso)
   const day = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-')
   return (!from || day >= from) && (!to || day <= to)
 }
+
+const FILTER_CONTROL = 'h-9 rounded-md border border-input bg-card px-2.5 font-mono text-[12px] text-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 focus:outline-none'
 
 /** Columns of the desktop table: name | date | duration | language | status | actions. */
 const ROW_GRID = 'md:grid md:grid-cols-[minmax(0,1fr)_10rem_5.5rem_7rem_9rem_2rem] md:items-center md:gap-4'
@@ -265,8 +276,11 @@ function GroupHeader({ label }: { label: string }) {
 
 export function MeetingsPage() {
   const [meetings, setMeetings] = useState<Meeting[] | null>(null)
+  const [library, setLibrary] = useState<{ count: number; seconds: number } | null>(null)
+  const [tagOptions, setTagOptions] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [filter, setFilter] = useState<StatusFilter>('all')
   const [tag, setTag] = useState('')
   const [from, setFrom] = useState('')
@@ -279,14 +293,32 @@ export function MeetingsPage() {
   const renameCancelled = useRef(false)
   const sync = useStore(syncStore)
 
+  // Search, tag, dates and sort are applied by the server (GET /api/meetings); typing waits a moment first.
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(query.trim()), 250)
+    return () => window.clearTimeout(timer)
+  }, [query])
+
+  const filters = useMemo<MeetingFilters>(
+    () => ({ q: debouncedQuery || undefined, tag: tag || undefined, sort, ...dayBounds(from, to) }),
+    [debouncedQuery, tag, sort, from, to],
+  )
+  const requestSeq = useRef(0)
+
   const load = useCallback(async () => {
+    const seq = ++requestSeq.current
+    const unfiltered = !filters.q && !filters.tag && !filters.start && !filters.end
     try {
-      setMeetings(await api.listMeetings())
+      const [list, tagNames] = await Promise.all([api.listMeetings(filters), api.listTags()])
+      if (seq !== requestSeq.current) return // a newer filter answered first
+      setMeetings(list)
+      setTagOptions(tagNames)
+      if (unfiltered) setLibrary({ count: list.length, seconds: list.reduce((sum, m) => sum + (m.duration_sec || 0), 0) })
       setError(null)
     } catch (e) {
-      setError(errorMessage(e))
+      if (seq === requestSeq.current) setError(errorMessage(e))
     }
-  }, [])
+  }, [filters])
 
   useEffect(() => {
     void load()
@@ -295,7 +327,8 @@ export function MeetingsPage() {
   }, [load])
 
   const serverIds = useMemo(() => new Set(meetings?.map((m) => m.id)), [meetings])
-  const tags = useMemo(() => [...new Set((meetings ?? []).flatMap((m) => m.tags))].sort((a, b) => a.localeCompare(b)), [meetings])
+  // Keep a chosen tag in the list even right after its last meeting lost it.
+  const tags = useMemo(() => (tag && !tagOptions.includes(tag) ? [...tagOptions, tag] : tagOptions), [tagOptions, tag])
   const localOnly = sync.recordings.filter((r) => !serverIds.has(r.id) && !tag
     && (filter === 'all' || filter === 'progress') && r.title.toLowerCase().includes(query.trim().toLowerCase())
     && inDateRange(r.meetingAt ?? r.startedAt, from, to)).sort((a, b) => {
@@ -305,12 +338,8 @@ export function MeetingsPage() {
       return sort === 'oldest' ? delta : -delta
     })
 
-  // Search, tag and dates narrow the list first, so the status tab counts match what they would show.
-  const matching = useMemo(() => {
-    const q = query.trim().toLocaleLowerCase()
-    return (meetings ?? []).filter((m) => (m.title.toLocaleLowerCase().includes(q) || m.tags.some((t) => t.toLocaleLowerCase().includes(q)))
-      && (!tag || m.tags.includes(tag)) && inDateRange(meetingTime(m), from, to))
-  }, [meetings, query, tag, from, to])
+  // The server already applied search, tag and dates, so the status tab counts match what they would show.
+  const matching = useMemo(() => meetings ?? [], [meetings])
 
   const counts = useMemo(() => {
     const busy = matching.filter((m) => BUSY_STATUSES.includes(m.status))
@@ -319,10 +348,9 @@ export function MeetingsPage() {
       transcribed: matching.filter((m) => m.status === 'done').length,
       progress: busy.length,
       failed: matching.filter((m) => m.status === 'failed').length,
-      recorded: (meetings ?? []).reduce((sum, m) => sum + (m.duration_sec || 0), 0), // whole library, next to its total
       remaining: busy.reduce((sum, m) => sum + (remainingSeconds(m) ?? 0), 0),
     }
-  }, [meetings, matching])
+  }, [matching])
 
   const visible = useMemo(() => {
     const list = matching.filter((m) => matchesFilter(m, filter))
@@ -345,7 +373,7 @@ export function MeetingsPage() {
     return Array.from(buckets, ([label, items]) => ({ label, items }))
   }, [visible, sort])
 
-  const total = meetings?.length ?? 0
+  const total = library?.count ?? 0
   const filtering = filter !== 'all' || query.trim() !== '' || !!tag || !!from || !!to
 
   const startRename = (meeting: Meeting) => {
@@ -404,8 +432,8 @@ export function MeetingsPage() {
         eyebrow="Library"
         title="Meetings"
         description={
-          meetings && total > 0
-            ? `${total} ${total === 1 ? 'meeting' : 'meetings'} · ${formatDuration(counts.recorded)} of audio`
+          library && total > 0
+            ? `${total} ${total === 1 ? 'meeting' : 'meetings'} · ${formatDuration(library.seconds)} of audio`
             : 'Record or upload a meeting and get the transcript in the language it was spoken.'
         }
         actions={
@@ -516,20 +544,36 @@ export function MeetingsPage() {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-end gap-3 text-sm">
-          <label className="grid gap-1">Tag
-            <select className="h-9 rounded-md border border-input bg-card px-2" value={tag} onChange={(e) => setTag(e.target.value)}>
+        <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
+          <div className="grid w-full gap-1 sm:w-48">
+            <FieldLabel htmlFor="filter-tag">Tag</FieldLabel>
+            <select
+              id="filter-tag"
+              value={tag}
+              onChange={(e) => setTag(e.target.value)}
+              className={FILTER_CONTROL}
+            >
               <option value="">All tags</option>
-              {tags.map((name) => <option key={name}>{name}</option>)}
+              {tags.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
             </select>
-          </label>
-          <label className="grid gap-1">From
-            <Input type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} />
-          </label>
-          <label className="grid gap-1">Through
-            <Input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} />
-          </label>
-          {filtering && <Button size="sm" variant="ghost" onClick={clearFilters}>Reset filters</Button>}
+          </div>
+          <div className="grid min-w-0 flex-1 gap-1 sm:w-40 sm:flex-none">
+            <FieldLabel htmlFor="filter-from">From</FieldLabel>
+            <Input id="filter-from" type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} className={FILTER_CONTROL} />
+          </div>
+          <div className="grid min-w-0 flex-1 gap-1 sm:w-40 sm:flex-none">
+            <FieldLabel htmlFor="filter-to">Through</FieldLabel>
+            <Input id="filter-to" type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} className={FILTER_CONTROL} />
+          </div>
+          {filtering && (
+            <Button size="sm" variant="ghost" onClick={clearFilters} className="mb-0.5">
+              <X className="size-3.5" /> Reset filters
+            </Button>
+          )}
         </div>
 
         {filter === 'progress' && counts.remaining > 0 && (

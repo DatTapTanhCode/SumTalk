@@ -1,6 +1,8 @@
-import { Cloud, CloudUpload, Cpu, ListChecks, LoaderCircle, Mic, Plus, TriangleAlert, Upload, WifiOff, Zap } from 'lucide-react'
-import { Link, NavLink, Outlet, useLocation } from 'react-router'
+import { Cloud, CloudUpload, Cpu, ListChecks, LoaderCircle, LogOut, Mic, Plus, TriangleAlert, Upload, WifiOff, Zap } from 'lucide-react'
+import { useState } from 'react'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { sessionStore } from '../audio/session'
+import { authStore, signOut } from '../lib/auth'
 import { cn, formatClock } from '../lib/format'
 import { healthStore } from '../lib/server'
 import { useStore } from '../lib/store'
@@ -157,6 +159,62 @@ function RecordingPill({ className }: { className?: string }) {
   )
 }
 
+/** Signed-in account + sign out. Only shown when the server has a sign-in page. */
+function AccountChip({ compact = false }: { compact?: boolean }) {
+  const { status, username } = useStore(authStore)
+  const session = useStore(sessionStore)
+  const navigate = useNavigate()
+  const [busy, setBusy] = useState(false)
+  if (status !== 'signed-in') return null
+  const recording = session.phase !== 'idle'
+
+  const leave = async () => {
+    setBusy(true)
+    try {
+      await signOut()
+    } catch {
+      // already signed out on the server, or offline: the cookie is cleared next time
+    } finally {
+      setBusy(false)
+      navigate('/login', { replace: true })
+    }
+  }
+
+  const title = recording ? 'Stop the recording before signing out' : 'Sign out'
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={() => void leave()}
+        disabled={busy || recording}
+        aria-label="Sign out"
+        title={title}
+        className="grid size-8 place-items-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-40"
+      >
+        <LogOut className="size-4" />
+      </button>
+    )
+  }
+  return (
+    <div className="flex w-full items-center gap-2 rounded-md border border-border bg-card py-1 pr-1 pl-2.5">
+      <span className="grid size-6 shrink-0 place-items-center rounded-[3px] bg-foreground font-mono text-[11px] font-semibold text-background uppercase">
+        {(username ?? '?').slice(0, 1)}
+      </span>
+      <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground">{username}</span>
+      <button
+        type="button"
+        onClick={() => void leave()}
+        disabled={busy || recording}
+        title={title}
+        className="inline-flex h-7 items-center gap-1 rounded-md px-2 font-mono text-[10px] tracking-[0.1em] text-muted-foreground uppercase hover:bg-secondary hover:text-foreground disabled:opacity-40"
+      >
+        <LogOut className="size-3" />
+        Sign out
+      </button>
+    </div>
+  )
+}
+
 export function Layout() {
   const session = useStore(sessionStore)
   const recording = session.phase === 'recording' || session.phase === 'paused'
@@ -214,6 +272,7 @@ export function Layout() {
             <ConnectionChip />
             <ModelChip />
           </div>
+          <AccountChip />
         </div>
       </aside>
 
@@ -227,6 +286,7 @@ export function Layout() {
           <div className="ml-auto flex items-center gap-1.5">
             <RecordingPill />
             <ConnectionChip quiet />
+            <AccountChip compact />
           </div>
         </div>
       </header>
