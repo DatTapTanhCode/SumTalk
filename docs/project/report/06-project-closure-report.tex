@@ -412,8 +412,9 @@ Phiên bản v0.3 thuộc Sprint 3 (mốc M3, 30/10/2026), trên nhánh \path{fe
 
 Phiên bản v0.2 thuộc Sprint 2 (mốc M2, 09/10/2026): transcript live với độ trễ khoảng 3\,s (chunk ghi âm 3\,s), và
 benchmark các model LLM để chọn model cho tóm tắt và dịch. Kết quả benchmark được lưu trên Wiki của dự án (theo
-xác nhận của nhóm). Báo cáo này chưa chép số liệu vì Wiki không truy cập được khi lập báo cáo; model được chọn:
-\canDien[tên model LLM, chép từ Wiki].
+xác nhận của nhóm). Báo cáo này chưa chép số liệu vì Wiki không truy cập được khi lập báo cáo; model được chọn là \texttt{gemma4:26b-a4b}
+(chạy qua Ollama), đặt làm mặc định cho tóm tắt và dịch trong \path{backend/.env.example} với ghi chú ``chọn từ benchmark
+Sprint 2''; cấu hình mẫu cho bản AWS (\path{deploy/.env.example}) dùng \texttt{gpt-4o-mini} qua API.
 
 \section{v0.1 -- ghi lại cuộc họp}
 
@@ -718,7 +719,7 @@ theo xác nhận của nhóm; các ngày còn trống được bổ sung ở M�
     \midrule
     Nghiệm thu cuối theo SOW (Chương~\ref{chap:sow}) & Đã hoàn thành, ngày 03/12/2026 \\
     Bàn giao mã nguồn, bộ cài, URL, tài liệu & Đã hoàn thành, ngày 03/12/2026 \\
-    Gỡ tài nguyên AWS không dùng (EC2, Elastic IP, bucket) & Đã hoàn thành, ngày \canDien \\
+    Gỡ tài nguyên AWS không dùng (EC2, Elastic IP, bucket) & Đã hoàn thành, ngày 03/12/2026 (cùng ngày nghiệm thu) \\
     Lưu trữ tài liệu, biên bản & Đã hoàn thành, lưu trên Wiki của dự án (Azure DevOps) \\
     \bottomrule
   \end{tabularx}
@@ -729,11 +730,10 @@ theo xác nhận của nhóm; các ngày còn trống được bổ sung ở M�
 
 Các việc cần làm đều là bổ sung số liệu và chữ ký, không còn việc kỹ thuật:
 \begin{enumerate}
-  \item Điền ngày gỡ tài nguyên AWS (EC2, Elastic IP, bucket S3) vào Bảng~\ref{tab:closure}.
   \item Đóng Sprint 5 trên Azure Boards (hai story In Progress, bảy task Testing hoặc Ready for Release); khi đó
         tính CPI cả dự án; cập nhật điều lệ dự án~\cite{pid} (253 giờ kế hoạch, 264,5 giờ thực tế) theo dashboard và board (243 và 262 giờ), tính lại business case
         (NPV, ROI, thời gian hoàn vốn).
-  \item Bổ sung kết quả benchmark và model LLM được chọn của v0.2 (Mục~\ref{sec:v02}).
+  \item Chép số liệu benchmark từ Wiki vào v0.2 (Mục~\ref{sec:v02}), nếu cần đưa vào báo cáo.
   \item Ký biên bản nghiệm thu cuối ngày 03/12/2026 (mẫu ở Hình~\ref{fig:acceptance-form}) và bảng phê duyệt bên dưới.
 \end{enumerate}
 

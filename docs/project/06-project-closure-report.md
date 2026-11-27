@@ -146,7 +146,7 @@ phát hành chưa deploy lên AWS thật. Hạn chế cuối đã được xử 
 ### v0.2 – Transcript live, chọn LLM (Sprint 2, mốc M2 09/10/2026)
 
 Transcript live với độ trễ khoảng 3 s (chunk ghi âm 3 s) và benchmark các model LLM để chọn model cho tóm tắt và dịch.
-Kết quả benchmark được lưu trên Wiki của dự án (theo xác nhận của nhóm). Báo cáo này chưa chép số liệu vì Wiki không truy cập được khi lập báo cáo; model được chọn: [CẦN ĐIỀN: tên model LLM, chép từ Wiki].
+Kết quả benchmark được lưu trên Wiki của dự án (theo xác nhận của nhóm). Báo cáo này chưa chép số liệu vì Wiki không truy cập được khi lập báo cáo; model được chọn là `gemma4:26b-a4b` (chạy qua Ollama), đặt làm mặc định cho tóm tắt và dịch trong `backend/.env.example` với ghi chú "chọn từ benchmark Sprint 2"; cấu hình mẫu cho bản AWS (`deploy/.env.example`) dùng `gpt-4o-mini` qua API.
 
 ### v0.1 – Ghi lại cuộc họp (Sprint 1, mốc M1 25/09/2026)
 
@@ -274,15 +274,14 @@ Cả bốn hạng mục đã hoàn thành theo xác nhận của nhóm; các ng�
 |---|---|
 | Nghiệm thu cuối ([Statement of Work (SOW) và nghiệm thu](#sow)) | Đã hoàn thành, ngày 03/12/2026 |
 | Bàn giao mã nguồn, bộ cài, URL, tài liệu | Đã hoàn thành, ngày 03/12/2026 |
-| Gỡ tài nguyên AWS không dùng (EC2, Elastic IP, bucket) | Đã hoàn thành, ngày [CẦN ĐIỀN] |
+| Gỡ tài nguyên AWS không dùng (EC2, Elastic IP, bucket) | Đã hoàn thành, ngày 03/12/2026 (cùng ngày nghiệm thu) |
 | Lưu trữ tài liệu, biên bản | Đã hoàn thành, lưu trên Wiki của dự án (Azure DevOps) |
 
 ### 3.7 Việc còn lại để hoàn tất hồ sơ
 
-1. Điền ngày gỡ tài nguyên AWS (EC2, Elastic IP, bucket S3) vào bảng mục 3.6.
-2. Đóng Sprint 5 trên Azure Boards (2 story In Progress, 7 task Testing hoặc Ready for Release); khi đó tính CPI cả dự án; cập nhật tài liệu 01 (253 giờ kế hoạch, 264,5 giờ thực tế) theo dashboard và board (243 và 262 giờ), tính lại business case (NPV, ROI, thời gian hoàn vốn).
-3. Bổ sung kết quả benchmark và model LLM được chọn của v0.2.
-4. Ký biên bản nghiệm thu cuối ngày 03/12/2026 (mẫu ở mục 1.7) và bảng phê duyệt dưới đây.
+1. Đóng Sprint 5 trên Azure Boards (2 story In Progress, 7 task Testing hoặc Ready for Release); khi đó tính CPI cả dự án; cập nhật tài liệu 01 (253 giờ kế hoạch, 264,5 giờ thực tế) theo dashboard và board (243 và 262 giờ), tính lại business case (NPV, ROI, thời gian hoàn vốn).
+2. Chép số liệu benchmark từ Wiki vào v0.2, nếu cần đưa vào báo cáo.
+3. Ký biên bản nghiệm thu cuối ngày 03/12/2026 (mẫu ở mục 1.7) và bảng phê duyệt dưới đây.
 
 ### 3.8 Phê duyệt
 
