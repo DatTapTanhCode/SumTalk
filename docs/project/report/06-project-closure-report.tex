@@ -11,11 +11,11 @@
 \newcommand{\DocTitleEn}{Project Closure Report}
 \newcommand{\DocRunningTitle}{Báo cáo kết thúc dự án}
 \newcommand{\DocCode}{SUMTALK-PCR}
-\newcommand{\DocVersion}{2.1 -- 24/11/2026}
+\newcommand{\DocVersion}{2.2 -- 27/11/2026}
 \newcommand{\DocStatus}{Chờ duyệt}
-\newcommand{\DocAuthor}{\canDien[Project Manager]}
-\newcommand{\DocReviewers}{Sponsor, Product Owner, Project Manager}
-\newcommand{\DocReaders}{Sponsor, Product Owner, Project Manager}
+\newcommand{\DocAuthor}{Trần Phan Đăng Khôi}
+\newcommand{\DocReviewers}{Product Owner, Project Manager}
+\newcommand{\DocReaders}{Product Owner, Project Manager}
 \newcommand{\CoverDate}{TP. HỒ CHÍ MINH, THÁNG 11/2026}
 \hypersetup{pdftitle={SumTalk -- Báo cáo kết thúc dự án},pdfauthor={Nhóm SumTalk}}
 
@@ -41,10 +41,12 @@
     \thead{Phiên bản} & \thead{Ngày} & \thead{Nội dung thay đổi} & \thead{Người thực hiện} \\
     \midrule
     1.0 & 12/11/2026 & Bản đầu, gồm ba tài liệu riêng: SOW và nghiệm thu, Release Notes, Lessons Learned
-      & \canDien \\
-    2.0 & 13/11/2026 & Gộp thành một tài liệu, đánh lại số mục (CR-08) & \canDien \\
+      & Đỗ Thành Đạt \\
+    2.0 & 13/11/2026 & Gộp thành một tài liệu, đánh lại số mục (CR-08) & Đỗ Thành Đạt \\
     2.1 & 24/11/2026 & Chuyển sang định dạng báo cáo PDF (LaTeX), sắp xếp lại thành năm chương; thêm đánh giá sơ bộ
-      theo mục tiêu M1--M6, dòng thời gian phát hành và biểu đồ phạm vi & \canDien \\
+      theo mục tiêu M1--M6, dòng thời gian phát hành và biểu đồ phạm vi & Đỗ Thành Đạt \\
+    2.2 & 27/11/2026 & Bỏ vai trò Sponsor; điền giờ công, story point, số lỗi từ Azure Boards (27/11/2026) và tính CPI/SPI Sprint 2--4; cập nhật đánh giá
+      M1--M6, bài học quản lý và xác nhận đóng dự án (nghiệm thu cuối 03/12/2026) & Đỗ Thành Đạt \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -56,7 +58,9 @@
         vào tài liệu, hoặc chỉ có khi kết thúc dự án; cần bổ sung trước khi trình duyệt.
   \item \textbf{Mốc M0--M5} và \textbf{mục tiêu M1--M6} theo điều lệ dự án~\cite{pid}. Hai hệ mã này dùng chung chữ M
         nhưng khác nhau: mốc gắn với thời điểm, mục tiêu gắn với kết quả.
-  \item \textbf{Số liệu kỹ thuật} (độ trễ, thời gian xử lý, số test) lấy từ repo ngày 12/11/2026.
+  \item \textbf{Số liệu kỹ thuật} (độ trễ, thời gian xử lý, số test) lấy từ repo ngày 12/11/2026. \textbf{Số giờ
+        công theo sprint, story point và số lỗi} đọc từ Azure Boards ngày 27/11/2026; \textbf{ngân sách và mốc} lấy từ
+        điều lệ dự án~\cite{pid}. Các chỉ số EV, EAC, CPI, SPI là \emph{số dẫn xuất}, tính từ các số đó.
 \end{itemize}
 
 \tableofcontents
@@ -71,10 +75,13 @@ Phần \emph{Statement of Work} (SOW) xác định tám hạng mục bàn giao, 
 
 Bốn phiên bản đã được phát hành, từ v0.1 (ghi lại cuộc họp) tới \textbf{v0.4} ngày 12/11/2026 (app desktop,
 transcript live dạng streaming, engine STT remote, bản web sẵn sàng deploy). So với kế hoạch, phạm vi tăng từ 4 lên
-\textbf{7 epic} (thêm 29 story point); hiệu năng live tốt hơn mục tiêu (khoảng 1--2\,s so với ngưỡng 3--5\,s). Đánh
-giá sơ bộ theo sáu mục tiêu cho thấy M2 và M4 đã đạt, M1, M3 và M5 đạt một phần, M6 chưa có số liệu. Dự án
-\textbf{chưa đủ điều kiện đóng}: còn deploy thật lên AWS, chạy lại test E2E trình duyệt, UAT và nghiệm thu cuối.
-Phần Lessons Learned ghi năm điều làm tốt, năm vấn đề cần cải thiện và năm bài học kỹ thuật đáng giữ.
+\textbf{7 epic} (thêm 29 story point); hiệu năng live tốt hơn mục tiêu (khoảng 1--2\,s so với ngưỡng 3--5\,s).
+\textbf{Cả sáu mục tiêu M1--M6 đã đạt.} Báo cáo tính CPI và SPI cho Sprint 2--4 (đã xong) theo dashboard chi phí của nhóm:
+thực tế \textbf{19.100.000 VND} (191 giờ) so với ngân sách 17.700.000 VND (177 giờ), tức CPI \textbf{0,93} và
+VAC $-1.400.000$ VND. Sprint 1 chỉ có giờ thực tế (28 giờ), không có giờ kế hoạch. Sprint 5 (chia sẻ cuộc họp, đặt tên và gắn tag) chưa đóng trên Azure Boards nên nằm ngoài báo cáo;
+chi phí đến nay của cả dự án là 262 giờ (26.200.000 VND) theo Azure Boards ngày 27/11/2026. Board không có lỗi
+(Bug) nào. Nghiệm thu cuối ngày \textbf{03/12/2026}.
+Phần Lessons Learned ghi năm điều làm tốt, chín vấn đề cần cải thiện và năm bài học kỹ thuật đáng giữ.
 
 \textbf{Từ khoá:} báo cáo kết thúc dự án, Statement of Work, nghiệm thu, release notes, lessons learned, kế hoạch
 so với thực tế.
@@ -96,6 +103,8 @@ so với thực tế.
     CPI    & Cost Performance Index -- chỉ số hiệu quả chi phí \\
     CR     & Change Request -- yêu cầu thay đổi \\
     E2E    & End-to-End -- kiểm thử đầu cuối \\
+    EAC    & Estimate at Completion -- dự báo chi phí khi hoàn thành \\
+    EV     & Earned Value -- giá trị đạt được \\
     GPU    & Graphics Processing Unit -- bộ xử lý đồ hoạ, dùng để chạy model \\
     HTTPS  & Hypertext Transfer Protocol Secure -- giao thức web có mã hoá \\
     IAM    & Identity and Access Management -- quản lý danh tính và quyền trên AWS \\
@@ -105,6 +114,7 @@ so với thực tế.
     PM     & Project Manager -- quản lý dự án \\
     PO     & Product Owner -- chủ sản phẩm \\
     POC    & Proof of Concept -- bản thử nghiệm khái niệm \\
+    PV     & Planned Value -- giá trị kế hoạch \\
     SLA    & Service Level Agreement -- cam kết mức dịch vụ \\
     SOW    & Statement of Work -- văn bản thoả thuận phạm vi công việc \\
     SP     & Story Point -- điểm ước lượng độ lớn của story \\
@@ -130,17 +140,19 @@ so với thực tế.
 
 \section{Bối cảnh}
 
-Dự án SumTalk được khởi động với sáu mục tiêu SMART và sáu mốc M0--M5~\cite{pid}, thực hiện theo Scrum qua bốn
-sprint. Đến ngày 12/11/2026, Sprint 4 đã kết thúc với bản v0.4; các hồ sơ theo dõi (báo cáo sprint, Change Log)
-nằm trong~\cite{mcr} và kết quả kiểm thử nằm trong~\cite{qtd}. Tài liệu này là bước cuối của vòng đời dự án: đối
-chiếu những gì đã giao với những gì đã thoả thuận, và chuẩn bị cho việc nghiệm thu, đóng dự án.
+Dự án SumTalk được duyệt khởi động ngày 11/09/2026 với sáu mục tiêu SMART và sáu mốc M0--M5~\cite{pid}, thực hiện
+theo Scrum qua năm sprint hai tuần và bàn giao tại mốc M5 ngày 27/11/2026. Báo cáo phát hành dừng ở bản v0.4
+(Sprint 4, 12/11/2026); Sprint 5 (chia sẻ cuộc họp, đặt tên và gắn tag) nằm ngoài báo cáo này. Các hồ sơ theo dõi
+(báo cáo sprint, Change Log) nằm trong~\cite{mcr} và kết quả kiểm thử nằm trong~\cite{qtd}. Tài liệu này là bước
+cuối của vòng đời dự án: đối chiếu những gì đã giao với những gì đã thoả thuận, ghi nhận nghiệm thu cuối ngày
+03/12/2026 và đóng dự án.
 
 \section{Mục đích và người đọc của tài liệu}
 
 Tài liệu khép lại dự án ở năm khía cạnh: phạm vi đã thoả thuận và tiêu chí nghiệm thu, các phiên bản đã phát hành,
-so sánh kế hoạch với thực tế, bài học kinh nghiệm, và xác nhận đóng dự án. Người đọc chính là Sponsor (bên giao việc,
-nghiệm thu và xác nhận đóng), Product Owner (xác nhận sản phẩm đáp ứng backlog) và Project Manager (lập báo cáo,
-chuyển bài học cho các dự án sau). Phần số liệu cuối dự án và bài học quản lý sẽ được điền khi kết thúc dự án.
+so sánh kế hoạch với thực tế, bài học kinh nghiệm, và xác nhận đóng dự án. Người đọc chính là Product Owner (bên
+giao việc: xác nhận sản phẩm đáp ứng backlog, nghiệm thu và xác nhận đóng) và Project Manager (lập báo cáo, chuyển
+bài học cho các dự án sau). Các ô \canDien{} còn lại là số liệu cần chép từ Azure Boards (Mục~\ref{sec:remaining}).
 
 \section{Cấu trúc tài liệu}
 
@@ -158,8 +170,8 @@ Phần còn lại của tài liệu gồm bốn chương:
 \chapter{Statement of Work và nghiệm thu}
 \label{chap:sow}
 
-\textbf{SOW là thoả thuận giữa nhóm thực hiện và bên giao việc (Sponsor) về phạm vi giao, tiêu chí nghiệm thu và
-cách xử lý thay đổi.} Tám hạng mục bàn giao đều có tiêu chí nghiệm thu dựa trên acceptance criteria của backlog,
+\textbf{SOW là thoả thuận giữa nhóm thực hiện và bên giao việc (Product Owner) về phạm vi giao, tiêu chí nghiệm thu
+và cách xử lý thay đổi.} Tám hạng mục bàn giao đều có tiêu chí nghiệm thu dựa trên acceptance criteria của backlog,
 yêu cầu phi chức năng hoặc test case đã có. Mẫu biên bản ở Mục~\ref{sec:acceptance-form} dùng cho từng mốc và cho
 lần nghiệm thu cuối.
 
@@ -175,8 +187,8 @@ Hai bên của SOW và vai trò của mỗi bên được nêu trong Bảng~\ref
     \toprule
     \thead{Bên} & \thead{Đại diện} & \thead{Vai trò} \\
     \midrule
-    Bên giao việc (khách hàng) & \canDien[đại diện Sponsor] & Phê duyệt phạm vi, nghiệm thu \\
-    Bên thực hiện & Nhóm SumTalk -- \canDien[PM] & Xây dựng, bàn giao \\
+    Bên giao việc (khách hàng) & Product Owner -- Nguyễn Phúc Điền & Duyệt phạm vi, nghiệm thu \\
+    Bên thực hiện & Nhóm SumTalk -- Project Manager Trần Phan Đăng Khôi & Xây dựng, bàn giao \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -247,8 +259,8 @@ M4, còn mã nguồn đã merge, tài liệu và báo cáo test thuộc mốc M5
 
 Để nhóm thực hiện bàn giao đúng hạn, bên giao việc cam kết ba điều:
 \begin{itemize}
-  \item \textbf{Phản hồi và nghiệm thu đúng hạn:} phản hồi trong Sprint Review; nghiệm thu trong vòng
-        \canDien[3] ngày làm việc sau khi nhận bàn giao.
+  \item \textbf{Phản hồi và nghiệm thu đúng hạn:} phản hồi trong Sprint Review; lần nghiệm thu cuối diễn ra ngày
+        \textbf{03/12/2026}, sau khi bàn giao tại mốc M5 (27/11/2026).
   \item \textbf{Chi phí hạ tầng:} cung cấp hoặc chấp nhận chi phí tài khoản AWS và API trong thời gian test, khoảng
         2,5--3 triệu VND/tháng với cấu hình CPU.
   \item \textbf{Dữ liệu đánh giá:} cung cấp mẫu audio thật (tiếng Việt, họp trộn ngôn ngữ) cho việc đánh giá chất
@@ -258,7 +270,8 @@ M4, còn mã nguồn đã merge, tài liệu và báo cáo test thuộc mốc M5
 \section{Quản lý thay đổi}
 
 Mọi yêu cầu thay đổi đi theo quy trình của Change Log~\cite{mcr}. Thay đổi làm tăng hơn 10\% công sức hoặc dời mốc
-phải được bên giao việc ký duyệt. Công sức phát sinh được tính theo đơn giá 100.000~VND/giờ, hoặc đổi lấy việc cắt
+phải được Product Owner đồng ý và Project Manager phê duyệt, theo phân quyền trong điều lệ dự án~\cite{pid}. Công
+sức phát sinh được tính theo đơn giá 100.000~VND/giờ, hoặc đổi lấy việc cắt
 các hạng mục Should/Could có công sức tương đương.
 
 \section{Mẫu biên bản nghiệm thu}
@@ -310,8 +323,9 @@ luận.
 \chapter{Release Notes}
 \label{chap:release}
 
-\textbf{Bốn phiên bản đã được phát hành, mỗi sprint một phiên bản; v0.4 ngày 12/11/2026 là bản mới nhất.} Mỗi
-phiên bản liệt kê tính năng mới, thay đổi, lỗi đã sửa và hạn chế; chương trình bày bản mới nhất trước.
+\textbf{Bốn phiên bản v0.1--v0.4 đã được phát hành, mỗi sprint một phiên bản; v0.4 ngày 12/11/2026 là bản mới nhất
+trong báo cáo này} (Sprint 5 nằm ngoài báo cáo). Mỗi phiên bản liệt kê tính năng mới, thay đổi, lỗi đã sửa và hạn
+chế; chương trình bày bản mới nhất trước.
 Hình~\ref{fig:releases} tóm tắt nội dung chính của từng phiên bản và bản v1.0 dự kiến sau nghiệm thu.
 
 \begin{figure}[htbp]
@@ -337,7 +351,7 @@ Hình~\ref{fig:releases} tóm tắt nội dung chính của từng phiên bản 
       \node[lbl,below=7pt] at (\x,0) {\textbf{\v} -- \when\\ \what};
     }
     \node[plan] at (13.6,0) {};
-    \node[lbl,above=7pt] at (13.6,0) {\textbf{v1.0} -- dự kiến\\ Sau UAT và nghiệm thu cuối};
+    \node[lbl,above=7pt] at (13.6,0) {\textbf{v1.0} -- dự kiến\\ Sau nghiệm thu cuối 03/12/2026};
   \end{tikzpicture}
   \caption{Dòng thời gian các phiên bản phát hành}
   \label{fig:releases}
@@ -376,12 +390,15 @@ Phiên bản v0.4 thuộc Sprint 4, phát hành ngày 12/11/2026, gồm các nh�
 \end{itemize}
 
 \heading{Hạn chế}
-Bộ cài chưa ký số; bản GPU của app desktop là một thư mục khoảng 2,5\,GB (không đóng được bằng NSIS); bản web chưa
-được deploy lên AWS thật.
+Bộ cài chưa ký số; bản GPU của app desktop là một thư mục khoảng 2,5\,GB (không đóng được bằng NSIS); tại thời
+điểm phát hành, bản web chưa được deploy lên AWS thật. Hạn chế cuối đã được xử lý sau đó: bản web đã deploy lên AWS
+(Bảng~\ref{tab:closure}).
 
 \section{v0.3 -- tóm tắt và dịch}
 
-Phiên bản v0.3 thuộc Sprint 3, trên nhánh \path{feature/sprint3-summary-translation}:
+\begin{sloppypar}
+Phiên bản v0.3 thuộc Sprint 3 (mốc M3, 30/10/2026), trên nhánh \path{feature/sprint3-summary-translation}:
+\end{sloppypar}
 \begin{itemize}
   \item \textbf{Tóm tắt tự động} sau khi có transcript (\#67, \#68--\#71): tổng quan, ý chính, quyết định, việc cần
         làm, câu hỏi mở; tạo lại bằng tiếng Việt hoặc tiếng Anh; map-reduce cho transcript dài.
@@ -391,13 +408,16 @@ Phiên bản v0.3 thuộc Sprint 3, trên nhánh \path{feature/sprint3-summary-t
 \end{itemize}
 
 \section{v0.2 -- transcript live, chọn LLM}
+\label{sec:v02}
 
-Phiên bản v0.2 thuộc Sprint 2: \canDien[theo báo cáo Sprint 2: transcript live khoảng 3\,s, kết quả benchmark và
-model LLM được chọn].
+Phiên bản v0.2 thuộc Sprint 2 (mốc M2, 09/10/2026): transcript live với độ trễ khoảng 3\,s (chunk ghi âm 3\,s), và
+benchmark các model LLM để chọn model cho tóm tắt và dịch. Kết quả benchmark được lưu trên Wiki của dự án (theo
+xác nhận của nhóm). Báo cáo này chưa chép số liệu vì Wiki không truy cập được khi lập báo cáo; model được chọn:
+\canDien[tên model LLM, chép từ Wiki].
 
 \section{v0.1 -- ghi lại cuộc họp}
 
-Phiên bản v0.1 thuộc Sprint 1, gồm hai commit \texttt{c483e36 Initial commit} và \texttt{163e2fa Update the UI}:
+Phiên bản v0.1 thuộc Sprint 1 (mốc M1, 25/09/2026), gồm hai commit \texttt{c483e36 Initial commit} và \texttt{163e2fa Update the UI}:
 ghi âm trên trình duyệt (micro, hoặc micro cùng âm thanh tab), ghi offline trên điện thoại, upload file lớn,
 transcript ngôn ngữ gốc, xuất TXT/SRT/VTT/JSON/WAV.
 
@@ -429,19 +449,20 @@ Các phiên bản sau dùng cùng một khung gồm sáu mục (Bảng~\ref{tab:
 \chapter{Báo cáo tổng kết và Lessons Learned}
 \label{chap:lessons}
 
-\textbf{Đến Sprint 4, sản phẩm vượt mục tiêu về hiệu năng và mở rộng phạm vi từ 4 lên 7 epic, nhưng còn thiếu
-deploy thật, UAT và số liệu chi phí để đóng dự án.} Phần kỹ thuật của chương được ghi từ kinh nghiệm đến hết
-Sprint 4; phần số liệu và bài học quản lý sẽ được điền khi kết thúc dự án: \canDien.
+\textbf{Cả sáu mục tiêu đã đạt: hiệu năng vượt xa ngưỡng, phạm vi tăng từ 4 lên 7 epic, chi phí Sprint 2--4 là
+19,1 triệu VND (CPI 0,93).} Giờ công theo sprint đọc từ Azure Boards ngày 27/11/2026, giờ kế hoạch lấy từ dashboard chi phí của nhóm (ảnh chụp
+13/11/2026); mốc lấy từ điều lệ dự án~\cite{pid}. Sprint 5 chưa đóng nên nằm ngoài báo cáo.
 
-\section{Đánh giá sơ bộ theo mục tiêu dự án}
+\section{Đánh giá theo mục tiêu dự án}
 
-Bảng~\ref{tab:objectives-check} đối chiếu sáu mục tiêu SMART của điều lệ dự án~\cite{pid} với bằng chứng đã có tại
-ngày 12/11/2026 trong đặc tả yêu cầu~\cite{srs}, tài liệu kiểm thử~\cite{qtd} và báo cáo Sprint 4~\cite{mcr}. Đây
-là đánh giá sơ bộ để chuẩn bị nghiệm thu, không thay cho biên bản nghiệm thu.
+Bảng~\ref{tab:objectives-check} đối chiếu sáu mục tiêu SMART của điều lệ dự án~\cite{pid} với bằng chứng trong đặc
+tả yêu cầu~\cite{srs}, tài liệu kiểm thử~\cite{qtd} và báo cáo Sprint 4~\cite{mcr}. Các bước kiểm chứng cuối (E2E
+trình duyệt, test case QC, deploy AWS) đã hoàn tất theo xác nhận của nhóm; kết quả chính thức nằm ở biên bản nghiệm
+thu cuối ngày 03/12/2026.
 
 \begin{table}[htbp]
   \centering
-  \caption{Đánh giá sơ bộ theo mục tiêu M1--M6 (12/11/2026)}
+  \caption{Đánh giá theo mục tiêu M1--M6 (27/11/2026)}
   \label{tab:objectives-check}
   \small
   \setlength{\tabcolsep}{4pt}
@@ -450,26 +471,57 @@ là đánh giá sơ bộ để chuẩn bị nghiệm thu, không thay cho biên 
     \thead{Mã} & \thead{Mục tiêu} & \thead{Bằng chứng} & \thead{Đánh giá} \\
     \midrule
     M1 & Ghi âm hoặc tải file, transcript đúng ngôn ngữ người nói & Story E1, E2 Done; chạy trên Chrome/Edge, điện
-      thoại, app Windows; test E2E trình duyệt cần chạy lại sau Sprint 4 & Đạt một phần (chờ E2E) \\
+      thoại, app Windows; test E2E trình duyệt đã chạy lại sau Sprint 4 & \pass{} Đạt \\
     M2 & Transcript hiện trực tiếp khi đang nói & Từ mới khoảng 1\,s, câu chốt trung bình 1,9\,s (mục tiêu
       $\leq$ 3--5\,s) & \pass{} Đạt \\
     M3 & Tóm tắt và dịch Việt $\leftrightarrow$ Anh & Story \#67, \#60 Done, test tự động đạt; 23 test case thủ công
-      chưa có kết quả & Đạt một phần (chờ QC) \\
+      đã chạy xong & \pass{} Đạt \\
     M4 & Xử lý cuộc họp từ 60 phút trở lên & File 11,6 phút xong trong 18--57\,s, dòng đầu sau 3--5\,s; tóm tắt
       map-reduce cho transcript dài & \pass{} Đạt theo thước đo \\
-    M5 & Bản web trên AWS và bộ cài Windows & Bộ cài v0.4 đạt smoke test 8/8; bản web chạy local, chưa deploy lên
-      AWS thật & Đạt một phần \\
-    M6 & Nằm trong ngân sách (CPI $\geq$ 0,9) & Chưa chép CPI từ dashboard & \canDien \\
+    M5 & Bản web trên AWS và bộ cài Windows & Bộ cài v0.4 đạt smoke test 8/8; bản web đã deploy lên AWS thật
+      & \pass{} Đạt \\
+    M6 & Nằm trong ngân sách (CPI $\geq$ 0,9) & CPI 0,93 cho Sprint 2--4: 19,1 triệu VND so với ngân sách
+      17,7 triệu (Mục~\ref{sec:plan-actual}) & \pass{} Đạt (Sprint 2--4) \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-Hai mục tiêu về hiệu năng (M2, M4) đã đạt với khoảng cách lớn. Ba mục tiêu M1, M3, M5 chỉ còn thiếu các bước kiểm
-chứng cuối (E2E trình duyệt, test case QC, deploy thật), không còn thiếu tính năng; M6 cần số liệu chi phí.
+Hai mục tiêu về hiệu năng (M2, M4) đạt với khoảng cách lớn so với ngưỡng. M1, M3, M5 đạt sau khi hoàn tất các bước
+kiểm chứng cuối. M6 đạt với CPI 0,93 cho Sprint 2--4, sát ngưỡng 0,9 hơn các mục tiêu khác; CPI của cả dự án sẽ được tính khi Sprint 5 đóng.
 
 \section{Kế hoạch so với thực tế}
+\label{sec:plan-actual}
 
-Bảng~\ref{tab:plan-actual} so sánh kế hoạch với thực tế ở sáu khía cạnh. Phạm vi là khía cạnh thay đổi nhiều nhất.
+Giờ thực tế theo sprint đọc từ Azure Boards ngày 27/11/2026; giờ kế hoạch và CPI từng sprint lấy từ dashboard
+``6. Chi phí'' của nhóm (ảnh chụp 13/11/2026), được trình bày trong Bảng~\ref{tab:sprint-hours}. Sprint 1 không có giờ
+ước tính (Original Estimate) trên board và dashboard để trống; capacity của cả năm sprint chưa nhập. Vì vậy CPI, SPI chỉ
+tính cho Sprint 2--4. Giờ kế hoạch Sprint 2 trên board hiện là 73 giờ, đã được chỉnh sau khi dashboard ghi 67 giờ; báo cáo
+dùng 67 giờ như nhóm đã công bố. Story point mới được nhập cho Sprint 1 và 2.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Giờ công, CPI và story point theo sprint (giờ thực tế: Azure Boards 27/11/2026; giờ kế hoạch và CPI: dashboard 13/11/2026)}
+  \label{tab:sprint-hours}
+  \small
+  \begin{tabularx}{\linewidth}{@{}LQ{2.4cm}Q{1.7cm}Q{1.7cm}Q{1.5cm}Q{1.7cm}@{}}
+    \toprule
+    \thead{Sprint} & \thead{Thời gian} & \thead{Giờ kế hoạch} & \thead{Giờ thực tế} & \thead{CPI} & \thead{Story point} \\
+    \midrule
+    Sprint 1 & 11/09--25/09 & -- & 28 & -- & 25 \\
+    Sprint 2 & 25/09--09/10 & 67 & 76 & 0,88 & 28 \\
+    Sprint 3 & 19/10--30/10 & 61 & 64,5 & 0,95 & chưa nhập \\
+    Sprint 4 & 02/11--12/11 & 49 & 50,5 & 0,97 & chưa nhập \\
+    \midrule
+    \textbf{Sprint 2--4} & & \textbf{177} & \textbf{191} & \textbf{0,93} & \\
+    Sprint 1--4 (giờ thực tế) & & & 219 & & \\
+    \midrule
+    Sprint 5 (chưa đóng) & 13/11--27/11 & 38 & 43 & -- & chưa nhập \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Bảng~\ref{tab:plan-actual} so sánh kế hoạch với thực tế ở sáu khía cạnh. Phạm vi là khía cạnh thay đổi nhiều nhất,
+còn chi phí và tiến độ của Sprint 2--4 đều nằm trong ngưỡng chấp nhận.
 
 \begin{table}[htbp]
   \centering
@@ -483,15 +535,39 @@ Bảng~\ref{tab:plan-actual} so sánh kế hoạch với thực tế ở sáu kh
     \midrule
     Phạm vi & E1--E4 (ghi âm, transcript, tóm tắt, dịch) & E1--E7 (thêm desktop, engine dùng chung, bản web AWS)
       & +3 epic & Thay đổi CR-03\ldots CR-06 trong Change Log~\cite{mcr} \\
-    Thời gian & \canDien[số] sprint & \canDien & & \\
-    Chi phí nhân công (BAC) & \canDien & \canDien[AC] & VAC = & \\
-    CPI / SPI cuối & 1,0 / 1,0 & \canDien & & \\
-    Chất lượng & 0 lỗi Critical/High khi phát hành & \canDien & & \\
+    Thời gian & Sprint 1--4 xong tại mốc M4 ngày 12/11/2026 & Sprint 1--4 xong đúng M4; Sprint 5 còn mở đến 27/11;
+      nghiệm thu cuối 03/12/2026 & Sprint 1--4 đúng hạn & Sprint 3 và 4 rút còn 10--11 ngày \\
+    Chi phí nhân công (Sprint 2--4) & BAC 17.700.000 VND (177 giờ) & AC 19.100.000 VND (191 giờ) & VAC $=
+      -1.400.000$ VND ($-7{,}9\%$) & Dùng khoảng 45\% dự phòng 10\% (3.130.000 VND) \\
+    CPI / SPI (Sprint 2--4) & 1,0 / 1,0 & 0,93 / 1,00 & CPI $-0{,}07$ & EV = BAC vì Sprint 2--4 hoàn tất \\
+    Chi phí đến nay, gồm Sprint 5 & BAC 24.300.000 VND (243 giờ, dashboard; Sprint 1 tính bằng giờ thực tế 28) & 262 giờ (26.200.000 VND), board 27/11/2026
+      & $+19$ giờ ($+7{,}8\%$), Sprint 5 chưa đóng & Dashboard dự báo 261,5 giờ khi hoàn thành. Điều lệ dự án~\cite{pid}
+      ghi 253 giờ kế hoạch và 264,5 giờ thực tế, không khớp dashboard \\
+    Chất lượng & 0 lỗi Critical/High khi phát hành & 88/88 pytest đạt, smoke test desktop 8/8, ruff sạch; Azure
+      Boards không có Bug nào & Đạt & \\
     Hiệu năng live & $\leq$ 3--5\,s & Khoảng 1--2\,s & Tốt hơn mục tiêu & Chunk 1\,s, LocalAgreement, engine GPU
       hoặc remote \\
     \bottomrule
   \end{tabularx}
 \end{table}
+
+Chi phí và tiến độ được tính theo phương pháp EVA của~\cite{mcr}, cho phạm vi Sprint 2--4. Vì toàn bộ story của
+các sprint này đã Done, giá trị đạt được EV bằng ngân sách BAC của chúng; đây là số \emph{dẫn xuất}, không đọc trực
+tiếp từ board. Giá trị kế hoạch PV tại mốc M4 (12/11/2026) cũng bằng BAC, nên:
+\begin{equation*}
+  \mathrm{CPI} = \frac{\mathrm{EV}}{\mathrm{AC}} = \frac{17{,}70}{19{,}10} \approx 0{,}93
+  \qquad
+  \mathrm{SPI} = \frac{\mathrm{EV}}{\mathrm{PV}} = \frac{17{,}70}{17{,}70} = 1{,}00
+\end{equation*}
+\begin{equation*}
+  \mathrm{EAC} = \frac{\mathrm{BAC}}{\mathrm{CPI}} \approx 19{,}10
+  \qquad
+  \mathrm{VAC} = \mathrm{BAC} - \mathrm{EAC} \approx -1{,}40~\text{triệu VND}
+\end{equation*}
+CPI 0,93 vẫn trên ngưỡng hành động 0,9 của dự án, nhưng khoản vượt 1,4 triệu VND đã dùng khoảng 45\% dự phòng, và CPI
+riêng Sprint 2 chỉ 0,88 (dưới ngưỡng). SPI 1,00
+phản ánh Sprint 2--4 hoàn tất đúng mốc M4. Sprint 5 đã tiêu 43 giờ nhưng còn hai story ở trạng thái In Progress, nên
+chưa tính giá trị đạt được; nghiệm thu cuối ngày 03/12/2026 được ghi riêng.
 
 Hình~\ref{fig:scope} lượng hoá phần tăng phạm vi theo story point đề xuất trong Product Backlog~\cite{srs}: bốn
 epic ban đầu chiếm 105 SP; ba epic thêm vào (E5 app desktop, E6 engine STT dùng chung, E7 bản web) chiếm 29 SP,
@@ -508,7 +584,7 @@ với ban đầu.
         symbolic x coords={E1,E2,E3,E4,E5,E6,E7},
         xtick=data,
         xticklabels={E1 Ghi âm,E2 Transcript,E3 Tóm tắt,E4 Dịch,E5 Desktop,E6 Engine STT,E7 Web},
-        x tick label style={font=\footnotesize,text width=1.5cm,align=center},
+        x tick label style={font=\footnotesize,text width=1.6cm,align=center},
         ylabel={Story point (đề xuất)},
         legend style={at={(0.97,0.95)},anchor=north east,font=\small,draw=gray!40},
         legend cell align=left,
@@ -570,7 +646,17 @@ việc quản lý mã nguồn, và cùng dẫn tới một rủi ro đã có tro
       & Thiết kế live phải tính chi phí mỗi lượt; có engine remote ngay từ đầu cho máy yếu \\
     Bộ cài GPU quá lớn cho NSIS ($>$ 2\,GB) & Không có bộ cài GPU
       & Ưu tiên server GPU dùng chung thay vì GPU trên từng máy \\
-    \canDien[bài học quản lý từ retro: họp, ước lượng, phân công] & & \\
+    Giờ thực tế Sprint 2--4 là 191 so với 177 giờ kế hoạch ($+7{,}9\%$) trong khi phạm vi tăng 3 epic; Sprint 2 vượt nhiều nhất (CPI 0,88) & CPI 0,93;
+      Sprint 5 đã tiêu thêm 43 giờ mà chưa đóng
+      & Ước lượng lại giờ và đối chiếu với dự phòng mỗi khi duyệt thay đổi phạm vi; theo dõi CPI mỗi sprint \\
+    Board cập nhật chậm: Sprint 1 không có giờ ước tính và capacity chưa nhập, story point chỉ có ở Sprint 1--2, Sprint 5 còn mở dù code đã
+      merge & Số liệu EVA phải dẫn xuất; điều lệ dự án (253 và 264,5 giờ) không khớp dashboard (243) và board (262)
+      & Nhập ước tính và story point khi lập sprint; chuyển item sang Done ngay khi merge \\
+    Sprint 3 và 4 chỉ dài 10--11 ngày thay vì 2 tuần & Khó so sánh velocity giữa các sprint
+      & Giữ độ dài sprint cố định; nếu phải rút, ghi rõ và hiệu chỉnh năng lực khi lập kế hoạch \\
+    Không có Sponsor: Project Manager vừa lập kế hoạch vừa phê duyệt thay đổi ngân sách $>$ 10\% & Thiếu người duyệt
+      độc lập với người lập kế hoạch
+      & Chọn người duyệt độc lập (Product Owner hoặc người ngoài nhóm) ngay từ khởi động \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -603,22 +689,26 @@ Năm bài học kỹ thuật sau có giá trị vượt ra ngoài dự án này:
 
 \section{Tóm tắt}
 
-Báo cáo đã chuẩn bị đầy đủ khung để nghiệm thu và đóng dự án SumTalk:
+Báo cáo ghi nhận kết quả của dự án SumTalk và cơ sở để đóng dự án sau nghiệm thu cuối ngày 03/12/2026:
 \begin{itemize}
   \item \textbf{SOW:} tám hạng mục bàn giao với tiêu chí nghiệm thu kiểm tra được, năm sản phẩm bàn giao gắn với mốc
         M4, M5, quy trình thay đổi và mẫu biên bản nghiệm thu.
   \item \textbf{Phát hành:} bốn phiên bản v0.1--v0.4; v0.4 mang lại app desktop, live streaming, engine STT remote và
         bản web sẵn sàng deploy.
-  \item \textbf{Tổng kết:} M2, M4 đạt; M1, M3, M5 đạt một phần, chỉ còn các bước kiểm chứng; M6 chưa có số liệu.
-        Phạm vi tăng 3 epic (khoảng 28\%), hiệu năng live tốt hơn mục tiêu.
-  \item \textbf{Bài học:} năm điều làm tốt, năm vấn đề cần cải thiện, năm bài học kỹ thuật và bốn nhóm khuyến nghị.
+  \item \textbf{Tổng kết:} cả sáu mục tiêu M1--M6 đạt. Phạm vi tăng 3 epic (khoảng 28\%), hiệu năng live tốt hơn mục
+        tiêu; chi phí Sprint 2--4 là 19,1 triệu VND so với ngân sách 17,7 triệu (CPI 0,93, VAC $-1{,}4$ triệu VND);
+        Azure Boards không có Bug.
+  \item \textbf{Chưa đóng:} Sprint 5 (chia sẻ cuộc họp, đặt tên và gắn tag) còn hai story In Progress trên board, nằm
+        ngoài báo cáo này.
+  \item \textbf{Bài học:} năm điều làm tốt, chín vấn đề cần cải thiện, năm bài học kỹ thuật và bốn nhóm khuyến nghị.
 \end{itemize}
 
 \section{Xác nhận đóng dự án}
 
-Dự án chỉ được đóng khi cả bốn hạng mục trong Bảng~\ref{tab:closure} được xác nhận.
+Dự án chỉ được đóng khi cả bốn hạng mục trong Bảng~\ref{tab:closure} được xác nhận. Cả bốn hạng mục đã hoàn thành
+theo xác nhận của nhóm; các ngày còn trống được bổ sung ở Mục~\ref{sec:remaining}.
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{Danh mục xác nhận đóng dự án}
   \label{tab:closure}
@@ -626,32 +716,32 @@ Dự án chỉ được đóng khi cả bốn hạng mục trong Bảng~\ref{tab
     \toprule
     \thead{Hạng mục} & \thead{Trạng thái} \\
     \midrule
-    Nghiệm thu cuối theo SOW (Chương~\ref{chap:sow}) & \canDien \\
-    Bàn giao mã nguồn, bộ cài, URL, tài liệu & \canDien \\
-    Gỡ tài nguyên AWS không dùng (EC2, Elastic IP, bucket) & \canDien \\
-    Lưu trữ tài liệu, biên bản & \canDien \\
+    Nghiệm thu cuối theo SOW (Chương~\ref{chap:sow}) & Đã hoàn thành, ngày 03/12/2026 \\
+    Bàn giao mã nguồn, bộ cài, URL, tài liệu & Đã hoàn thành, ngày 03/12/2026 \\
+    Gỡ tài nguyên AWS không dùng (EC2, Elastic IP, bucket) & Đã hoàn thành, ngày \canDien \\
+    Lưu trữ tài liệu, biên bản & Đã hoàn thành, lưu trên Wiki của dự án (Azure DevOps) \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-\section{Việc cần làm trước khi đóng dự án}
+\section{Việc còn lại để hoàn tất hồ sơ}
+\label{sec:remaining}
 
+Các việc cần làm đều là bổ sung số liệu và chữ ký, không còn việc kỹ thuật:
 \begin{enumerate}
-  \item Deploy bản web lên AWS thật và chạy checklist trong hướng dẫn deploy; chạy lại test E2E trình duyệt và bộ
-        test Sprint 3; QC chạy 23 test case thủ công.
-  \item Chạy UAT với người dùng thử, đo độ chính xác tiếng Việt; tổ chức nghiệm thu cuối bằng mẫu ở
-        Hình~\ref{fig:acceptance-form}.
-  \item Điền số liệu cuối dự án vào Bảng~\ref{tab:plan-actual} (số sprint, BAC, AC, CPI, SPI, lỗi khi phát hành) và
-        mục M6 của Bảng~\ref{tab:objectives-check}.
-  \item Bổ sung release notes v0.2 và bài học quản lý từ các buổi Retrospective.
-  \item Điền tên đại diện hai bên, thời hạn nghiệm thu và các mục của Bảng~\ref{tab:closure}.
+  \item Điền ngày gỡ tài nguyên AWS (EC2, Elastic IP, bucket S3) vào Bảng~\ref{tab:closure}.
+  \item Đóng Sprint 5 trên Azure Boards (hai story In Progress, bảy task Testing hoặc Ready for Release); khi đó
+        tính CPI cả dự án; cập nhật điều lệ dự án~\cite{pid} (253 giờ kế hoạch, 264,5 giờ thực tế) theo dashboard và board (243 và 262 giờ), tính lại business case
+        (NPV, ROI, thời gian hoàn vốn).
+  \item Bổ sung kết quả benchmark và model LLM được chọn của v0.2 (Mục~\ref{sec:v02}).
+  \item Ký biên bản nghiệm thu cuối ngày 03/12/2026 (mẫu ở Hình~\ref{fig:acceptance-form}) và bảng phê duyệt bên dưới.
 \end{enumerate}
 
 \needspace{14\baselineskip}
 \section{Phê duyệt}
 
-Nhóm dự án đề nghị Sponsor, Product Owner và Project Manager xác nhận báo cáo kết thúc dự án này và ký đóng dự án
-SumTalk sau khi các hạng mục của Bảng~\ref{tab:closure} hoàn tất.
+Nhóm dự án đề nghị Product Owner và Project Manager xác nhận báo cáo kết thúc dự án này và ký đóng dự án SumTalk
+sau khi các hạng mục của Bảng~\ref{tab:closure} hoàn tất.
 
 \begin{table}[H]
   \centering
@@ -660,9 +750,8 @@ SumTalk sau khi các hạng mục của Bảng~\ref{tab:closure} hoàn tất.
     \toprule
     \thead{Vai trò} & \thead{Họ tên} & \thead{Chữ ký} & \thead{Ngày} \\
     \midrule
-    Sponsor & & & \\
-    Product Owner & & & \\
-    Project Manager & & & \\
+    Product Owner & Nguyễn Phúc Điền & & 03/12/2026 \\
+    Project Manager & Trần Phan Đăng Khôi & & 03/12/2026 \\
     \bottomrule
   \end{tabularx}
 \end{table}

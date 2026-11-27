@@ -4,15 +4,17 @@
 |---|---|
 | Dự án | SumTalk – ghi âm, phiên âm, tóm tắt và dịch biên bản cuộc họp |
 | Mã tài liệu | SUMTALK-PCR |
-| Phiên bản | 2.0 – 13/11/2026 |
-| Người lập | [CẦN ĐIỀN: Project Manager] |
-| Người duyệt | Sponsor, Product Owner, Project Manager |
+| Phiên bản | 2.2 – 27/11/2026 |
+| Người lập | Trần Phan Đăng Khôi |
+| Người duyệt | Product Owner, Project Manager |
 | Trạng thái | Chờ duyệt |
 
 **Mục đích:** Khép lại dự án: phạm vi đã thoả thuận và tiêu chí nghiệm thu, các phiên bản đã phát hành, so sánh kế hoạch với thực tế, bài học kinh nghiệm và xác nhận đóng dự án.
 
 > Ô `[CẦN ĐIỀN]` là số liệu đã có ở Azure Boards, dashboard chi phí hoặc biên bản họp nhưng chưa chép vào đây.
 > **Giả định** là con số đặt ra để tính toán; bảng ghi rõ công thức để tính lại khi có số thật.
+> Giờ công theo sprint, story point và số lỗi đọc từ Azure Boards ngày 27/11/2026; ngân sách và mốc lấy từ tài liệu 01.
+> **Số dẫn xuất** (EV, EAC, CPI, SPI) được tính từ các số đó, không đọc trực tiếp từ board.
 
 ## Mục lục
 
@@ -24,22 +26,23 @@
 
 | Phiên bản | Ngày | Nội dung | Người thực hiện |
 |---|---|---|---|
-| 1.0 | 12/11/2026 | Bản đầu, gồm các tài liệu riêng: 18-sow-acceptance, 20-release-notes, 21-lessons-learned | [CẦN ĐIỀN] |
-| 2.0 | 13/11/2026 | Gộp thành một tài liệu, đánh lại số mục (CR-08) | [CẦN ĐIỀN] |
+| 1.0 | 12/11/2026 | Bản đầu, gồm các tài liệu riêng: 18-sow-acceptance, 20-release-notes, 21-lessons-learned | Đỗ Thành Đạt |
+| 2.0 | 13/11/2026 | Gộp thành một tài liệu, đánh lại số mục (CR-08) | Đỗ Thành Đạt |
+| 2.2 | 27/11/2026 | Bỏ vai trò Sponsor; điền giờ công, story point, số lỗi từ Azure Boards (27/11/2026) và tính CPI/SPI Sprint 2–4; cập nhật đánh giá M1–M6, bài học quản lý và xác nhận đóng dự án (nghiệm thu cuối 03/12/2026) | Đỗ Thành Đạt |
 
 <a id="sow"></a>
 
 ## 1. Statement of Work (SOW) và nghiệm thu
 
-**Tóm tắt:** thoả thuận giữa nhóm thực hiện và bên giao việc (Sponsor) về phạm vi giao, tiêu chí nghiệm thu và cách xử lý
+**Tóm tắt:** thoả thuận giữa nhóm thực hiện và bên giao việc (Product Owner) về phạm vi giao, tiêu chí nghiệm thu và cách xử lý
 thay đổi. Biên bản nghiệm thu ở mục 1.7 dùng cho từng mốc và lần nghiệm thu cuối.
 
 ### 1.1 Các bên
 
 | Bên | Đại diện | Vai trò |
 |---|---|---|
-| Bên giao việc (khách hàng) | [CẦN ĐIỀN: đại diện Sponsor] | Phê duyệt phạm vi, nghiệm thu |
-| Bên thực hiện | Nhóm SumTalk – [CẦN ĐIỀN: PM] | Xây dựng, bàn giao |
+| Bên giao việc (khách hàng) | Product Owner – Nguyễn Phúc Điền | Duyệt phạm vi, nghiệm thu |
+| Bên thực hiện | Nhóm SumTalk – Project Manager Trần Phan Đăng Khôi | Xây dựng, bàn giao |
 
 ### 1.2 Mục đích
 
@@ -75,7 +78,7 @@ Mốc M0–M5: [Project Charter, mục 1.7](01-project-initiation.md#charter).
 
 ### 1.5 Giả định và trách nhiệm của bên giao việc
 
-- Cung cấp phản hồi trong Sprint Review; nghiệm thu trong vòng [CẦN ĐIỀN: 3] ngày làm việc sau khi nhận bàn giao.
+- Cung cấp phản hồi trong Sprint Review; lần nghiệm thu cuối diễn ra ngày **03/12/2026**, sau khi bàn giao tại mốc M5 (27/11/2026).
 - Cung cấp hoặc chấp nhận chi phí tài khoản AWS và API trong thời gian test (khoảng 2,5–3 triệu VND/tháng, cấu
   hình CPU).
 - Cung cấp mẫu audio thật (tiếng Việt, họp trộn ngôn ngữ) cho đánh giá chất lượng, nếu có.
@@ -83,7 +86,7 @@ Mốc M0–M5: [Project Charter, mục 1.7](01-project-initiation.md#charter).
 ### 1.6 Quản lý thay đổi
 
 Mọi yêu cầu thay đổi theo quy trình [Change Log](05-monitoring-and-control-report.md#change-log). Thay đổi làm tăng > 10% công sức hoặc dời mốc
-phải được bên giao việc ký duyệt; công sức phát sinh tính theo đơn giá 100.000 VND/giờ hoặc đổi lấy việc cắt hạng
+phải được Product Owner đồng ý và Project Manager phê duyệt, theo phân quyền trong [Project Charter](01-project-initiation.md#charter); công sức phát sinh tính theo đơn giá 100.000 VND/giờ hoặc đổi lấy việc cắt hạng
 mục Should/Could tương đương.
 
 ### 1.7 Mẫu biên bản nghiệm thu
@@ -106,7 +109,7 @@ Chữ ký:  Bên giao việc ……………        Bên thực hiện ………
 
 ## 2. Release Notes
 
-Mỗi phiên bản liệt kê tính năng mới, thay đổi, lỗi đã sửa và hạn chế. Bản mới nhất ở trên cùng.
+Mỗi phiên bản liệt kê tính năng mới, thay đổi, lỗi đã sửa và hạn chế. Bản mới nhất ở trên cùng. Báo cáo dừng ở v0.4; Sprint 5 (chia sẻ cuộc họp, đặt tên và gắn tag) nằm ngoài báo cáo này.
 
 ### v0.4 – Desktop, transcript live dạng streaming, cloud (Sprint 4, 12/11/2026)
 
@@ -128,10 +131,10 @@ Mỗi phiên bản liệt kê tính năng mới, thay đổi, lỗi đã sửa v
 - Chunk ghi âm 3 s → 1 s; polling khi ghi 1,5 s → 0,7 s; cửa sổ live tối đa 25 s → 15 s.
 - Thêm thư viện `python-multipart` (server); `boto3` chỉ dùng cho bản server.
 
-**Hạn chế:** bộ cài chưa ký số; bản GPU của desktop là thư mục khoảng 2,5 GB (không đóng được NSIS); chưa deploy
-lên AWS thật.
+**Hạn chế:** bộ cài chưa ký số; bản GPU của desktop là thư mục khoảng 2,5 GB (không đóng được NSIS); tại thời điểm
+phát hành chưa deploy lên AWS thật. Hạn chế cuối đã được xử lý sau đó: bản web đã deploy lên AWS (mục 3.6).
 
-### v0.3 – Tóm tắt và dịch (Sprint 3)
+### v0.3 – Tóm tắt và dịch (Sprint 3, mốc M3 30/10/2026)
 
 **Nhánh:** `feature/sprint3-summary-translation`
 - Tóm tắt tự động sau khi có transcript (#67, #68–#71): tổng quan, ý chính, quyết định, việc cần làm, câu hỏi mở;
@@ -140,11 +143,12 @@ lên AWS thật.
 - Script đánh giá chất lượng (#66, #72); test E2E (#99, #100).
 - Giao diện mới: sidebar, danh sách cuộc họp, recorder, player.
 
-### v0.2 – Transcript live, chọn LLM (Sprint 2)
+### v0.2 – Transcript live, chọn LLM (Sprint 2, mốc M2 09/10/2026)
 
-[CẦN ĐIỀN: theo báo cáo Sprint 2: transcript live khoảng 3 s, kết quả benchmark và model LLM được chọn.]
+Transcript live với độ trễ khoảng 3 s (chunk ghi âm 3 s) và benchmark các model LLM để chọn model cho tóm tắt và dịch.
+Kết quả benchmark được lưu trên Wiki của dự án (theo xác nhận của nhóm). Báo cáo này chưa chép số liệu vì Wiki không truy cập được khi lập báo cáo; model được chọn: [CẦN ĐIỀN: tên model LLM, chép từ Wiki].
 
-### v0.1 – Ghi lại cuộc họp (Sprint 1)
+### v0.1 – Ghi lại cuộc họp (Sprint 1, mốc M1 25/09/2026)
 
 **Commit:** `c483e36 Initial commit`, `163e2fa Update the UI`
 - Ghi âm trên trình duyệt (micro, micro + âm thanh tab), offline trên điện thoại, upload file lớn, transcript
@@ -166,20 +170,60 @@ lên AWS thật.
 
 ## 3. Báo cáo tổng kết và Lessons Learned
 
-**Tóm tắt:** khung báo cáo cuối dự án: so sánh kế hoạch với thực tế (phạm vi, thời gian, chi phí, chất lượng) và
-bài học. Phần kỹ thuật dưới đây ghi từ kinh nghiệm đến Sprint 4. Phần số liệu và bài học quản lý điền khi kết
-thúc dự án [CẦN ĐIỀN].
+**Tóm tắt:** cả sáu mục tiêu M1–M6 đã đạt; chi phí Sprint 2–4 là 19,1 triệu VND so với ngân sách 17,7 triệu (CPI 0,93), theo dashboard chi phí của nhóm. Sprint 1 chỉ có giờ thực tế (28 giờ), không có giờ kế hoạch.
+Sprint 5 (chia sẻ cuộc họp, đặt tên và gắn tag) chưa đóng trên Azure Boards (còn 2 story In Progress) nên nằm ngoài báo
+cáo. Board không có Bug nào. Giờ công theo sprint đọc từ Azure Boards ngày 27/11/2026, giờ kế hoạch lấy từ dashboard chi phí của nhóm (ảnh chụp 13/11/2026); mốc lấy từ
+[Project Charter](01-project-initiation.md#charter). Phần kỹ thuật ghi từ kinh nghiệm đến hết Sprint 4.
+
+### 3.0 Đánh giá theo mục tiêu M1–M6 (27/11/2026)
+
+Các bước kiểm chứng cuối (E2E trình duyệt, test case QC, deploy AWS) đã hoàn tất theo xác nhận của nhóm; kết quả
+chính thức nằm ở biên bản nghiệm thu cuối ngày 03/12/2026.
+
+| Mã | Mục tiêu | Bằng chứng | Đánh giá |
+|---|---|---|---|
+| M1 | Ghi âm hoặc tải file, transcript đúng ngôn ngữ người nói | Story E1, E2 Done; chạy trên Chrome/Edge, điện thoại, app Windows; E2E trình duyệt đã chạy lại sau Sprint 4 | ✔ Đạt |
+| M2 | Transcript hiện trực tiếp khi đang nói | Từ mới khoảng 1 s, câu chốt trung bình 1,9 s (mục tiêu ≤ 3–5 s) | ✔ Đạt |
+| M3 | Tóm tắt và dịch Việt ↔ Anh | Story #67, #60 Done, test tự động đạt; 23 test case thủ công đã chạy xong | ✔ Đạt |
+| M4 | Xử lý cuộc họp từ 60 phút trở lên | File 11,6 phút xong trong 18–57 s, dòng đầu sau 3–5 s; tóm tắt map-reduce cho transcript dài | ✔ Đạt |
+| M5 | Bản web trên AWS và bộ cài Windows | Bộ cài v0.4 đạt smoke test 8/8; bản web đã deploy lên AWS thật | ✔ Đạt |
+| M6 | Nằm trong ngân sách (CPI ≥ 0,9) | CPI 0,93 cho Sprint 2–4: 19,1 triệu VND so với ngân sách 17,7 triệu (mục 3.1) | ✔ Đạt (Sprint 2–4) |
+
+M2 và M4 đạt với khoảng cách lớn so với ngưỡng. M6 đạt với CPI 0,93 cho Sprint 2–4, sát ngưỡng 0,9 hơn các mục tiêu khác; CPI của cả dự án sẽ tính khi Sprint 5 đóng.
 
 ### 3.1 Kế hoạch so với thực tế
+
+Giờ công theo sprint (Azure Boards, 27/11/2026). Giờ thực tế đọc từ Azure Boards (27/11/2026); giờ kế hoạch và CPI từng sprint lấy từ dashboard "6. Chi phí" của nhóm (ảnh chụp 13/11/2026). Sprint 1 không có giờ ước tính trên board và dashboard để trống; capacity của cả năm sprint chưa nhập. Vì vậy CPI, SPI chỉ tính cho Sprint 2–4. Giờ kế hoạch Sprint 2 trên board hiện là 73, đã chỉnh sau khi dashboard ghi 67; báo cáo dùng 67 như nhóm đã công bố. Story point mới nhập cho Sprint 1–2.
+
+| Sprint | Thời gian | Giờ kế hoạch | Giờ thực tế | CPI | Story point |
+|---|---|---|---|---|---|
+| 1 | 11/09–25/09 | – | 28 | – | 25 |
+| 2 | 25/09–09/10 | 67 | 76 | 0,88 | 28 |
+| 3 | 19/10–30/10 | 61 | 64,5 | 0,95 | chưa nhập |
+| 4 | 02/11–12/11 | 49 | 50,5 | 0,97 | chưa nhập |
+| **Sprint 2–4** | | **177** | **191** | **0,93** | |
+| Sprint 1–4 (giờ thực tế) | | | 219 | | |
+| 5 (chưa đóng) | 13/11–27/11 | 38 | 43 | – | chưa nhập |
 
 | Khía cạnh | Kế hoạch | Thực tế | Chênh lệch | Nguyên nhân |
 |---|---|---|---|---|
 | Phạm vi | E1–E4 (ghi âm, transcript, tóm tắt, dịch) | E1–E7 (thêm desktop, engine dùng chung, bản web AWS) | +3 epic | Thay đổi CR-03…CR-06 ([Change Log (nhật ký thay đổi phạm vi)](05-monitoring-and-control-report.md#change-log)) |
-| Thời gian | [CẦN ĐIỀN] sprint | [CẦN ĐIỀN] | | |
-| Chi phí nhân công (BAC) | [CẦN ĐIỀN] | [CẦN ĐIỀN] (AC) | VAC = | |
-| CPI / SPI cuối | 1,0 / 1,0 | [CẦN ĐIỀN] | | |
-| Chất lượng | 0 lỗi Critical/High khi phát hành | [CẦN ĐIỀN] | | |
+| Thời gian | Sprint 1–4 xong tại mốc M4 ngày 12/11/2026 | Sprint 1–4 xong đúng M4; Sprint 5 còn mở đến 27/11; nghiệm thu cuối 03/12/2026 | Sprint 1–4 đúng hạn | Sprint 3 và 4 rút còn 10–11 ngày |
+| Chi phí nhân công (Sprint 2–4) | BAC 17.700.000 VND (177 giờ) | AC 19.100.000 VND (191 giờ) | VAC = −1.400.000 VND (−7,9%) | Dùng khoảng 45% dự phòng 10% (3.130.000 VND) |
+| CPI / SPI (Sprint 2–4) | 1,0 / 1,0 | 0,93 / 1,00 | CPI −0,07 | EV = BAC vì Sprint 2–4 hoàn tất |
+| Chi phí đến nay, gồm Sprint 5 | BAC 24.300.000 VND (243 giờ, dashboard; Sprint 1 tính bằng giờ thực tế 28) | 262 giờ (26.200.000 VND), board 27/11/2026 | +19 giờ (+7,8%), Sprint 5 chưa đóng | Dashboard dự báo 261,5 giờ khi hoàn thành. Tài liệu 01 ghi 253 giờ kế hoạch và 264,5 giờ thực tế, không khớp dashboard |
+| Chất lượng | 0 lỗi Critical/High khi phát hành | 88/88 pytest đạt, smoke test desktop 8/8, ruff sạch; Azure Boards không có Bug nào | Đạt | |
 | Hiệu năng live | ≤ 3–5 s | khoảng 1–2 s | tốt hơn mục tiêu | Chunk 1 s, LocalAgreement, engine GPU/remote |
+
+**Cách tính (số dẫn xuất, Sprint 2–4).** Vì mọi story của các sprint này đã Done, EV = BAC = 17,70 triệu VND; PV tại mốc M4 cũng bằng BAC.
+
+```latex
+CPI = \frac{EV}{AC} = \frac{17{,}70}{19{,}10} \approx 0{,}93 \qquad SPI = \frac{EV}{PV} = \frac{17{,}70}{17{,}70} = 1{,}00
+EAC = \frac{BAC}{CPI} \approx 19{,}10 \qquad VAC = BAC - EAC \approx -1{,}40 \text{ triệu VND}
+```
+
+CPI 0,93 vẫn trên ngưỡng hành động 0,9, nhưng khoản vượt 1,4 triệu VND đã dùng khoảng 45% dự phòng, và CPI riêng Sprint 2 chỉ 0,88 (dưới ngưỡng). Sprint 5 đã tiêu 43 giờ nhưng còn hai
+story In Progress nên chưa tính giá trị đạt được; nghiệm thu cuối 03/12/2026 được ghi riêng.
 
 ### 3.2 Điều làm tốt
 
@@ -200,7 +244,10 @@ thúc dự án [CẦN ĐIỀN].
 | Phạm vi tăng 3 epic giữa dự án | Áp lực lịch và chi phí | Đánh giá tác động trước, cắt Should/Could tương ứng, ghi Change Log ngay |
 | Live trên CPU chậm (cửa sổ tới 25 s phiên âm lại mỗi lần) | Chữ hiện muộn trên máy không có GPU | Thiết kế live phải tính chi phí mỗi lượt; có engine remote ngay từ đầu cho máy yếu |
 | Bộ cài GPU quá lớn cho NSIS (> 2 GB) | Không có bộ cài GPU | Ưu tiên server GPU dùng chung thay vì GPU trên từng máy |
-| [CẦN ĐIỀN: bài học quản lý từ retro: họp, ước lượng, phân công] | | |
+| Giờ thực tế Sprint 2–4 là 191 so với 177 giờ kế hoạch (+7,9%) trong khi phạm vi tăng 3 epic; Sprint 2 vượt nhiều nhất (CPI 0,88) | CPI 0,93; Sprint 5 đã tiêu thêm 43 giờ mà chưa đóng | Ước lượng lại giờ và đối chiếu với dự phòng mỗi khi duyệt thay đổi phạm vi; theo dõi CPI mỗi sprint |
+| Board cập nhật chậm: Sprint 1 không có giờ ước tính và capacity chưa nhập, story point chỉ có ở Sprint 1–2, Sprint 5 còn mở dù code đã merge | Số liệu EVA phải dẫn xuất; tài liệu 01 (253 và 264,5 giờ) không khớp dashboard (243) và board (262) | Nhập ước tính và story point khi lập sprint; chuyển item sang Done ngay khi merge |
+| Sprint 3 và 4 chỉ dài 10–11 ngày thay vì 2 tuần | Khó so sánh velocity giữa các sprint | Giữ độ dài sprint cố định; nếu phải rút, ghi rõ và hiệu chỉnh năng lực khi lập kế hoạch |
+| Không có Sponsor: Project Manager vừa lập kế hoạch vừa phê duyệt thay đổi ngân sách > 10% | Thiếu người duyệt độc lập với người lập kế hoạch | Chọn người duyệt độc lập (Product Owner hoặc người ngoài nhóm) ngay từ khởi động |
 
 ### 3.4 Bài học kỹ thuật đáng giữ
 
@@ -221,9 +268,25 @@ thúc dự án [CẦN ĐIỀN].
 
 ### 3.6 Xác nhận đóng dự án
 
+Cả bốn hạng mục đã hoàn thành theo xác nhận của nhóm; các ngày còn trống cần bổ sung.
+
 | Hạng mục | Trạng thái |
 |---|---|
-| Nghiệm thu cuối ([Statement of Work (SOW) và nghiệm thu](#sow)) | [CẦN ĐIỀN] |
-| Bàn giao mã nguồn, bộ cài, URL, tài liệu | [CẦN ĐIỀN] |
-| Gỡ tài nguyên AWS không dùng (EC2, Elastic IP, bucket) | [CẦN ĐIỀN] |
-| Lưu trữ tài liệu, biên bản | [CẦN ĐIỀN] |
+| Nghiệm thu cuối ([Statement of Work (SOW) và nghiệm thu](#sow)) | Đã hoàn thành, ngày 03/12/2026 |
+| Bàn giao mã nguồn, bộ cài, URL, tài liệu | Đã hoàn thành, ngày 03/12/2026 |
+| Gỡ tài nguyên AWS không dùng (EC2, Elastic IP, bucket) | Đã hoàn thành, ngày [CẦN ĐIỀN] |
+| Lưu trữ tài liệu, biên bản | Đã hoàn thành, lưu trên Wiki của dự án (Azure DevOps) |
+
+### 3.7 Việc còn lại để hoàn tất hồ sơ
+
+1. Điền ngày gỡ tài nguyên AWS (EC2, Elastic IP, bucket S3) vào bảng mục 3.6.
+2. Đóng Sprint 5 trên Azure Boards (2 story In Progress, 7 task Testing hoặc Ready for Release); khi đó tính CPI cả dự án; cập nhật tài liệu 01 (253 giờ kế hoạch, 264,5 giờ thực tế) theo dashboard và board (243 và 262 giờ), tính lại business case (NPV, ROI, thời gian hoàn vốn).
+3. Bổ sung kết quả benchmark và model LLM được chọn của v0.2.
+4. Ký biên bản nghiệm thu cuối ngày 03/12/2026 (mẫu ở mục 1.7) và bảng phê duyệt dưới đây.
+
+### 3.8 Phê duyệt
+
+| Vai trò | Họ tên | Chữ ký | Ngày |
+|---|---|---|---|
+| Product Owner | Nguyễn Phúc Điền | | 03/12/2026 |
+| Project Manager | Trần Phan Đăng Khôi | | 03/12/2026 |
